@@ -3,9 +3,11 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 4b — Release, **built and ready to tag** after a fix session (Session 6) driven by the user's testing of the packaged app. Phases 1–4a are complete. `package.json` is at **1.0.0**; the tag `v1.0.0` has not been created (the user tags and pushes).
+**Phase:** 4b — Release, **built and ready to tag**. Phases 1–4a are complete. `package.json` is at **1.0.0**; the tag `v1.0.0` has not been created (the user tags and pushes).
 
 The app is on GitHub (`origin/main`, pushed at the start of Session 4). Everything since is committed locally and **not pushed**; the user pushes.
+
+**The Windows release is one zip** (Session 7): `Wayfarers-Journal-<version>-win64.zip`, the app folder packed with asar (native modules and the icon unpacked). Extract anywhere, run `Wayfarer's Journal.exe`, `data/` appears beside it; update by extracting over the old folder. The portable exe is gone: it re-extracted on every launch (~19 s) and Windows 11 Smart App Control refused the unsigned NSIS launcher. `npm run electron:build` builds the zip; the workflow attaches only `release/*.zip`.
 
 What Session 6 fixed: the capture hotkey now goes through a low-level keyboard hook (`uiohook-napi`) so it fires while a DirectInput game has the keyboard, with focus taken and handed back through `user32` (koffi) and a "Test your hotkey" button in Preferences; floating panels are centred by a flex frame instead of a transform; form-control contrast is fixed at the token level (`ground` replaces the colliding `base` colour token); icon controls are sized by the `IconButton` primitive with tooltips everywhere; a splash window shows at once on launch and the non-essential main-process work is deferred; the release now ships a zip of the unpacked app beside the portable exe. Two native modules are runtime dependencies (`uiohook-napi`, `koffi`), both prebuilt N-API; `npmRebuild` is off.
 
@@ -17,8 +19,8 @@ What Phase 4b added: the positioning change (a journal for roleplay characters i
 
 ## Next Up
 1. **The user verifies in-game:** the hook-based hotkey over the game (borderless windowed), the capture box taking focus and handing it back on Enter/Escape, and the splash. Tooling verified all of it with synthetic input against Notepad and Chrome, not against a game.
-2. **Release v1.0.0:** the user pushes `main`, tags `v1.0.0` and pushes the tag; the workflow builds the portable exe and the zip and attaches both. Watch the first run: `npm ci` on the runner must pull `@koromix/koffi-win32-x64` (koffi's platform package) and `uiohook-napi` ships its prebuilds; `npm run icon` runs Electron on the runner; electron-builder gets `--publish never`. If the run fails, fix and re-tag (`v1.0.1`).
-3. **Portable launch time** is dominated by electron-builder's launcher re-extracting thousands of files on every start (`asar: false`). If the zip is not enough, try `asar: true` with `asarUnpack` for `node_modules/uiohook-napi`, `node_modules/koffi`, `node_modules/@koromix` and `examples/`, then re-verify `PROJECT_ROOT`, static serving and the example import from inside the archive.
+2. **Release v1.0.0:** the user pushes `main`, tags `v1.0.0` and pushes the tag; the workflow builds the zip and attaches it. Watch the first run: `npm ci` on the runner must pull `@koromix/koffi-win32-x64` (koffi's platform package) and `uiohook-napi` ships its prebuilds; `npm run icon` runs Electron on the runner; electron-builder gets `--publish never`. If the run fails, fix and re-tag (`v1.0.1`).
+3. After the release, download the zip on a clean PC and walk the README's *Download* section once: SmartScreen wording on the exe inside the zip, `data/` beside it, updating by extracting over the old folder.
 4. Phase 5 — Launch: announcement post using the example character; a GIF demo for the README if wanted.
 5. Optional: plain-text journal import; a macOS/Linux packaged build (the hook and koffi have prebuilds for both; focus hand-back is Windows-only by design).
 
@@ -46,6 +48,24 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 7 — 2026-09-22
+**Goal:** Short pre-release session: the zip becomes the only Windows artifact, asar on, README for the extract-and-run flow, CHANGELOG and PROGRESS; version stays 1.0.0.
+
+**Done:**
+- **Zip only, with asar.** `win.target: zip`, artifact `Wayfarers-Journal-${version}-win64.zip`; the portable target and its `unpackDirName` are gone from package.json, `electron:build` and the workflow. `asar: true` with `asarUnpack` for `node_modules/uiohook-napi`, `node_modules/koffi`, `node_modules/@koromix` (koffi's platform package) and `build/icon.png`; `main.ts` reads the icon from `app.asar.unpacked` and no longer looks at `PORTABLE_EXECUTABLE_DIR`. Verified from a scratch folder: `app.asar` present with 108 unpacked files, `/api/app` reports `desktop: true`, `dataDir` beside the exe and `hotkey.backend: "hook"`, the example character imports from inside the archive, `index.html` and the entry chunk are served from it, the main window title shows the character, and the tray icon exists on disk. Launch timings (Start-Process → port / splash / main window): first launch after extracting 15.0 s / 15.0 s / 15.0 s (Windows scanning a freshly extracted 150 MB folder on first run; the non-asar zip's first launch in Session 6 took 5 s), then 0.51 s / **0.26 s** / 0.92 s and 0.49 s / **0.25 s** / 0.49 s. The Session 5 portable exe took 19–20 s every launch.
+- **README** download section rewritten for the zip: extract anywhere that is yours (not a system folder), run the exe inside, `data/` appears beside it, back up by copying the folder, update by extracting over the old one; SmartScreen note kept (the exe inside is still unsigned); Smart App Control entry dropped (it blocked only the NSIS launcher — the plain exe ran under it); a FAQ entry for "I extracted a new version and my journals are gone". CONTRIBUTING, the bug template, the workflow job name and DESIGN lose their portable wording.
+- **CHANGELOG** 1.0.0 entry describes the zip and the hook-based hotkey; PROGRESS rewritten.
+
+**Decisions:** one artifact rather than two, because the portable launcher was both slow and blocked; asar on now that the only files the OS needs on disk (native modules, icon) are unpacked. Recorded in DESIGN §Packaging.
+
+**Build / typecheck:** pass on client, server and Electron; `npm run electron:build` produced `release/Wayfarers-Journal-1.0.0-win64.zip` (148.5 MB).
+
+**Known issues:**
+- The exe inside the zip is unsigned; SmartScreen's "More info → Run anyway" still applies.
+- In-game hotkey behaviour remains the user's check (Session 6 note).
+
+**Next:** the user tags v1.0.0.
 
 ### Session 6 — 2026-09-22
 **Goal:** Fix session from the user's testing of the packaged app: hotkey dead in-game, palette off centre, input contrast, tiny icons, slow start. Version stays 1.0.0.

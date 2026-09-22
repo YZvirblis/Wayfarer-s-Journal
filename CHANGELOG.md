@@ -4,7 +4,7 @@ All notable changes to Wayfarer's Journal are recorded here. The format follows 
 
 ## [1.0.0] — 2026-09-22
 
-The first release: a local journal for roleplay characters, as a portable Windows executable or from source.
+The first release: a local journal for roleplay characters, as a Windows zip (extract and run) or from source.
 
 ### Added
 
@@ -22,10 +22,10 @@ The first release: a local journal for roleplay characters, as a portable Window
 - **Export and import** — full JSON export/import as a new character (validated, migrated, previewed, never overwriting) and a readable Markdown export.
 - **Backups** — twenty rolling backups per character, restorable from the app as a new character or in place.
 - **Two themes** — Dark and Parchment. Layouts down to about 600 px wide for use beside a game.
-- **Desktop app (Windows)** — a portable `.exe` running the same server in-process on a free loopback port; `data/` beside the exe with a user-data fallback; window state; tray with *Open*, *Quick capture* and *Quit* and a close-to-tray setting; links open in the system browser; original icon.
-- **Global quick capture** — `Ctrl+Shift+J` anywhere on the PC (configurable in Preferences, with the registration status shown) opens a small always-on-top capture window that saves to the Inbox and hands focus back.
+- **Desktop app (Windows)** — a zip of the app folder: extract anywhere, run `Wayfarer's Journal.exe`, and `data/` appears beside it (user-data fallback if the folder is read-only). The same server runs in-process on a free loopback port; a splash shows at once on launch; window state is remembered; tray with *Open*, *Quick capture* and *Quit* and a close-to-tray setting; links open in the system browser; original icon.
+- **Global quick capture** — `Ctrl+Shift+J` anywhere on the PC, through a low-level keyboard hook so it works while a game reads the keyboard directly (configurable in Preferences, which shows the active backend and has a *Test your hotkey* button). A small always-on-top capture box takes the keyboard, saves to the Inbox on Enter, and hands the keyboard back to the game.
 - **About and Preferences** dialogs; version taken from `package.json` at build time.
-- **Release workflow** — GitHub Actions builds the portable exe on `v*` tags and attaches it to a GitHub Release.
+- **Release workflow** — GitHub Actions builds the Windows zip on `v*` tags and attaches it to a GitHub Release.
 
 ### File format
 

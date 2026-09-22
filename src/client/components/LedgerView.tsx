@@ -9,6 +9,7 @@ import { fuzzyScore } from '../lib/fuzzy';
 import { formatSeptims, formatSigned, parseQuickEntry, totals, withRunningBalance, type LedgerRow } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
 import { normalizeTitle } from '../lib/links';
+import { useSettings } from '../lib/settingsStore';
 import { LinkTextarea } from './LinkTextarea';
 import { Markdown } from './Markdown';
 import { TagChip } from './TagChip';
@@ -18,6 +19,7 @@ import { Button, IconButton } from './ui/Button';
 import { EmptyState } from './ui/EmptyState';
 import { SegmentedControl } from './ui/SegmentedControl';
 import { Tooltip } from './ui/Tooltip';
+import { Veil } from './ui/Veil';
 
 const DIRECTIONS = [
   { value: 'spent' as const, label: 'Spent' },
@@ -335,6 +337,7 @@ function Row({
 }) {
   const { transaction } = row;
   const { openEntry } = useLinks();
+  const { hideSecrets } = useSettings();
   const counterparty = transaction.counterpartyId ? people.find((person) => person.id === transaction.counterpartyId) : undefined;
   const goal = transaction.goalId ? doc.goals.find((candidate) => candidate.id === transaction.goalId) : undefined;
   const tags = transaction.tagIds.map((id) => doc.tags.find((tag) => tag.id === id)).filter(Boolean);
@@ -342,6 +345,7 @@ function Row({
 
   return (
     <li className="group/row">
+      <Veil hidden={hideSecrets && transaction.secret} label="Secret line">
       <div className="grid grid-cols-[4.75rem_1fr_auto] items-start gap-x-3 rounded px-2 py-2 transition-colors hover:bg-ink/[0.03] sm:grid-cols-[4.75rem_1fr_auto_5rem]">
         <span className="pt-0.5 font-display text-2xs uppercase leading-snug tracking-[0.1em] text-faint">
           {formatCalendarShort(transaction.date)}
@@ -393,6 +397,7 @@ function Row({
         <span className="hidden pt-0.5 text-right text-xs tabular-nums text-faint sm:block">{formatSeptims(row.balance)}{row.balance < 0 ? ' dr' : ''}</span>
       </div>
       {editing ? <Editor doc={doc} transaction={transaction} people={people} onDone={() => onEdit(null)} /> : null}
+      </Veil>
     </li>
   );
 }

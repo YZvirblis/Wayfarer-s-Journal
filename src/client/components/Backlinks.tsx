@@ -6,6 +6,7 @@ import { iconByName } from '../lib/icons';
 import { useLinks } from '../lib/linkContext';
 import { backlinksTo, type Backlink } from '../lib/links';
 import { colorClasses } from '../lib/palette';
+import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
 
 const KIND_LABELS: Record<Exclude<Backlink['source']['kind'], 'entry'>, string> = {
@@ -61,7 +62,8 @@ function BacklinkRow({ backlink, doc }: { backlink: Backlink; doc: CharacterDocu
 
 /** "Mentioned in…" — every body that links to this entry, computed from the document each render. */
 export function Backlinks({ doc, entryId, className }: { doc: CharacterDocument; entryId: string; className?: string }) {
-  const backlinks = useMemo(() => backlinksTo(doc, entryId), [doc, entryId]);
+  const { hideSecrets } = useSettings();
+  const backlinks = useMemo(() => backlinksTo(doc, entryId, hideSecrets), [doc, entryId, hideSecrets]);
 
   return (
     <section className={className} aria-label="Mentioned in">

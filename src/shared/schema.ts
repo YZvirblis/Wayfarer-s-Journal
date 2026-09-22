@@ -188,7 +188,9 @@ export type Theme = (typeof THEMES)[number];
 export const settingsSchema = z.object({
   theme: z.enum(THEMES).catch('dark'),
   lastCharacterId: z.string().nullable().default(null),
+  /** Blur everything marked secret, for screenshots and streaming. */
+  hideSecrets: z.boolean().catch(false),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'dark', lastCharacterId: null };
+export const DEFAULT_SETTINGS: Settings = { theme: 'dark', lastCharacterId: null, hideSecrets: false };

@@ -26,6 +26,7 @@ import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
 import { SaveStatus } from './SaveStatus';
+import { SecretsToggle } from './SecretsToggle';
 import { Sigil } from './Sigil';
 import { TagChip } from './TagChip';
 import { ThemeToggle } from './ThemeToggle';
@@ -336,7 +337,10 @@ export function Sidebar({
 
       <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
         <SaveStatus />
-        <ThemeToggle />
+        <div className="flex items-center gap-0.5">
+          <SecretsToggle />
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   );

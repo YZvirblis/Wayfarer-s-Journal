@@ -14,6 +14,7 @@ import { cn } from '../lib/cn';
 import { buildGraph, endpoints, type GraphEdge, type GraphNode } from '../lib/graph';
 import { useLinks } from '../lib/linkContext';
 import { colorClasses } from '../lib/palette';
+import { useSettings } from '../lib/settingsStore';
 import { TagChip } from './TagChip';
 import { Button, IconButton } from './ui/Button';
 import { EmptyState } from './ui/EmptyState';
@@ -71,7 +72,8 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
   const [hover, setHover] = useState<{ id: string; x: number; y: number } | null>(null);
   const [, bump] = useState(0);
 
-  const graph = useMemo(() => buildGraph(doc, { tagIds: activeTagIds, hideSecrets: false }), [doc, activeTagIds]);
+  const { hideSecrets } = useSettings();
+  const graph = useMemo(() => buildGraph(doc, { tagIds: activeTagIds, hideSecrets }), [doc, activeTagIds, hideSecrets]);
   const nodesById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node] as const)), [graph]);
 
   const tagsInWeb = useMemo(() => {

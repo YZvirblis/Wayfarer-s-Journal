@@ -6,6 +6,7 @@ import { cn } from '../lib/cn';
 import { fuzzyScore } from '../lib/fuzzy';
 import { iconByName } from '../lib/icons';
 import { colorClasses } from '../lib/palette';
+import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
 
 interface EntryPickerProps {
@@ -31,15 +32,17 @@ export function EntryPicker({ open, onOpenChange, doc, title, onPick }: EntryPic
 
   const typesById = useMemo(() => new Map(doc.entryTypes.map((type) => [type.id, type] as const)), [doc.entryTypes]);
 
+  const { hideSecrets } = useSettings();
   const results = useMemo(() => {
     const scored = doc.entries.flatMap((entry) => {
+      if (hideSecrets && entry.secret) return [];
       const score = fuzzyScore(query, `${entry.title} ${Object.values(entry.fields).join(' ')}`);
       return score === null ? [] : [{ entry, score }];
     });
     if (query.trim()) scored.sort((a, b) => b.score - a.score);
     else scored.sort((a, b) => b.entry.updatedAt.localeCompare(a.entry.updatedAt));
     return scored.slice(0, 40).map(({ entry }) => entry);
-  }, [doc.entries, query]);
+  }, [doc.entries, query, hideSecrets]);
   const active = Math.min(activeIndex, Math.max(0, results.length - 1));
 
   useEffect(() => {

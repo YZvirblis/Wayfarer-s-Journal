@@ -231,6 +231,9 @@ interface Goal {
 - **Performance:** d3-force (the only new dependency, ~20 kB) runs the simulation; positions are written straight to SVG attributes on each tick, and React only re-renders when the data or the hover changes. Node positions are remembered across filter changes so the web does not jump.
 - **Filter** by tag reuses the sidebar's tag filter state.
 
+### Hide-secrets mode (Phase 3)
+`settings.hideSecrets` (persisted in `settings.json`, toggled from the sidebar footer, the rail, or the palette) blurs everything marked secret: entries in lists and in the detail pane, profile sections, goals (cards and Overview tiles) and ledger lines. `ui/Veil.tsx` wraps each of them: a blurred, non-selectable copy under a "Secret · click to reveal" pill; a click (never a hover) reveals that one item until the mode is turned off and on again. A plum banner across the top of the main area says "Secrets hidden" while it is on. Secret entries, sections, transactions and goals are also left out of the relationship web, the "Mentioned in" panel, palette results, the Inbox's entry picker and a person's Dealings, so nothing leaks through a snippet or a count. Balances still include secret transactions; the mode hides words, not arithmetic.
+
 ### Layout modes (Phase 2)
 Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:
 
@@ -272,7 +275,7 @@ Custom-section rename/delete, which the rail cannot host, moves into the list he
 - `data/` is never committed. Real player data never goes in the repo.
 - The example character (`examples/example-character.json`) is fictional and original.
 - The README states: *Unofficial fan tool. Not affiliated with Bethesda or the Keizaal Online team.*
-- Secret flags exist so players can hide IC secrets (Phase 3 blur mode) when sharing screenshots or streaming.
+- Secret flags exist so players can hide IC secrets when sharing screenshots or streaming; hide-secrets mode (Phase 3) blurs them with click-to-reveal.
 
 ## 8. Conventions
 - Strict TypeScript. zod schemas are the single source of truth for types.

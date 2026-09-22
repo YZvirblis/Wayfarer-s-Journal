@@ -5,14 +5,21 @@ import { cn } from '../lib/cn';
 import { bodyPreview, formatCalendarShort } from '../lib/format';
 import { chronological, formatSeptims, formatSigned, totals } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
+import { useSettings } from '../lib/settingsStore';
 import { Button } from './ui/Button';
 
 /** A person's money history: what passed between you, and the last few lines of it. */
 export function Dealings({ doc, entryId, className }: { doc: CharacterDocument; entryId: string; className?: string }) {
   const { openLedger } = useLinks();
+  const { hideSecrets } = useSettings();
   const own = useMemo(
-    () => chronological(doc.transactions.filter((transaction) => transaction.counterpartyId === entryId)).reverse(),
-    [doc.transactions, entryId],
+    () =>
+      chronological(
+        doc.transactions.filter(
+          (transaction) => transaction.counterpartyId === entryId && !(hideSecrets && transaction.secret),
+        ),
+      ).reverse(),
+    [doc.transactions, entryId, hideSecrets],
   );
   const sums = totals(own);
 

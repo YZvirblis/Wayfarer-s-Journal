@@ -3,6 +3,8 @@ import {
   CalendarDays,
   CirclePlus,
   Coins,
+  Eye,
+  EyeOff,
   Feather,
   Inbox,
   Moon,
@@ -44,6 +46,7 @@ export interface PaletteActions {
   switchCharacter: (id: string) => void;
   manageCharacters: () => void;
   toggleTheme: () => void;
+  toggleSecrets: () => void;
 }
 
 type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
@@ -68,15 +71,16 @@ function buildCommands(
   doc: CharacterDocument,
   characters: CharacterSummary[],
   query: string,
-  theme: string,
+  settings: { theme: string; hideSecrets: boolean },
   actions: PaletteActions,
 ): Command[] {
+  const { theme, hideSecrets } = settings;
   const typesById = new Map(doc.entryTypes.map((type) => [type.id, type] as const));
   const commands: Command[] = [];
 
   for (const entry of doc.entries) {
     const type = typesById.get(entry.typeId);
-    if (!type) continue;
+    if (!type || (hideSecrets && entry.secret)) continue;
     commands.push({
       id: `entry:${entry.id}`,
       group: 'Entries',
@@ -168,6 +172,7 @@ function buildCommands(
   }
 
   for (const section of doc.profile.sections) {
+    if (hideSecrets && section.secret) continue;
     commands.push({
       id: `section:${section.id}`,
       group: 'Overview',
@@ -258,6 +263,16 @@ function buildCommands(
   });
 
   commands.push({
+    id: 'journal:secrets',
+    group: 'Journal',
+    label: hideSecrets ? 'Show secrets' : 'Hide secrets',
+    keywords: 'blur screenshot stream privacy reveal',
+    hint: hideSecrets ? 'Currently hidden' : 'For screenshots',
+    icon: hideSecrets ? Eye : EyeOff,
+    iconClass: hideSecrets ? 'text-plum' : undefined,
+    run: actions.toggleSecrets,
+  });
+  commands.push({
     id: 'journal:theme',
     group: 'Journal',
     label: theme === 'dark' ? 'Switch to Parchment theme' : 'Switch to Dark theme',
@@ -307,7 +322,7 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions, i
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const list = useRef<HTMLDivElement | null>(null);
-  const { theme } = useSettings();
+  const { theme, hideSecrets } = useSettings();
 
   useEffect(() => {
     if (open) {
@@ -317,8 +332,8 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions, i
   }, [open, initialQuery]);
 
   const results = useMemo(
-    () => rank(buildCommands(doc, characters, query, theme, actions), query),
-    [doc, characters, query, theme, actions],
+    () => rank(buildCommands(doc, characters, query, { theme, hideSecrets }, actions), query),
+    [doc, characters, query, theme, hideSecrets, actions],
   );
   const active = Math.min(activeIndex, Math.max(0, results.length - 1));
 

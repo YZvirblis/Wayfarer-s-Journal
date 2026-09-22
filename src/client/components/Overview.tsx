@@ -7,6 +7,7 @@ import { mutate } from '../lib/documentStore';
 import { compactRelative } from '../lib/format';
 import { goalProgress, totals } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
+import { useSettings } from '../lib/settingsStore';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { GoalTile } from './GoalCard';
 import { MarkdownField } from './MarkdownField';
@@ -15,6 +16,7 @@ import { Button, IconButton } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { Divider } from './ui/Divider';
 import { Tooltip } from './ui/Tooltip';
+import { Veil } from './ui/Veil';
 
 function updateProfile(recipe: (profile: CharacterDocument['profile']) => void): void {
   mutate((draft) => recipe(draft.profile));
@@ -67,6 +69,7 @@ function FieldRow({ field, onDelete }: { field: ProfileField; onDelete: () => vo
 }
 
 function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete: () => void }) {
+  const { hideSecrets } = useSettings();
   const title = useAutoCommit(section.title, (value) =>
     updateProfile((profile) => {
       const target = profile.sections.find((candidate) => candidate.id === section.id);
@@ -76,6 +79,7 @@ function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete
 
   return (
     <section id={`profile-section-${section.id}`} className="group/section scroll-mt-6">
+      <Veil hidden={hideSecrets && section.secret} label="Secret section">
       <header className="mb-3 flex items-center gap-2">
         <GripVertical className="h-3.5 w-3.5 shrink-0 text-faint/40" aria-hidden />
         <input
@@ -121,6 +125,7 @@ function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete
         placeholder="Write freely here — markdown works."
         minHeight={140}
       />
+      </Veil>
     </section>
   );
 }
@@ -137,6 +142,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function Overview({ doc }: { doc: CharacterDocument }) {
   const [pendingSection, setPendingSection] = useState<ProfileSection | null>(null);
   const { openGoals } = useLinks();
+  const { hideSecrets } = useSettings();
   const name = useAutoCommit(doc.profile.name, (value) =>
     updateProfile((profile) => void (profile.name = value || 'Unnamed Wayfarer')),
   );
@@ -184,7 +190,9 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
             <p className="wj-eyebrow mb-3">Goals</p>
             <div className="grid gap-3 sm:grid-cols-2">
               {doc.goals.map((goal) => (
-                <GoalTile key={goal.id} goal={goal} progress={goalProgress(goal, doc.transactions)} onOpen={openGoals} />
+                <Veil key={goal.id} hidden={hideSecrets && goal.secret} label="Secret goal">
+                  <GoalTile goal={goal} progress={goalProgress(goal, doc.transactions)} onOpen={openGoals} />
+                </Veil>
               ))}
             </div>
           </div>

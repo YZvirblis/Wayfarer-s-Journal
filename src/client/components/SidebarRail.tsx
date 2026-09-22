@@ -21,6 +21,7 @@ import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
 import { SaveStatus } from './SaveStatus';
+import { SecretsToggle } from './SecretsToggle';
 import { Sigil } from './Sigil';
 import { TagChip } from './TagChip';
 import { ThemeToggle } from './ThemeToggle';
@@ -256,6 +257,7 @@ export function SidebarRail({
       </Popover.Root>
 
       <span className="my-2 h-px w-6 bg-line/15" />
+      <SecretsToggle side="right" />
       <ThemeToggle />
       <SaveStatus compact className="mt-1" />
     </aside>

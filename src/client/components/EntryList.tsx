@@ -5,11 +5,13 @@ import { cn } from '../lib/cn';
 import { bodyPreview, relativeTime } from '../lib/format';
 import { handleListKey } from '../lib/listKeys';
 import { colorClasses } from '../lib/palette';
+import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
 import type { SortKey } from '../types';
 import { ProgressBar, StatusBadge, STATUS_ORDER } from './QuestStatus';
 import { TagChip } from './TagChip';
 import { Button, IconButton } from './ui/Button';
+import { Veil } from './ui/Veil';
 import {
   Menu,
   MenuContent,
@@ -81,6 +83,7 @@ export function EntryList({
 }: EntryListProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('updated');
+  const { hideSecrets } = useSettings();
 
   const tagsById = useMemo(() => new Map(doc.tags.map((tag) => [tag.id, tag] as const)), [doc.tags]);
   const tagNames = useMemo(
@@ -274,6 +277,7 @@ export function EntryList({
                   >
                     {active ? <span className="absolute inset-y-1.5 left-0 w-[2px] rounded-full bg-gold/80" /> : null}
 
+                    <Veil hidden={hideSecrets && entry.secret}>
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
@@ -310,6 +314,7 @@ export function EntryList({
                       })}
                       <span className="ml-auto shrink-0 text-2xs text-faint/80">{relativeTime(entry.updatedAt)}</span>
                     </div>
+                    </Veil>
                   </button>
                 </li>
               );

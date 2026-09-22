@@ -64,6 +64,16 @@ export function toggleTheme(): void {
   setTheme(THEMES[(index + 1) % THEMES.length] ?? 'dark');
 }
 
+export function setHideSecrets(hideSecrets: boolean): void {
+  if (settings.hideSecrets === hideSecrets) return;
+  publish({ ...settings, hideSecrets });
+  persist();
+}
+
+export function toggleHideSecrets(): void {
+  setHideSecrets(!settings.hideSecrets);
+}
+
 export function setLastCharacterId(id: string | null): void {
   if (settings.lastCharacterId === id) return;
   publish({ ...settings, lastCharacterId: id });

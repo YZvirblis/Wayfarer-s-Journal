@@ -74,13 +74,20 @@ export function titleCounts(entries: Entry[]): Map<string, number> {
 }
 
 /** Every markdown body in the document that can carry links, and where it lives. */
+interface SourceBase {
+  id: string;
+  label: string;
+  body: string;
+  /** Marked secret by the player; hidden from snippets while hide-secrets mode is on. */
+  secret: boolean;
+}
 export type LinkSource =
-  | { kind: 'entry'; id: string; label: string; typeId: string; body: string }
-  | { kind: 'section'; id: string; label: string; body: string }
-  | { kind: 'capture'; id: string; label: string; body: string }
-  | { kind: 'session'; id: string; label: string; body: string }
-  | { kind: 'transaction'; id: string; label: string; body: string }
-  | { kind: 'goal'; id: string; label: string; body: string };
+  | (SourceBase & { kind: 'entry'; typeId: string })
+  | (SourceBase & { kind: 'section' })
+  | (SourceBase & { kind: 'capture' })
+  | (SourceBase & { kind: 'session' })
+  | (SourceBase & { kind: 'transaction' })
+  | (SourceBase & { kind: 'goal' });
 
 export function linkSources(doc: CharacterDocument): LinkSource[] {
   return [
@@ -90,36 +97,42 @@ export function linkSources(doc: CharacterDocument): LinkSource[] {
       label: entry.title || 'Untitled',
       typeId: entry.typeId,
       body: entry.body,
+      secret: entry.secret,
     })),
     ...doc.profile.sections.map((section): LinkSource => ({
       kind: 'section',
       id: section.id,
       label: section.title || 'Untitled section',
       body: section.body,
+      secret: section.secret,
     })),
     ...doc.captures.map((capture): LinkSource => ({
       kind: 'capture',
       id: capture.id,
       label: 'Inbox',
       body: capture.body,
+      secret: false,
     })),
     ...doc.sessions.map((session): LinkSource => ({
       kind: 'session',
       id: session.id,
       label: session.title || session.date,
       body: session.body,
+      secret: false,
     })),
     ...doc.transactions.map((transaction): LinkSource => ({
       kind: 'transaction',
       id: transaction.id,
       label: `${transaction.amount < 0 ? '−' : '+'}${Math.abs(transaction.amount).toLocaleString()} septims`,
       body: transaction.description,
+      secret: transaction.secret,
     })),
     ...doc.goals.map((goal): LinkSource => ({
       kind: 'goal',
       id: goal.id,
       label: goal.title || 'Untitled goal',
       body: goal.notes,
+      secret: goal.secret,
     })),
   ];
 }
@@ -150,10 +163,11 @@ function snippetAround(body: string, link: ParsedLink): Pick<Backlink, 'before' 
 }
 
 /** Everything that links to `entryId`, one row per source, computed on demand. */
-export function backlinksTo(doc: CharacterDocument, entryId: string): Backlink[] {
+export function backlinksTo(doc: CharacterDocument, entryId: string, hideSecrets = false): Backlink[] {
   const backlinks: Backlink[] = [];
   for (const source of linkSources(doc)) {
     if (source.kind === 'entry' && source.id === entryId) continue;
+    if (hideSecrets && source.secret) continue;
     const mentions = parseLinks(source.body).filter(
       (link) => resolveLink(doc.entries, doc.entryTypes, link.title, link.typeName)?.id === entryId,
     );

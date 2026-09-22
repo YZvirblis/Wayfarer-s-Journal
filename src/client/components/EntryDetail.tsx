@@ -5,6 +5,7 @@ import { cn } from '../lib/cn';
 import { deleteEntry, duplicateEntry, renameEntry, updateEntry } from '../lib/documentStore';
 import { formatDate, relativeTime } from '../lib/format';
 import { colorClasses } from '../lib/palette';
+import { useSettings } from '../lib/settingsStore';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { iconByName } from '../lib/icons';
 import { singularize } from '../lib/words';
@@ -20,6 +21,7 @@ import { Divider } from './ui/Divider';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
 import { SegmentedControl } from './ui/SegmentedControl';
 import { Tooltip } from './ui/Tooltip';
+import { Veil } from './ui/Veil';
 
 function TextField({ entryId, field, value }: { entryId: string; field: FieldDef; value: string }) {
   const draft = useAutoCommit(value, (next) =>
@@ -141,6 +143,7 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
   const [confirmDelete, setConfirmDelete] = useState(false);
   const title = useAutoCommit(entry.title, (value) => renameEntry(entry.id, value));
   const titleInput = useRef<HTMLInputElement | null>(null);
+  const { hideSecrets } = useSettings();
   const TypeIcon = iconByName(type.icon);
   const colors = colorClasses(type.color);
 
@@ -221,6 +224,7 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
           </div>
         </div>
 
+        <Veil hidden={hideSecrets && entry.secret} label="Secret entry">
         <input
           ref={titleInput}
           value={title.value}
@@ -318,6 +322,7 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
 
         <Divider className="my-6" />
         <Backlinks doc={doc} entryId={entry.id} />
+        </Veil>
       </div>
 
       <ConfirmDialog

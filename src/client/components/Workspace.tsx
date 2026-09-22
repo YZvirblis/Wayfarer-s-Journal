@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, EyeOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { CharacterSummary, EntryType, Goal, PaletteColor } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
@@ -18,7 +18,7 @@ import { LinkContext, type LinkContextValue } from '../lib/linkContext';
 import { isCaptureShortcut, isPaletteShortcut } from '../lib/keys';
 import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
 import { normalizeTitle, type LinkSource } from '../lib/links';
-import { toggleTheme } from '../lib/settingsStore';
+import { setHideSecrets, toggleHideSecrets, toggleTheme, useSettings } from '../lib/settingsStore';
 import type { View } from '../types';
 import { CommandPalette, type PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
@@ -66,6 +66,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const [goalDialog, setGoalDialog] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
   const [fieldsTypeId, setFieldsTypeId] = useState<string | null>(null);
+  const { hideSecrets } = useSettings();
   const wide = useMediaQuery(WIDE_QUERY);
   const [palette, setPalette] = useState<{ open: boolean; query: string }>({ open: false, query: '' });
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -186,6 +187,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       switchCharacter: onSwitchCharacter,
       manageCharacters: onManageCharacters,
       toggleTheme,
+      toggleSecrets: toggleHideSecrets,
     }),
     [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters],
   );
@@ -291,7 +293,17 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         />
       )}
 
-      <main className="flex min-w-0 flex-1">
+      <main className="flex min-w-0 flex-1 flex-col">
+        {hideSecrets ? (
+          <div className="flex shrink-0 items-center justify-center gap-2 border-b border-plum/30 bg-plum/10 px-3 py-1 text-2xs uppercase tracking-[0.14em] text-plum">
+            <EyeOff className="h-3 w-3" />
+            Secrets hidden
+            <button type="button" onClick={() => setHideSecrets(false)} className="underline-offset-2 hover:underline">
+              show them
+            </button>
+          </div>
+        ) : null}
+        <div className="flex min-h-0 min-w-0 flex-1">
         {view.kind === 'overview' ? (
           <Overview doc={doc} />
         ) : view.kind === 'inbox' ? (
@@ -337,6 +349,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             <p className="text-sm text-faint">That section is gone. Pick another from the sidebar.</p>
           </Centered>
         )}
+        </div>
       </main>
 
       <TagManager open={tagManagerOpen} onOpenChange={setTagManagerOpen} doc={doc} />

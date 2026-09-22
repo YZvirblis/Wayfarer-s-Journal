@@ -3,10 +3,12 @@ import { useState } from 'react';
 import type { CharacterDocument, Goal } from '../../shared/schema';
 import { deleteGoal } from '../lib/documentStore';
 import { goalProgress } from '../lib/ledger';
+import { useSettings } from '../lib/settingsStore';
 import { GoalCard } from './GoalCard';
 import { Button } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { EmptyState } from './ui/EmptyState';
+import { Veil } from './ui/Veil';
 
 interface GoalsViewProps {
   doc: CharacterDocument;
@@ -17,6 +19,7 @@ interface GoalsViewProps {
 
 export function GoalsView({ doc, onNewGoal, onEditGoal, onOpenLedger }: GoalsViewProps) {
   const [pendingDelete, setPendingDelete] = useState<Goal | null>(null);
+  const { hideSecrets } = useSettings();
 
   return (
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
@@ -50,14 +53,15 @@ export function GoalsView({ doc, onNewGoal, onEditGoal, onOpenLedger }: GoalsVie
         ) : (
           <div className="grid gap-4 pane:grid-cols-2">
             {doc.goals.map((goal) => (
-              <GoalCard
-                key={goal.id}
-                goal={goal}
-                progress={goalProgress(goal, doc.transactions)}
-                onEdit={() => onEditGoal(goal)}
-                onDelete={() => setPendingDelete(goal)}
-                onOpenLedger={onOpenLedger}
-              />
+              <Veil key={goal.id} hidden={hideSecrets && goal.secret} label="Secret goal">
+                <GoalCard
+                  goal={goal}
+                  progress={goalProgress(goal, doc.transactions)}
+                  onEdit={() => onEditGoal(goal)}
+                  onDelete={() => setPendingDelete(goal)}
+                  onOpenLedger={onOpenLedger}
+                />
+              </Veil>
             ))}
           </div>
         )}

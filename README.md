@@ -245,6 +245,9 @@ Saves are atomic: a new file is written beside the old one and swapped in, so a 
 **Windows says "Windows protected your PC".**
 Click **More info**, then **Run anyway**. The build is unsigned because a code-signing certificate is a recurring cost that does not make sense for a free tool; see [Download](#download). If you would rather not trust a binary, [run from source](#run-from-source).
 
+**Windows says "An Application Control policy has blocked this file" and the portable exe never opens.**
+That is **Smart App Control** (Windows 11), which is stricter than SmartScreen: it refuses unsigned self-extracting launchers outright, with no "Run anyway". Use the **zip** download instead; the unpacked app inside it starts normally. (Turning Smart App Control off is a one-way switch in Windows Security, so the zip is the better answer.)
+
 **"Port 4777 is already in use".**
 Something else on your PC is listening there, or a previous journal is still running (`stop.bat` closes it). Otherwise start with another port: `set WJ_PORT=4800` then `npm start` (or `WJ_PORT=4800 npm start` on macOS/Linux). The desktop app never has this problem; it picks a free port each time.
 

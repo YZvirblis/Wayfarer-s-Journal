@@ -3,9 +3,11 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 4b — Release, **built and ready to tag**. Phases 1–4a are complete. `package.json` is at **1.0.0**; the tag `v1.0.0` has not been created (the user tags and pushes).
+**Phase:** 4b — Release, **built and ready to tag** after a fix session (Session 6) driven by the user's testing of the packaged app. Phases 1–4a are complete. `package.json` is at **1.0.0**; the tag `v1.0.0` has not been created (the user tags and pushes).
 
 The app is on GitHub (`origin/main`, pushed at the start of Session 4). Everything since is committed locally and **not pushed**; the user pushes.
+
+What Session 6 fixed: the capture hotkey now goes through a low-level keyboard hook (`uiohook-napi`) so it fires while a DirectInput game has the keyboard, with focus taken and handed back through `user32` (koffi) and a "Test your hotkey" button in Preferences; floating panels are centred by a flex frame instead of a transform; form-control contrast is fixed at the token level (`ground` replaces the colliding `base` colour token); icon controls are sized by the `IconButton` primitive with tooltips everywhere; a splash window shows at once on launch and the non-essential main-process work is deferred; the release now ships a zip of the unpacked app beside the portable exe. Two native modules are runtime dependencies (`uiohook-napi`, `koffi`), both prebuilt N-API; `npmRebuild` is off.
 
 What Phase 4b added: the positioning change (a journal for roleplay characters in general; currency is a per-character profile setting, schema v6; Skyrim wording neutralised outside the example); an About dialog; a **portable Windows desktop app** (`electron/`, electron-builder, `npm run electron:build` → `release/Wayfarers-Journal-1.0.0-portable.exe`, 96 MB, verified to create `data/` beside itself and register the hotkey); an **OS-level quick-capture hotkey** (default Ctrl+Shift+J, configurable in the new Preferences dialog, frameless always-on-top capture window); a GitHub Actions workflow that builds the exe on `v*` tags and attaches it to a Release; the README rewritten as the full manual; CONTRIBUTING, issue and PR templates, CHANGELOG.
 
@@ -14,10 +16,11 @@ What Phase 4b added: the positioning change (a journal for roleplay characters i
 **Web mode is unchanged:** `start.bat`, `start.sh`, `npm run dev`, `npm start` all work as before. The desktop app is a wrapper that runs the same server in-process (`src/server/app.ts` → `startServer()`).
 
 ## Next Up
-1. **Release v1.0.0:** the user pushes `main`, tags `v1.0.0` and pushes the tag; the workflow in `.github/workflows/release.yml` builds and attaches the exe. Watch the first run: `npm run icon` runs Electron on the runner (offscreen render), and electron-builder is passed `--publish never`. If the run fails, fix and re-tag (`v1.0.1`).
-2. After the first release: download the exe from the Release page on a clean PC and walk the README's *Download* section once (SmartScreen wording, `data/` beside the exe, hotkey over a game window, tray behaviour). Tray "Quick capture" and the real key press could not be exercised from tooling this session.
-3. Phase 5 — Launch: announcement post using the example character; a GIF demo for the README if wanted (the ROADMAP item lists it; only still screenshots exist).
-4. Optional: plain-text journal import (ROADMAP, Phase 4b tail); a macOS/Linux packaged build (electron-builder targets exist; untested).
+1. **The user verifies in-game:** the hook-based hotkey over the game (borderless windowed), the capture box taking focus and handing it back on Enter/Escape, and the splash. Tooling verified all of it with synthetic input against Notepad and Chrome, not against a game.
+2. **Release v1.0.0:** the user pushes `main`, tags `v1.0.0` and pushes the tag; the workflow builds the portable exe and the zip and attaches both. Watch the first run: `npm ci` on the runner must pull `@koromix/koffi-win32-x64` (koffi's platform package) and `uiohook-napi` ships its prebuilds; `npm run icon` runs Electron on the runner; electron-builder gets `--publish never`. If the run fails, fix and re-tag (`v1.0.1`).
+3. **Portable launch time** is dominated by electron-builder's launcher re-extracting thousands of files on every start (`asar: false`). If the zip is not enough, try `asar: true` with `asarUnpack` for `node_modules/uiohook-napi`, `node_modules/koffi`, `node_modules/@koromix` and `examples/`, then re-verify `PROJECT_ROOT`, static serving and the example import from inside the archive.
+4. Phase 5 — Launch: announcement post using the example character; a GIF demo for the README if wanted.
+5. Optional: plain-text journal import; a macOS/Linux packaged build (the hook and koffi have prebuilds for both; focus hand-back is Windows-only by design).
 
 ## Open Questions
 - Final project name: "Wayfarer's Journal" is the working name (kept in one config constant).
@@ -43,6 +46,34 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 6 — 2026-09-22
+**Goal:** Fix session from the user's testing of the packaged app: hotkey dead in-game, palette off centre, input contrast, tiny icons, slow start. Version stays 1.0.0.
+
+**Done:**
+- **Hotkey through a keyboard hook.** `electron/hotkey.ts`: `uiohook-napi` (WH_KEYBOARD_LL, prebuilt N-API) matches one parsed combination — exact modifiers, no auto-repeat, keyboard events only, released in `before-quit`; `globalShortcut` is the fallback and `appInfo.hotkey.backend` says which is live. `electron/foreground.ts` (koffi → `user32`): the capture box is shown inactive and activated with attached input queues (a hook press carries no foreground permission), a blur inside 600 ms is retried, and on Enter/Escape the foreground goes back to the window that had it. Preferences shows the backend and has **Test your hotkey** (`POST /api/app/hotkey-test` → the next press is recorded instead of opening the box). README: privacy note, FAQ on the backends and on exclusive full-screen. Verified with synthetic input (uiohook `keyTap`) from source against Notepad and from the packaged exe against Chrome: the box takes focus, a capture is filed, focus returns after Enter and after Escape; the Preferences test reports the press.
+- **Panels centred.** `DIALOG_FRAME` / `DIALOG_PANEL` in `ui/Modal.tsx`; palette, quick capture, entry picker and every modal measured at 700, 960 and 1440 px with equal margins and no overflow. Root cause: the entrance keyframes' `transform` (fill-mode `both`) replaced `-translate-x-1/2`.
+- **Contrast at the token level.** The `base` colour token collided with Tailwind's `text-base` font size (the New Character input's text came out in the background colour). Renamed to `ground`; all controls themed once in `index.css`; `faint` lifted in both themes so label inputs clear 4.5:1. Audited both themes with a computed-contrast script on character select, overview, ledger, people and sessions.
+- **Icon controls.** `IconButton` fixes hit target and glyph (36/18 default, `xs` 32/16 in dense rows, rail 40/20), applies the glyph size itself, consistent rest/hover/open states, tooltips on every icon-only control; rail buttons no longer shrink when the rail overflows; modal close, save indicator, grips and the entry-list search row follow.
+- **Startup.** `electron/splash.html` shown before the server loads (theme from `settings.json`); the tray, hook and koffi load a tick after the main window shows. Packaging adds a zip of the unpacked app (`win.target: portable, zip`) and `portable.unpackDirName`; the workflow attaches both. Launch timings below.
+- Commits: 6.1 hotkey, 6.3 contrast, 6.2 panels, 6.4 icons, 6.5 startup (in that order, each buildable).
+
+**Decisions:** hook + `globalShortcut` fallback; koffi for `user32` instead of a compiled addon or a helper process; flex-frame centring; `ground` token; `IconButton` owns glyph size. All in the DESIGN Decision Log.
+
+**Build / typecheck:** pass on client, server and Electron; `electron-builder --win portable zip` produced both artifacts; the packaged exe was launched from a scratch folder with the hook active.
+
+**Launch timings** (Start-Process → server port up / first window / main window with a character loaded; this PC):
+- Before (Session 5 portable exe, three back-to-back launches): 19.7 s / 20.1 s, 19.2 s / 19.4 s, 18.8 s / 19.3 s to port / window. All of it is the launcher extracting ~250 MB of files to `%TEMP%`.
+- After, zip (unpacked app, three launches): first launch after unzipping 5.3 s port / **5.0 s splash** / 5.6 s main window (cold file cache); then 0.84 s / **0.29 s splash** / 0.84 s; then 0.60 s / **0.29 s** / 0.67 s.
+- After, portable exe: **could not be measured** — Smart App Control on this PC now refuses the freshly built unsigned NSIS launcher ("An Application Control policy has blocked this file"; the Session 5 build ran earlier in the day). By construction it re-extracts every launch (see DESIGN), so expect the baseline ~19 s plus the splash appearing once extraction ends. Documented in the README FAQ; the zip is the recommended download.
+
+**Known issues:**
+- The portable exe still re-extracts on every launch (electron-builder's launcher deletes its unpack folder; `unpackDirName` only names it). The zip is the fast path; `asar: true` is the next lever (Next Up).
+- In-game behaviour (DirectInput, borderless vs exclusive full-screen) is verified by the user, not by tooling.
+- Windows 11 Notepad was used as the "normal app" for focus tests from source; the packaged run returned focus to Chrome, which held the foreground at the time — the same code path.
+- Two native modules ship in the exe; if CI's `npm ci` ever fails to fetch koffi's platform package, the app still starts (focus hand-back degrades to off, the hook stays).
+
+**Next:** the user's in-game check, then tag v1.0.0.
 
 ### Session 5 — 2026-09-22
 **Goal:** Phase 4b — Release: positioning change, About dialog, Electron portable exe, OS-level capture hotkey, release workflow, README manual, repo files; version 1.0.0, no tag.

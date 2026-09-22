@@ -74,18 +74,21 @@
       "dist/**",
       "examples/**",
       "electron/preload.cjs",
+      "electron/splash.html",
       "build/icon.png",
       "package.json"
     ],
     "win": {
       "target": [
-        "portable"
+        "portable",
+        "zip"
       ],
       "icon": "build/icon.ico",
-      "artifactName": "Wayfarers-Journal-${version}-portable.exe"
+      "artifactName": "Wayfarers-Journal-${version}-win-x64.${ext}"
     },
     "portable": {
-      "artifactName": "Wayfarers-Journal-${version}-portable.exe"
+      "artifactName": "Wayfarers-Journal-${version}-portable.exe",
+      "unpackDirName": "wayfarers-journal"
     }
   }
 }

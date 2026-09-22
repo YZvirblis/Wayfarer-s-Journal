@@ -108,6 +108,7 @@ function saveState(win?: BrowserWindow): void {
 /* -------------------------------------------------------------------------- */
 
 let mainWindow: BrowserWindow | null = null;
+let splashWindow: BrowserWindow | null = null;
 let captureWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let quitting = false;
@@ -122,6 +123,48 @@ let hotkeyTestUntil = 0;
 
 const iconPath = () => path.join(app.getAppPath(), 'build', 'icon.png');
 const preloadPath = () => path.join(app.getAppPath(), 'electron', 'preload.cjs');
+const splashPath = () => path.join(app.getAppPath(), 'electron', 'splash.html');
+
+/** The theme the journal will open in, read straight from settings.json so the splash matches from its first frame. */
+function readTheme(dataDir: string): 'dark' | 'parchment' {
+  try {
+    const settings = JSON.parse(fs.readFileSync(path.join(dataDir, 'settings.json'), 'utf8')) as { theme?: unknown };
+    return settings.theme === 'parchment' ? 'parchment' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+/**
+ * A small frameless window shown before anything else loads, so the player
+ * sees the app respond at once. Closed the moment the journal is ready.
+ */
+function showSplash(theme: 'dark' | 'parchment'): void {
+  splashWindow = new BrowserWindow({
+    width: 360,
+    height: 240,
+    frame: false,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    alwaysOnTop: false,
+    center: true,
+    title: APP_NAME,
+    backgroundColor: theme === 'parchment' ? '#e5d7bd' : '#0d0b09',
+    icon: iconPath(),
+    show: true,
+    webPreferences: { sandbox: true },
+  });
+  splashWindow.on('closed', () => {
+    splashWindow = null;
+  });
+  void splashWindow.loadFile(splashPath(), { query: { theme } });
+}
+
+function closeSplash(): void {
+  if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close();
+  splashWindow = null;
+}
 
 function openExternal(url: string): void {
   if (/^https?:/i.test(url)) void shell.openExternal(url);
@@ -157,7 +200,10 @@ function createMainWindow(): BrowserWindow {
   });
   if (state.maximized) win.maximize();
   attachLinkHandling(win);
-  win.once('ready-to-show', () => win.show());
+  win.once('ready-to-show', () => {
+    win.show();
+    closeSplash();
+  });
   win.on('resize', () => saveState(win));
   win.on('move', () => saveState(win));
   win.on('close', (event) => {
@@ -348,8 +394,24 @@ async function applySettings(): Promise<void> {
 /* Boot                                                                        */
 /* -------------------------------------------------------------------------- */
 
+/** Everything the journal does not need in order to appear: the tray, the hotkey, the focus helpers. */
+async function bootExtras(): Promise<void> {
+  if (!server) return;
+  buildTray();
+  hotkeys = createHotkeyService(onHotkey);
+  const focus = await loadForeground();
+  foreground = focus.foreground;
+  if (focus.note) console.log(`[wayfarer] ${focus.note}`);
+  await applySettings();
+  server.serverEvents.on('settings', () => void applySettings());
+  server.serverEvents.on('hotkeyTest', startHotkeyTest);
+}
+
 async function boot(): Promise<void> {
+  Menu.setApplicationMenu(null);
   const data = resolveDataDir();
+  showSplash(readTheme(data.dir));
+
   const port = await freePort();
   process.env.WJ_DATA_DIR = data.dir;
   process.env.WJ_PORT = String(port);
@@ -360,16 +422,6 @@ async function boot(): Promise<void> {
   baseUrl = running.url;
   server.setAppInfo({ desktop: true, dataDir: data.dir, dataDirFallback: data.fallback });
   console.log(`[wayfarer] serving ${running.url} · data in ${data.dir}${data.fallback ? ' (fallback)' : ''}`);
-
-  Menu.setApplicationMenu(null);
-  buildTray();
-  hotkeys = createHotkeyService(onHotkey);
-  const focus = await loadForeground();
-  foreground = focus.foreground;
-  if (focus.note) console.log(`[wayfarer] ${focus.note}`);
-  await applySettings();
-  server.serverEvents.on('settings', () => void applySettings());
-  server.serverEvents.on('hotkeyTest', startHotkeyTest);
 
   ipcMain.handle('capture:submit', async (_event, text: unknown) => {
     const body = typeof text === 'string' ? text : '';
@@ -397,6 +449,10 @@ async function boot(): Promise<void> {
   ipcMain.on('capture:open', () => openCaptureWindow());
 
   mainWindow = createMainWindow();
+  // The tray, the hook and the focus helpers can wait until the window is on screen.
+  mainWindow.once('show', () => {
+    setTimeout(() => void bootExtras().catch((error: unknown) => console.error('[wayfarer]', error)), 50);
+  });
 
   if (data.fallback && !state.fallbackNoticeShown) {
     state.fallbackNoticeShown = true;

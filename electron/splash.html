@@ -1,0 +1,146 @@
+<!doctype html>
+<!--
+  The splash the desktop app shows the instant it starts, while the server
+  boots and the journal loads. Self-contained, no requests: the theme comes
+  in as ?theme=dark|parchment so the colours match the journal from the
+  first frame.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wayfarer's Journal</title>
+    <script>
+      document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') === 'parchment' ? 'parchment' : 'dark';
+    </script>
+    <style>
+      :root {
+        --bg: #0d0b09;
+        --panel: #13100c;
+        --ink: #ede2cb;
+        --muted: #b2a489;
+        --gold: #d5af5c;
+        --line: rgba(214, 188, 138, 0.16);
+      }
+      html[data-theme='parchment'] {
+        --bg: #e5d7bd;
+        --panel: #f0e6d1;
+        --ink: #221b11;
+        --muted: #544530;
+        --gold: #8f6a1e;
+        --line: rgba(92, 68, 36, 0.26);
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        overflow: hidden;
+        user-select: none;
+        -webkit-app-region: drag;
+      }
+      .frame {
+        box-sizing: border-box;
+        height: 100%;
+        border: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+      }
+      .emblem {
+        width: 72px;
+        height: 72px;
+      }
+      .name {
+        font-family: Cinzel, 'Palatino Linotype', Georgia, serif;
+        font-size: 17px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .rule {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 180px;
+        color: var(--gold);
+        font-size: 8px;
+      }
+      .rule::before,
+      .rule::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+      }
+      .rule::before {
+        background: linear-gradient(to right, transparent, var(--line));
+      }
+      .rule::after {
+        background: linear-gradient(to left, transparent, var(--line));
+      }
+      .loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      .ember {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+        animation: ember 1.6s ease-in-out infinite;
+      }
+      @keyframes ember {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <svg class="emblem" viewBox="0 0 256 256" aria-hidden="true">
+        <defs>
+          <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#1c1712" />
+            <stop offset="1" stop-color="#0d0b09" />
+          </linearGradient>
+          <linearGradient id="ruleL" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#d5af5c" stop-opacity="0" />
+            <stop offset="1" stop-color="#d5af5c" stop-opacity="0.9" />
+          </linearGradient>
+          <linearGradient id="ruleR" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#d5af5c" stop-opacity="0.9" />
+            <stop offset="1" stop-color="#d5af5c" stop-opacity="0" />
+          </linearGradient>
+          <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#d5af5c" stop-opacity="0.22" />
+            <stop offset="1" stop-color="#d5af5c" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect x="8" y="8" width="240" height="240" rx="44" fill="url(#tile)" />
+        <rect x="8.5" y="8.5" width="239" height="239" rx="44" fill="none" stroke="#d5af5c" stroke-opacity="0.35" />
+        <circle cx="128" cy="128" r="84" fill="url(#glow)" />
+        <rect x="34" y="127" width="62" height="2" fill="url(#ruleL)" />
+        <rect x="160" y="127" width="62" height="2" fill="url(#ruleR)" />
+        <g transform="translate(128 128) rotate(45)">
+          <rect x="-34" y="-34" width="68" height="68" rx="6" fill="none" stroke="#d5af5c" stroke-width="5" />
+          <rect x="-14" y="-14" width="28" height="28" rx="3" fill="#d5af5c" />
+        </g>
+      </svg>
+      <div class="name">Wayfarer's Journal</div>
+      <div class="rule">◆</div>
+      <div class="loading"><span class="ember"></span>Opening the journal</div>
+    </div>
+  </body>
+</html>

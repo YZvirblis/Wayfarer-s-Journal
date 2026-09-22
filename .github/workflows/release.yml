@@ -41,12 +41,15 @@ jobs:
         run: npm run electron:build -- --publish never
 
       - name: List artifacts
-        run: Get-ChildItem release -Filter *.exe | Select-Object Name, Length
+        run: Get-ChildItem release -Include *.exe, *.zip -Recurse -Depth 0 | Select-Object Name, Length
         shell: pwsh
 
       - name: Create the GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/*.exe
+          # The single-file portable exe, and a zip of the unpacked app that starts faster.
+          files: |
+            release/*.exe
+            release/*.zip
           generate_release_notes: true
           fail_on_unmatched_files: true

@@ -58,7 +58,10 @@ And besides those:
 
 ## Download
 
-**Windows:** grab `Wayfarers-Journal-<version>-portable.exe` from the [latest release](https://github.com/YZvirblis/Wayfarer-s-Journal/releases/latest), put it in a folder of its own, and run it. There is no installer and nothing to uninstall: the app makes a `data` folder next to itself and that is the whole footprint.
+**Windows:** the [latest release](https://github.com/YZvirblis/Wayfarer-s-Journal/releases/latest) has two downloads. There is no installer and nothing to uninstall either way: the app makes a `data` folder next to itself and that is the whole footprint.
+
+- `Wayfarers-Journal-<version>-portable.exe` — one file. Put it in a folder of its own and run it. It unpacks itself into a temporary folder on every launch, which takes a while (about twenty seconds on a fast SSD); you see the splash screen while it does.
+- `Wayfarers-Journal-<version>-win-x64.zip` — the same app, already unpacked. Extract the folder anywhere, run `Wayfarer's Journal.exe` inside it, and it starts in a couple of seconds. **Recommended** if you open the journal often.
 
 > **Windows SmartScreen will warn you the first time.** Click **More info → Run anyway**. The warning appears because the executable is not code-signed: a signing certificate costs a few hundred dollars a year, and this is a free, open-source project built by one person. The build is produced in public by [GitHub Actions](.github/workflows/release.yml) straight from the tagged source, so you can read exactly what went into it.
 

@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Every colour is space-separated RGB channels so Tailwind's
+   `/alpha` modifiers work (see tailwind.config.js). Switching themes is a
+   single attribute flip on <html data-theme="…">.
+--------------------------------------------------------------------------- */
+@layer base {
+  :root,
+  [data-theme='dark'] {
+    color-scheme: dark;
+
+    --wj-bg: 13 11 9;
+    --wj-panel: 19 16 12;
+    --wj-surface: 26 22 17;
+    --wj-raised: 35 30 23;
+    --wj-line: 214 188 138;
+    --wj-ink: 237 226 203;
+    --wj-muted: 178 164 137;
+    --wj-faint: 130 118 95;
+
+    --wj-gold: 213 175 92;
+    --wj-gold-deep: 166 132 60;
+    --wj-ember: 198 103 58;
+    --wj-copper: 190 138 92;
+    --wj-sage: 142 163 122;
+    --wj-frost: 132 168 194;
+    --wj-plum: 160 127 172;
+    --wj-rose: 197 116 126;
+
+    /* Firelight: a warm off-centre glow plus a darkened rim. */
+    --wj-glow: radial-gradient(1100px 620px at 18% -8%, rgb(var(--wj-gold) / 0.09), transparent 62%),
+      radial-gradient(900px 560px at 92% 4%, rgb(var(--wj-ember) / 0.06), transparent 60%),
+      radial-gradient(140% 120% at 50% 40%, transparent 42%, rgb(0 0 0 / 0.55) 100%);
+    --wj-grain-opacity: 0.05;
+    --wj-rule: rgb(var(--wj-line) / 0.16);
+    --wj-rule-soft: rgb(var(--wj-line) / 0.09);
+  }
+
+  [data-theme='parchment'] {
+    color-scheme: light;
+
+    --wj-bg: 229 215 189;
+    --wj-panel: 240 230 209;
+    --wj-surface: 248 241 225;
+    --wj-raised: 253 248 236;
+    --wj-line: 92 68 36;
+    --wj-ink: 34 27 17;
+    --wj-muted: 84 69 48;
+    --wj-faint: 124 106 80;
+
+    --wj-gold: 143 106 30;
+    --wj-gold-deep: 108 78 20;
+    --wj-ember: 163 69 32;
+    --wj-copper: 141 91 47;
+    --wj-sage: 84 105 63;
+    --wj-frost: 55 91 119;
+    --wj-plum: 111 74 123;
+    --wj-rose: 155 63 76;
+
+    --wj-glow: radial-gradient(900px 520px at 16% -10%, rgb(255 251 238 / 0.38), transparent 58%),
+      radial-gradient(820px 480px at 88% 2%, rgb(var(--wj-copper) / 0.08), transparent 62%),
+      radial-gradient(150% 130% at 50% 38%, transparent 44%, rgb(86 60 28 / 0.26) 100%);
+    --wj-grain-opacity: 0.07;
+    --wj-rule: rgb(var(--wj-line) / 0.26);
+    --wj-rule-soft: rgb(var(--wj-line) / 0.14);
+  }
+
+  * {
+    border-color: var(--wj-rule);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-base font-sans text-ink antialiased;
+    font-feature-settings: 'cv05' 1, 'ss03' 1;
+    overflow: hidden;
+  }
+
+  /* Two fixed, non-interactive layers: firelight and paper grain. */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    background: var(--wj-glow);
+  }
+  body::after {
+    opacity: var(--wj-grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  ::selection {
+    background: rgb(var(--wj-gold) / 0.28);
+    color: rgb(var(--wj-ink));
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 1px rgb(var(--wj-bg)),
+      0 0 0 3px rgb(var(--wj-gold) / 0.45);
+    border-radius: 3px;
+  }
+
+  input,
+  textarea,
+  button,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-faint;
+  }
+
+  textarea {
+    resize: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Shared pieces. Kept small on purpose — everything else is Tailwind in place.
+--------------------------------------------------------------------------- */
+@layer components {
+  .wj-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--wj-line) / 0.22) transparent;
+  }
+  .wj-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .wj-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .wj-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--wj-line) / 0.18);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  .wj-scroll:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--wj-line) / 0.3);
+  }
+
+  .wj-card {
+    @apply rounded-card border bg-surface shadow-card;
+    border-color: var(--wj-rule);
+  }
+
+  /* A rule that fades at both ends with a small lozenge at its centre —
+     the project's one decorative motif, reused instead of headings-with-lines. */
+  .wj-divider {
+    @apply flex items-center gap-3 text-gold/60;
+  }
+  .wj-divider::before,
+  .wj-divider::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+  }
+  .wj-divider::before {
+    background: linear-gradient(to right, transparent, var(--wj-rule));
+  }
+  .wj-divider::after {
+    background: linear-gradient(to left, transparent, var(--wj-rule));
+  }
+
+  .wj-field {
+    @apply w-full rounded border bg-base/40 px-3 py-2 text-sm text-ink transition-colors duration-150;
+    border-color: var(--wj-rule-soft);
+  }
+  .wj-field:hover {
+    border-color: var(--wj-rule);
+  }
+  .wj-field:focus {
+    outline: none;
+    border-color: rgb(var(--wj-gold) / 0.55);
+    box-shadow: 0 0 0 3px rgb(var(--wj-gold) / 0.12);
+  }
+
+  /* Titles and section headings behave like text until touched. */
+  .wj-quiet-field {
+    @apply w-full rounded border border-transparent bg-transparent transition-colors duration-150;
+  }
+  .wj-quiet-field:hover {
+    border-color: var(--wj-rule-soft);
+    background-color: rgb(var(--wj-ink) / 0.02);
+  }
+  .wj-quiet-field:focus {
+    outline: none;
+    border-color: rgb(var(--wj-gold) / 0.45);
+    background-color: rgb(var(--wj-ink) / 0.03);
+    box-shadow: 0 0 0 3px rgb(var(--wj-gold) / 0.1);
+  }
+
+  .wj-label {
+    @apply font-sans text-2xs font-medium uppercase tracking-[0.14em] text-faint;
+  }
+
+  .wj-eyebrow {
+    @apply font-display text-2xs uppercase tracking-wordmark text-gold/70;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Markdown output. Long-form text is set in EB Garamond at a comfortable size —
+   backstories are meant to be read, not skimmed.
+--------------------------------------------------------------------------- */
+@layer components {
+  .wj-prose {
+    @apply font-serif text-[1.0625rem] leading-[1.75] text-ink/90;
+  }
+  .wj-prose > * + * {
+    @apply mt-4;
+  }
+  .wj-prose h1,
+  .wj-prose h2,
+  .wj-prose h3 {
+    @apply font-display tracking-title text-ink;
+  }
+  .wj-prose h1 {
+    @apply mt-7 text-xl;
+  }
+  .wj-prose h2 {
+    @apply mt-7 text-lg;
+  }
+  .wj-prose h3 {
+    @apply mt-6 text-base uppercase tracking-[0.12em] text-gold/85;
+  }
+  .wj-prose strong {
+    @apply font-semibold text-ink;
+  }
+  .wj-prose em {
+    @apply italic text-ink/85;
+  }
+  .wj-prose a {
+    @apply text-gold underline decoration-gold/35 underline-offset-2 hover:decoration-gold;
+  }
+  .wj-prose ul,
+  .wj-prose ol {
+    @apply space-y-1.5 pl-5;
+  }
+  .wj-prose ul {
+    @apply list-none;
+  }
+  .wj-prose ul > li {
+    @apply relative;
+  }
+  .wj-prose ul > li::before {
+    content: '◆';
+    @apply absolute -left-5 top-0 text-[0.6em] leading-[2.4] text-gold/55;
+  }
+  .wj-prose ol {
+    @apply list-decimal;
+  }
+  .wj-prose ol > li::marker {
+    @apply font-display text-gold/60;
+  }
+  .wj-prose blockquote {
+    @apply border-l-2 pl-4 italic text-muted;
+    border-color: rgb(var(--wj-gold) / 0.45);
+  }
+  .wj-prose code {
+    @apply rounded bg-base/70 px-1.5 py-0.5 font-sans text-[0.85em] text-copper;
+  }
+  .wj-prose pre {
+    @apply overflow-x-auto rounded border bg-base/70 p-3;
+  }
+  .wj-prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .wj-prose hr {
+    @apply my-7 border-0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--wj-rule), transparent);
+  }
+  .wj-prose table {
+    @apply w-full border-collapse text-[0.95em];
+  }
+  .wj-prose th,
+  .wj-prose td {
+    @apply border px-3 py-1.5 text-left;
+  }
+  .wj-prose th {
+    @apply font-sans text-2xs uppercase tracking-[0.12em] text-faint;
+  }
+  .wj-prose p:first-child {
+    @apply mt-0;
+  }
+}

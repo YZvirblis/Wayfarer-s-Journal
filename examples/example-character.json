@@ -1,0 +1,542 @@
+{
+  "id": "example-sivrid",
+  "schemaVersion": 1,
+  "createdAt": "2026-06-02T19:14:00.000Z",
+  "updatedAt": "2026-09-19T21:40:00.000Z",
+  "profile": {
+    "name": "Sivrid Coal-Hand",
+    "fields": [
+      { "id": "race", "label": "Race", "value": "Nord" },
+      { "id": "age", "label": "Age", "value": "31" },
+      { "id": "birthplace", "label": "Birthplace", "value": "Dawnstar" },
+      { "id": "birthsign", "label": "Birth Sign", "value": "The Steed" },
+      { "id": "trade", "label": "Trade", "value": "Smith, and guard when the wagons need one" },
+      { "id": "home", "label": "Home", "value": "The Ember-House, two doors up from the harbour" }
+    ],
+    "sections": [
+      {
+        "id": "sec-backstory",
+        "title": "Backstory",
+        "body": "Born in Dawnstar in the cold months, to a woman who mended nets and a man who mended everything else.\n\nMy father kept the Ember-House forge for twenty-six years and never once shut it, not even the winter the harbour froze solid and the coal came in by sledge. He taught me that a bad weld is a lie you tell someone who will one day lean on it. He died owing four people money and not one of them spoke ill of him at the burning. I have been trying to work out that arithmetic ever since.\n\nThe forge came to me and my sister Sigunn. She keeps the books; I keep the fire. That arrangement has survived three bad seasons and one very bad argument.\n\nWhat I did not expect was the road. A caravan master named Gorm put a hammer in my hand instead of a sword and asked me to walk beside his wagons to Markarth — *you look like trouble, and trouble travelling with us is trouble not travelling against us*. That was four years ago. I have seen more of Skyrim from a wagon-bench than most Dawnstar folk see in a life, and I have learned that every hold has its own idea of what a fair price is.\n\nI keep this book because I met a man in Riften whose name I could not remember a week later, and it cost me eighty septims and a good knife. It will not happen twice."
+      },
+      {
+        "id": "sec-personality",
+        "title": "Personality",
+        "body": "Slow to speak, slower to swear an oath, and immovable once I have.\n\nI like the company of people who work with their hands and distrust anyone whose coin arrives without sweat on it. I am told I go quiet when I am angry, which unsettles people more than shouting would. That is not deliberate. Mostly.\n\nThings I will always stop for: a broken axle, a child alone on a road, a decent argument about steel.\n\nThings I will not do: work a blade for a man who will not tell me what he means to cut."
+      },
+      {
+        "id": "sec-oaths",
+        "title": "Oaths & Debts",
+        "body": "Written small, because these are nobody's business but mine.\n\n- **Four hundred septims to Ma'ziri.** He fronted the ingots when the Compact paid late and asked no interest. One hundred and fifty repaid. He has never once mentioned the rest, which makes it worse.\n- **A promise to Sister Alvina** that I would come back to the Quiet Lamp before first snow and tell her the truth about Hollowbarrow. First snow is not far off.\n- **A debt I do not intend to honour** to the Coin-Counter in Riften. He bought something from me before I understood what it was. If he comes north, I will deal with it at the forge door and not before.",
+        "secret": true
+      }
+    ]
+  },
+  "tags": [
+    { "id": "tag-whiterun", "name": "Whiterun", "color": "frost", "group": "Hold" },
+    { "id": "tag-riften", "name": "Riften", "color": "frost", "group": "Hold" },
+    { "id": "tag-solitude", "name": "Solitude", "color": "frost", "group": "Hold" },
+    { "id": "tag-windhelm", "name": "Windhelm", "color": "frost", "group": "Hold" },
+    { "id": "tag-markarth", "name": "Markarth", "color": "frost", "group": "Hold" },
+    { "id": "tag-dawnstar", "name": "Dawnstar", "color": "frost", "group": "Hold" },
+    { "id": "tag-falkreath", "name": "Falkreath", "color": "frost", "group": "Hold" },
+
+    { "id": "tag-merchant", "name": "Merchant", "color": "copper", "group": "Role" },
+    { "id": "tag-smith", "name": "Smith", "color": "copper", "group": "Role" },
+    { "id": "tag-guard", "name": "Sellsword", "color": "copper", "group": "Role" },
+    { "id": "tag-innkeeper", "name": "Innkeeper", "color": "copper", "group": "Role" },
+    { "id": "tag-priest", "name": "Priest", "color": "copper", "group": "Role" },
+    { "id": "tag-thief", "name": "Thief", "color": "copper", "group": "Role" },
+    { "id": "tag-noble", "name": "Noble", "color": "copper", "group": "Role" },
+    { "id": "tag-mage", "name": "Mage", "color": "copper", "group": "Role" },
+
+    { "id": "tag-trusted", "name": "Trusted", "color": "sage", "group": "Standing" },
+    { "id": "tag-owes-me", "name": "Owes me", "color": "gold", "group": "Standing" },
+    { "id": "tag-i-owe", "name": "I owe", "color": "ember", "group": "Standing" },
+    { "id": "tag-dangerous", "name": "Dangerous", "color": "rose", "group": "Standing" },
+    { "id": "tag-secret", "name": "Keep quiet", "color": "plum", "group": "Standing" }
+  ],
+  "entryTypes": [
+    {
+      "id": "people",
+      "name": "People",
+      "icon": "Users",
+      "color": "gold",
+      "builtIn": true,
+      "fields": [
+        { "key": "role", "label": "Role", "kind": "text" },
+        { "key": "location", "label": "Usually found", "kind": "text" },
+        { "key": "standing", "label": "Standing", "kind": "select", "options": ["Close", "Known", "Met"] }
+      ],
+      "features": {}
+    },
+    {
+      "id": "places",
+      "name": "Places",
+      "icon": "MapPin",
+      "color": "sage",
+      "builtIn": true,
+      "fields": [{ "key": "hold", "label": "Hold / Region", "kind": "text" }],
+      "features": {}
+    },
+    {
+      "id": "factions",
+      "name": "Factions",
+      "icon": "Shield",
+      "color": "frost",
+      "builtIn": true,
+      "fields": [{ "key": "base", "label": "Base", "kind": "text" }],
+      "features": {}
+    },
+    {
+      "id": "quests",
+      "name": "Quests",
+      "icon": "ScrollText",
+      "color": "ember",
+      "builtIn": true,
+      "fields": [],
+      "features": { "status": true, "progress": true }
+    },
+    {
+      "id": "notes",
+      "name": "Notes",
+      "icon": "NotebookPen",
+      "color": "plum",
+      "builtIn": true,
+      "fields": [],
+      "features": {}
+    },
+    {
+      "id": "rumours",
+      "name": "Rumours",
+      "icon": "Feather",
+      "color": "rose",
+      "builtIn": false,
+      "fields": [],
+      "features": {}
+    }
+  ],
+  "entries": [
+    {
+      "id": "p-sigunn",
+      "typeId": "people",
+      "title": "Sigunn Coal-Hand",
+      "tagIds": ["tag-dawnstar", "tag-trusted"],
+      "fields": { "role": "My sister; keeps the Ember-House books", "location": "Dawnstar, at the long table", "standing": "Close" },
+      "body": "Two years older and twice as sharp with a ledger. She can tell within a septim what a season will bring by the second week of it.\n\nWe argued badly in Second Seed over whether to take the Compact contract. She was right about the terms and I was right about the work, and neither of us has admitted either thing out loud.\n\nSomeone took her ledger from the house in Last Seed. She says it is only paper. It is not only paper.",
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-06-02T19:20:00.000Z",
+      "updatedAt": "2026-09-14T08:12:00.000Z"
+    },
+    {
+      "id": "p-gorm",
+      "typeId": "people",
+      "title": "Gorm the Lesser",
+      "tagIds": ["tag-merchant", "tag-trusted"],
+      "fields": { "role": "Caravan master, Hearthwarden wagons", "location": "The Rorikstead crossroads, most months", "standing": "Close" },
+      "body": "Calls himself *the Lesser* because his father was Gorm the Great and, in his words, \"one of us had to be honest about it.\"\n\nHe gave me my first road work. Pays on the day, every time, and has never once asked me to look the other way at a toll gate.\n\nHe is getting slower. Last run to Markarth he let me take the front bench for two whole days and pretended it was about the sun.",
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-06-02T19:28:00.000Z",
+      "updatedAt": "2026-09-11T17:03:00.000Z"
+    },
+    {
+      "id": "p-maziri",
+      "typeId": "people",
+      "title": "Ma'ziri",
+      "tagIds": ["tag-whiterun", "tag-merchant", "tag-i-owe"],
+      "fields": { "role": "Travelling trader — ingots, hides, odd glass", "location": "The camp outside Whiterun's west gate", "standing": "Known" },
+      "body": "Fronted me four hundred septims of iron and steel when the Compact paid two months late, and would not hear talk of interest. Said only: \"Ma'ziri has been the one waiting on coin. It is a cold place to stand.\"\n\nHe has a good eye for silver and a better one for lies. Do not haggle with him for sport; he enjoys it far more than I do and it costs me every time.\n\nOne hundred and fifty repaid. He has never asked after the rest.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-09T12:40:00.000Z",
+      "updatedAt": "2026-09-18T19:55:00.000Z"
+    },
+    {
+      "id": "p-brenna",
+      "typeId": "people",
+      "title": "Brenna Crow-Eye",
+      "tagIds": ["tag-whiterun", "tag-innkeeper", "tag-trusted"],
+      "fields": { "role": "Keeps the Kettle & Crow", "location": "Whiterun, by the lower well", "standing": "Known" },
+      "body": "Knows everything that is said in her common room and repeats almost none of it, which is the only reason anything gets said there at all.\n\nHolds a room for me on the first night of every month whether I come or not. I have stopped arguing about the wasted bed and started paying for it.\n\nIf you want to know who has come through Whiterun in the last fortnight, buy her a drink and talk about anything else for an hour first.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-11T20:02:00.000Z",
+      "updatedAt": "2026-09-02T22:18:00.000Z"
+    },
+    {
+      "id": "p-alvina",
+      "typeId": "people",
+      "title": "Sister Alvina",
+      "tagIds": ["tag-riften", "tag-priest", "tag-trusted"],
+      "fields": { "role": "Priestess of the Quiet Lamp", "location": "The almshouse off the lower canal, Riften", "standing": "Known" },
+      "body": "Feeds forty people a day on donations that should not stretch to twenty. I have never worked out the trick of it and I suspect the trick is simply that she does not eat much.\n\nShe patched my shoulder after the Hollowbarrow business and asked no questions at the time, which I mistook for disinterest. It was patience. She has since asked all of them.\n\nI promised her the truth before first snow.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-01T09:30:00.000Z",
+      "updatedAt": "2026-09-16T11:44:00.000Z"
+    },
+    {
+      "id": "p-vekka",
+      "typeId": "people",
+      "title": "Vekka gra-Morath",
+      "tagIds": ["tag-falkreath", "tag-guard", "tag-trusted"],
+      "fields": { "role": "Sellsword, hired by the wagon-run", "location": "Falkreath, when she is not working", "standing": "Close" },
+      "body": "Walked the Markarth run beside me three times. On the third we were attacked at the Hollowbarrow turning and she put herself between the arrows and Gorm's lead wagon without being asked.\n\nShe drinks like it is a duty and remembers everything the next morning, which I find frankly unfair.\n\nShe is the only other person who saw the arrowheads.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-14T16:20:00.000Z",
+      "updatedAt": "2026-09-19T21:40:00.000Z"
+    },
+    {
+      "id": "p-hjalti",
+      "typeId": "people",
+      "title": "Hjalti Broken-Tooth",
+      "tagIds": ["tag-markarth", "tag-smith", "tag-dangerous"],
+      "fields": { "role": "Smith; speaks for the Cinderhall Compact", "location": "Cinderhall, Markarth", "standing": "Known" },
+      "body": "A genuinely fine smith and a genuinely poor man to owe anything to.\n\nHe took the shield-band contract to the Compact on my behalf and has told everyone in Markarth that he *gave* it to me, which is a small lie with a long tail: now every delay is his generosity wasted rather than my work late.\n\nI tried to settle it over a drink in Sun's Height. He left before the second cup. I am not going to try a fourth time.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-20T18:05:00.000Z",
+      "updatedAt": "2026-09-08T13:27:00.000Z"
+    },
+    {
+      "id": "p-ulrid",
+      "typeId": "people",
+      "title": "Thane Ulrid Bear-Hand",
+      "tagIds": ["tag-windhelm", "tag-noble"],
+      "fields": { "role": "Thane; buys arms for his house guard", "location": "Windhelm, the upper hall", "standing": "Met" },
+      "body": "Met him once, for the length of time it takes to look at a blade and decide you want a cheaper one.\n\nHe asked whether I could put a house mark on forty spearheads by Frostfall. I said I could put a house mark on anything if the coin came first. He laughed. I do not think he was amused.\n\nWorth writing down anyway. Forty spearheads is forty spearheads.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-03T15:10:00.000Z",
+      "updatedAt": "2026-08-03T15:10:00.000Z"
+    },
+    {
+      "id": "p-faelor",
+      "typeId": "people",
+      "title": "Faelor Mirin",
+      "tagIds": ["tag-solitude", "tag-mage"],
+      "fields": { "role": "Enchanter; sells to the docks trade", "location": "A shop with no sign, Solitude", "standing": "Met" },
+      "body": "Altmer, courteous in the way that makes you check your own manners afterwards.\n\nHe wanted to buy blanks from me — unmarked, unhardened, no maker's stamp. Paid well above the going rate and did not blink at the price I invented on the spot to see what he would do.\n\nI have not said yes. A blade with no mark on it is a blade nobody can trace, and I have thought about that more than I would like.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-17T11:22:00.000Z",
+      "updatedAt": "2026-09-05T09:15:00.000Z"
+    },
+    {
+      "id": "p-rolf",
+      "typeId": "people",
+      "title": "Little Rolf",
+      "tagIds": ["tag-dawnstar"],
+      "fields": { "role": "Stablehand", "location": "Dawnstar, the harbour stables", "standing": "Met" },
+      "body": "Eleven, maybe twelve. Hangs around the forge door on cold mornings pretending to have business there.\n\nI have started leaving the small work where he can reach it — nail-heads, hooks, the dull jobs. He does them badly and then better.\n\nHis mother has not been seen since Mid Year. Nobody in Dawnstar will say so out loud.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-22T07:45:00.000Z",
+      "updatedAt": "2026-09-12T07:50:00.000Z"
+    },
+    {
+      "id": "p-coin-counter",
+      "typeId": "people",
+      "title": "The Coin-Counter",
+      "tagIds": ["tag-riften", "tag-thief", "tag-dangerous", "tag-secret"],
+      "fields": { "role": "Fence. Would not give a name.", "location": "The Low Stair, Riften", "standing": "Met" },
+      "body": "Thin, soft-spoken, counts coin twice even when he has already counted it twice.\n\nHe bought a set of hinges from me that I later understood were not wanted for a door. I did not ask. That is the part I keep returning to: I did not ask, and I *knew* not to ask, and those are the same thing.\n\nHe knows the Ember-House by name now. That was careless of me.",
+      "pinned": false,
+      "secret": true,
+      "createdAt": "2026-08-29T23:10:00.000Z",
+      "updatedAt": "2026-09-17T20:05:00.000Z"
+    },
+
+    {
+      "id": "pl-ember-house",
+      "typeId": "places",
+      "title": "The Ember-House",
+      "tagIds": ["tag-dawnstar"],
+      "fields": { "hold": "The Pale — Dawnstar, two doors up from the harbour" },
+      "body": "My father's forge, and now mine and Sigunn's. Stone below, timber above, and a chimney that has not gone properly cold since before I was born.\n\nThe front room is the shop. The back is the fire. Upstairs is two rooms and an argument about which of them is bigger.\n\nThe sea wind ruins everything left outside for one night. Everything.",
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-06-02T19:35:00.000Z",
+      "updatedAt": "2026-07-28T10:00:00.000Z"
+    },
+    {
+      "id": "pl-kettle-crow",
+      "typeId": "places",
+      "title": "The Kettle & Crow",
+      "tagIds": ["tag-whiterun"],
+      "fields": { "hold": "Whiterun Hold — by the lower well" },
+      "body": "Brenna's house. Low ceiling, good fire, bad ale, and the best bread between here and Riften.\n\nFirst night of every month there is a room with my name on it whether I arrive or not.\n\nThe corner table by the stair hears everything. Sit at the other one.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-11T20:10:00.000Z",
+      "updatedAt": "2026-09-02T22:20:00.000Z"
+    },
+    {
+      "id": "pl-crossroads",
+      "typeId": "places",
+      "title": "Rorikstead Crossroads Camp",
+      "tagIds": ["tag-whiterun", "tag-merchant"],
+      "fields": { "hold": "Whiterun Hold — the west road" },
+      "body": "Where the Hearthwarden wagons gather before a long run. Four fires, a rope corral, and whoever happens to be going the same way that week.\n\nGorm holds the bench by the biggest fire and pretends it is about the wind.\n\nGood place to hear what the roads are like. Bad place to leave anything unattended.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-20T14:05:00.000Z",
+      "updatedAt": "2026-08-30T18:40:00.000Z"
+    },
+    {
+      "id": "pl-cinderhall",
+      "typeId": "places",
+      "title": "Cinderhall",
+      "tagIds": ["tag-markarth", "tag-smith"],
+      "fields": { "hold": "The Reach — under Markarth's east terrace" },
+      "body": "The smiths' hall of the Compact. Eleven forges in one long stone room, all of them older than the Compact itself.\n\nThe heat is unbelievable and the noise worse. You learn to read lips inside a week or you learn nothing.\n\nHjalti speaks for the hall. That is not the same as the hall agreeing with him, which is a thing I should have worked out much sooner.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-20T18:15:00.000Z",
+      "updatedAt": "2026-09-08T13:30:00.000Z"
+    },
+    {
+      "id": "pl-hollowbarrow",
+      "typeId": "places",
+      "title": "Hollowbarrow",
+      "tagIds": ["tag-falkreath", "tag-dangerous"],
+      "fields": { "hold": "Falkreath Hold — off the Markarth road" },
+      "body": "A wagoners' rest for sixty years: a well, a wall, three turf houses and a shrine nobody could name.\n\nIt burned in Last Seed. Not raided — *burned*, and thoroughly, in weather too wet for an accident.\n\nThe well was filled in afterwards, which is what I cannot get past. Bandits do not fill in wells.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-12T19:30:00.000Z",
+      "updatedAt": "2026-09-19T21:38:00.000Z"
+    },
+    {
+      "id": "pl-low-stair",
+      "typeId": "places",
+      "title": "The Low Stair",
+      "tagIds": ["tag-riften", "tag-thief", "tag-secret"],
+      "fields": { "hold": "The Rift — Riften, below the canal walk" },
+      "body": "Nine steps down from the canal walk to a door with no handle on the outside.\n\nI have been through it once and I did not like a single thing about the way back up.\n\nIf I ever have to go again, I go in daylight and I tell Vekka where I am.",
+      "pinned": false,
+      "secret": true,
+      "createdAt": "2026-08-29T23:20:00.000Z",
+      "updatedAt": "2026-08-29T23:20:00.000Z"
+    },
+
+    {
+      "id": "f-hearthwarden",
+      "typeId": "factions",
+      "title": "The Hearthwarden Caravans",
+      "tagIds": ["tag-merchant", "tag-trusted"],
+      "fields": { "base": "Rorikstead crossroads" },
+      "body": "Not a guild, whatever the tax-takers think — six wagon families who agreed forty years ago to travel together and never quite stopped.\n\nThey pay guards honestly and feed them properly, which is rarer than it should be.\n\nGorm speaks for them at crossroads. Nobody voted on that.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-20T14:15:00.000Z",
+      "updatedAt": "2026-09-11T17:05:00.000Z"
+    },
+    {
+      "id": "f-compact",
+      "typeId": "factions",
+      "title": "The Cinderhall Compact",
+      "tagIds": ["tag-markarth", "tag-smith"],
+      "fields": { "base": "Cinderhall, Markarth" },
+      "body": "The smiths' compact of the Reach. Sets prices, settles disputes between forges, and takes a tenth of every contract it brokers.\n\nOutside smiths can take Compact work but cannot hold a seat. I have taken the work three times now and been reminded of the seat on every one.\n\nThey pay late but they do pay.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-20T18:20:00.000Z",
+      "updatedAt": "2026-09-13T12:00:00.000Z"
+    },
+    {
+      "id": "f-ashfall",
+      "typeId": "factions",
+      "title": "The Ashfall Kin",
+      "tagIds": ["tag-falkreath", "tag-dangerous"],
+      "fields": { "base": "Somewhere south of the Hollowbarrow turning" },
+      "body": "Whoever they are. The name comes from the wagoners, not from them.\n\nThey do not rob wagons for goods. Twice now they have taken nothing and burned the camp instead, which means somebody is paying them to make a road unusable.\n\nTheir arrowheads are all struck from the same die. That is not a bandit's habit. That is a *contract*.",
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-08-12T19:40:00.000Z",
+      "updatedAt": "2026-09-19T21:35:00.000Z"
+    },
+    {
+      "id": "f-quiet-lamp",
+      "typeId": "factions",
+      "title": "Order of the Quiet Lamp",
+      "tagIds": ["tag-riften", "tag-priest", "tag-trusted"],
+      "fields": { "base": "The almshouse off the lower canal, Riften" },
+      "body": "A small order of almsfolk. No temple, no tithe, no preaching — they keep a lamp burning in a window and feed whoever knocks.\n\nSister Alvina is the whole of it in Riften, as far as I can tell, though she speaks of the others as though there were dozens.\n\nI give them what I can when the Compact pays. It is not a tithe. It is closer to rent.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-01T09:40:00.000Z",
+      "updatedAt": "2026-09-16T11:46:00.000Z"
+    },
+
+    {
+      "id": "q-shield-bands",
+      "typeId": "quests",
+      "title": "Thirty shield-bands for the Compact",
+      "tagIds": ["tag-markarth", "tag-smith", "tag-i-owe"],
+      "fields": {},
+      "body": "Thirty steel-banded shields, Compact pattern, delivered to Cinderhall by the last week of Frostfall.\n\nHalf the coin on delivery, half on inspection — Hjalti's terms, agreed in front of witnesses who have all since developed poor memories.\n\nEighteen done. The wood is the slow part, not the steel; I am waiting on the second load of ash boards from Falkreath and the roads there are the roads they are.",
+      "status": "active",
+      "progress": { "current": 18, "target": 30 },
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-07-22T08:00:00.000Z",
+      "updatedAt": "2026-09-19T20:10:00.000Z"
+    },
+    {
+      "id": "q-maziri-debt",
+      "typeId": "quests",
+      "title": "Repay Ma'ziri — four hundred septims",
+      "tagIds": ["tag-whiterun", "tag-i-owe"],
+      "fields": {},
+      "body": "He will never ask. That is precisely why it is written here in large letters.\n\nOne hundred and fifty paid in Sun's Height, out of the first Compact payment. The rest when the shield-bands settle.\n\nIf the Compact pays late again, pay him first anyway.",
+      "status": "active",
+      "progress": { "current": 150, "target": 400 },
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-06-09T12:50:00.000Z",
+      "updatedAt": "2026-09-18T19:58:00.000Z"
+    },
+    {
+      "id": "q-ledger",
+      "typeId": "quests",
+      "title": "Find Sigunn's stolen ledger",
+      "tagIds": ["tag-dawnstar", "tag-secret"],
+      "fields": {},
+      "body": "Taken from the long table sometime in the last week of Last Seed. Nothing else in the house touched — not the strongbox, not the tools, not the silver in plain sight on the shelf.\n\nWhoever took it wanted to know *who owes us and who we owe*. That is a very specific appetite.\n\nSigunn says it is only paper. Sigunn has written down every transaction of this house for nine years.",
+      "status": "active",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-09-01T06:30:00.000Z",
+      "updatedAt": "2026-09-14T08:15:00.000Z"
+    },
+    {
+      "id": "q-hollowbarrow",
+      "typeId": "quests",
+      "title": "Who burned Hollowbarrow?",
+      "tagIds": ["tag-falkreath", "tag-dangerous", "tag-secret"],
+      "fields": {},
+      "body": "Three things I am sure of:\n\n1. It rained for two days before and two days after, so the fire was worked at.\n2. Nothing was carried off. The iron was still in the ash.\n3. Somebody filled in the well.\n\nOne thing I am not sure of: the arrowheads Vekka pulled out of the lead wagon were struck from the same die as the ones in the Hollowbarrow wall. Same die means one maker. One maker means a buyer.\n\nHolding this until after the Compact delivery. I cannot afford to be interesting to anyone this season.",
+      "status": "on_hold",
+      "pinned": false,
+      "secret": true,
+      "createdAt": "2026-08-12T20:00:00.000Z",
+      "updatedAt": "2026-09-19T21:30:00.000Z"
+    },
+    {
+      "id": "q-markarth-run",
+      "typeId": "quests",
+      "title": "See the Hearthwarden wagons safe to Markarth",
+      "tagIds": ["tag-markarth", "tag-merchant"],
+      "fields": {},
+      "body": "Eleven days, four wagons, one attack at the Hollowbarrow turning.\n\nNobody lost, one horse lamed, Vekka took an arrow through the cloak and complained about the cloak.\n\nPaid in full at the gate, as always.",
+      "status": "done",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-05T07:00:00.000Z",
+      "updatedAt": "2026-08-27T17:20:00.000Z"
+    },
+    {
+      "id": "q-hjalti-peace",
+      "typeId": "quests",
+      "title": "Make peace with Hjalti Broken-Tooth",
+      "tagIds": ["tag-markarth", "tag-smith"],
+      "fields": {},
+      "body": "Three attempts. A drink in Sun's Height, a fair offer on the Compact's tenth, and finally just asking him plainly what he wanted from me.\n\nHe left before the second cup all three times.\n\nI am done trying. Deliver the shield-bands, take the coin, and let the man tell whatever story he likes in Markarth.",
+      "status": "failed",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-07-25T19:00:00.000Z",
+      "updatedAt": "2026-09-08T13:35:00.000Z"
+    },
+
+    {
+      "id": "n-prices",
+      "typeId": "notes",
+      "title": "Prices I will not go below",
+      "tagIds": ["tag-smith", "tag-merchant"],
+      "fields": {},
+      "body": "Written after the Windhelm business, where I talked myself down twice in one conversation.\n\n| Work | Floor | Note |\n| --- | --- | --- |\n| Iron dagger | 18 | Below this I am paying for the coal |\n| Steel sword, plain | 95 | Plus 20 if they want a mark |\n| Shield band, Compact pattern | 34 | The wood is not included |\n| Repair, simple weld | 12 | Free for Gorm's wagons |\n| Repair, reforge | 40 | Never same-day, whatever they say |\n\n**The rule:** name the price, then stop talking. Silence is not an invitation to go lower.",
+      "pinned": true,
+      "secret": false,
+      "createdAt": "2026-08-04T20:15:00.000Z",
+      "updatedAt": "2026-09-06T10:05:00.000Z"
+    },
+    {
+      "id": "n-roads",
+      "typeId": "notes",
+      "title": "Roads, tolls and where not to camp",
+      "tagIds": ["tag-merchant"],
+      "fields": {},
+      "body": "- **Dawnstar to Whiterun:** four days with a loaded cart, three light. No tolls. Wolves after dusk past the second milestone.\n- **Whiterun to Markarth:** the long way through Rorikstead is a day more and three problems fewer.\n- **The Hollowbarrow turning:** do not camp there now. Do not camp within sight of it.\n- **Riften road:** tolls at the gate change with whoever is standing at it. Have the smaller purse ready and the larger one elsewhere.\n- **Falkreath ash boards:** always late. Always. Order a fortnight before you need them.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-06-25T09:00:00.000Z",
+      "updatedAt": "2026-09-10T14:30:00.000Z"
+    },
+    {
+      "id": "n-arrowheads",
+      "typeId": "notes",
+      "title": "The mark on the Ashfall arrowheads",
+      "tagIds": ["tag-falkreath", "tag-dangerous", "tag-smith"],
+      "fields": {},
+      "body": "Bodkin points, four-sided, struck not filed — which means a die, which means somebody set up to make a great many of them.\n\nThe shoulder has a flaw: a shallow crescent on the left face, the same on every one I have seen. A worn die, not a maker's mark. The owner has not recut it, which tells me they are making volume and do not care who knows.\n\nI have three of them wrapped in oilcloth under the anvil stone.\n\nWhoever cut that die works somewhere with a proper drop-hammer. There are not many of those in Skyrim, and I can name most of them.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-08-28T21:00:00.000Z",
+      "updatedAt": "2026-09-19T21:20:00.000Z"
+    },
+    {
+      "id": "n-kettle-words",
+      "typeId": "notes",
+      "title": "Words said at the Kettle & Crow",
+      "tagIds": ["tag-whiterun", "tag-secret"],
+      "fields": {},
+      "body": "Overheard, third night of Hearthfire, from the corner table by the stair. Two men, neither local, both dressed better than their hands.\n\n> \"...the Pale forge, the one on the harbour. Sister keeps the accounts.\"\n\nThen the other one said a word I did not catch and they both stopped talking and looked at the door, and I looked at my bread like a man who had heard nothing at all.\n\nSigunn's ledger went missing eleven days later.\n\nI have not told her. I am not sure why.",
+      "pinned": false,
+      "secret": true,
+      "createdAt": "2026-09-17T23:30:00.000Z",
+      "updatedAt": "2026-09-17T23:30:00.000Z"
+    },
+
+    {
+      "id": "r-second-forge",
+      "typeId": "rumours",
+      "title": "A second forge under Cinderhall",
+      "tagIds": ["tag-markarth", "tag-smith"],
+      "fields": {},
+      "body": "From two different Compact apprentices, a month apart, neither of whom knew the other had told me.\n\nA room below the east terrace, older than the hall, worked at night. The Compact does not list it and Hjalti says it is a store.\n\nStores do not need a chimney.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-09-13T12:10:00.000Z",
+      "updatedAt": "2026-09-13T12:10:00.000Z"
+    },
+    {
+      "id": "r-coin-counter-master",
+      "typeId": "rumours",
+      "title": "The Coin-Counter answers to someone in Solitude",
+      "tagIds": ["tag-riften", "tag-solitude", "tag-secret", "tag-dangerous"],
+      "fields": {},
+      "body": "Said by a very drunk man in Riften who became extremely sober the moment he realised he had said it.\n\nHe named no one. He did say \"the one who buys the unmarked work\", which I have not been able to stop thinking about since Faelor Mirin asked me for blanks.\n\nProbably nothing. Two loose threads are not a rope.\n\nI have written it down anyway.",
+      "pinned": false,
+      "secret": true,
+      "createdAt": "2026-09-17T20:15:00.000Z",
+      "updatedAt": "2026-09-18T08:00:00.000Z"
+    },
+    {
+      "id": "r-snowberries",
+      "typeId": "rumours",
+      "title": "Snowberries fetching triple in Windhelm",
+      "tagIds": ["tag-windhelm", "tag-merchant"],
+      "fields": {},
+      "body": "Gorm's youngest heard it at the crossroads and Gorm repeated it with the face he makes when he does not believe a thing but would like to.\n\nIf it is true it will not be true by the time anyone gets there, which is the nature of that kind of news.\n\nNot my trade. Writing it down for the wagon families.",
+      "pinned": false,
+      "secret": false,
+      "createdAt": "2026-09-11T17:10:00.000Z",
+      "updatedAt": "2026-09-11T17:10:00.000Z"
+    }
+  ]
+}

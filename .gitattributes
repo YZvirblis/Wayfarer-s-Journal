@@ -1,0 +1,8 @@
+# Keep launchers usable on the platform they target, whatever the clone settings.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

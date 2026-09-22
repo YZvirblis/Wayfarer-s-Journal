@@ -1,0 +1,21 @@
+# Player data — never committed. This is real, private journal content.
+data/
+
+# Dependencies & build output
+node_modules/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local environment overrides
+.env
+.env.local

@@ -431,6 +431,27 @@ export function updateEntryType(id: string, recipe: (type: EntryType) => void): 
   });
 }
 
+/** How many entries of a type carry a non-empty value in a field. */
+export function fieldUsage(doc: CharacterDocument, typeId: string, key: string): number {
+  return doc.entries.filter((entry) => {
+    if (entry.typeId !== typeId) return false;
+    const value = entry.fields[key];
+    return value !== undefined && String(value).trim() !== '';
+  }).length;
+}
+
+/** Drops a field definition and every value stored under it, in one save. */
+export function removeField(typeId: string, key: string): void {
+  mutate((draft) => {
+    const type = draft.entryTypes.find((candidate) => candidate.id === typeId);
+    if (!type) return;
+    type.fields = type.fields.filter((field) => field.key !== key);
+    for (const entry of draft.entries) {
+      if (entry.typeId === typeId && key in entry.fields) delete entry.fields[key];
+    }
+  });
+}
+
 /** Removes the section and every entry filed under it. */
 export function deleteEntryType(id: string): void {
   mutate((draft) => {

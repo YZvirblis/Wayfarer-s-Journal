@@ -19,6 +19,7 @@ interface EntryTypeViewProps {
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
   onEditSection: (type: EntryType) => void;
+  onEditFields: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
   onSearchEverywhere: (query: string) => void;
 }
@@ -32,6 +33,7 @@ export function EntryTypeView({
   onToggleTag,
   onClearTags,
   onEditSection,
+  onEditFields,
   onDeleteSection,
   onSearchEverywhere,
 }: EntryTypeViewProps) {
@@ -70,6 +72,7 @@ export function EntryTypeView({
           onToggleTag={onToggleTag}
           onClearTags={onClearTags}
           onEditSection={onEditSection}
+          onEditFields={onEditFields}
           onDeleteSection={onDeleteSection}
           onSearchEverywhere={onSearchEverywhere}
         />

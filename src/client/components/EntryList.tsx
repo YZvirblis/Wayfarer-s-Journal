@@ -1,4 +1,4 @@
-import { ArrowDownWideNarrow, EyeOff, MoreHorizontal, Pencil, Pin, Plus, Search, Trash2, X } from 'lucide-react';
+import { ArrowDownWideNarrow, EyeOff, ListChecks, MoreHorizontal, Pencil, Pin, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { CharacterDocument, Entry, EntryType, Tag } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -58,6 +58,7 @@ interface EntryListProps {
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
   onEditSection: (type: EntryType) => void;
+  onEditFields: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
   /** Hand the current query to the palette, which searches every section. */
   onSearchEverywhere: (query: string) => void;
@@ -74,6 +75,7 @@ export function EntryList({
   onToggleTag,
   onClearTags,
   onEditSection,
+  onEditFields,
   onDeleteSection,
   onSearchEverywhere,
 }: EntryListProps) {
@@ -129,26 +131,34 @@ export function EntryList({
               {visible.length === total ? total : `${visible.length} of ${total}`}
             </span>
             {/* The full sidebar carries these; the icon rail cannot, so they live here below `wide`. */}
-            {type.builtIn ? null : (
-              <Menu>
-                <MenuTrigger asChild>
-                  <IconButton variant="ghost" size="sm" className="h-6 w-6 wide:hidden" aria-label={`${type.name} options`}>
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                  </IconButton>
-                </MenuTrigger>
-                <MenuContent>
+            <Menu>
+              <MenuTrigger asChild>
+                <IconButton variant="ghost" size="sm" className="h-6 w-6 wide:hidden" aria-label={`${type.name} options`}>
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </IconButton>
+              </MenuTrigger>
+              <MenuContent>
+                {type.builtIn ? null : (
                   <MenuItem onSelect={() => onEditSection(type)}>
                     <Pencil className="h-3.5 w-3.5 opacity-70" />
                     Rename &amp; restyle
                   </MenuItem>
-                  <MenuSeparator />
-                  <MenuItem danger onSelect={() => onDeleteSection(type)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete section
-                  </MenuItem>
-                </MenuContent>
-              </Menu>
-            )}
+                )}
+                <MenuItem onSelect={() => onEditFields(type)}>
+                  <ListChecks className="h-3.5 w-3.5 opacity-70" />
+                  Edit fields…
+                </MenuItem>
+                {type.builtIn ? null : (
+                  <>
+                    <MenuSeparator />
+                    <MenuItem danger onSelect={() => onDeleteSection(type)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete section
+                    </MenuItem>
+                  </>
+                )}
+              </MenuContent>
+            </Menu>
           </div>
         </div>
 

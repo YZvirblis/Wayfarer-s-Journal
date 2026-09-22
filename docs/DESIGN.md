@@ -147,7 +147,7 @@ interface Entry {
 | Quests | — | status, progress |
 | Notes | — | — |
 
-Users can create custom entry types (sections) with a name, icon, and color in Phase 1. A field editor for custom types arrives in Phase 3, but the schema already supports it.
+Users can create custom entry types (sections) with a name, icon, and color. Since Phase 3, every section's options menu has **Edit fields…** (`components/FieldsDialog.tsx`): add, rename, reorder (arrow buttons), change the kind between text / choice / number, and edit a choice's options as a comma-separated list. Field *keys* never change (`f-<nanoid>` for new ones), so values survive renames; removing a field that carries data asks for confirmation and states how many entries are affected, then deletes the definition and every stored value in one mutation. Built-in types are editable too, except that People's `standing` field is locked (name editable, kind and options fixed) because the relationship web reads its values.
 
 ### schemaVersion 2 (Phase 2)
 Two additive top-level collections. Nothing from v1 changes shape.

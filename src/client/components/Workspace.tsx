@@ -22,6 +22,7 @@ import { toggleTheme } from '../lib/settingsStore';
 import type { View } from '../types';
 import { CommandPalette, type PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
+import { FieldsDialog } from './FieldsDialog';
 import { GoalDialog } from './GoalDialog';
 import { GoalsView } from './GoalsView';
 import { InboxView } from './InboxView';
@@ -64,6 +65,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const [goalDialog, setGoalDialog] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
+  const [fieldsTypeId, setFieldsTypeId] = useState<string | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
   const [palette, setPalette] = useState<{ open: boolean; query: string }>({ open: false, query: '' });
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -266,6 +268,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onCapture={openCapture}
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onEditSection={(type) => setSectionDialog({ open: true, type })}
+          onEditFields={(type) => setFieldsTypeId(type.id)}
           onDeleteSection={(type) => setPendingSectionDelete(type)}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
@@ -325,6 +328,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             onToggleTag={toggleTag}
             onClearTags={() => setActiveTagIds([])}
             onEditSection={(type) => setSectionDialog({ open: true, type })}
+            onEditFields={(type) => setFieldsTypeId(type.id)}
             onDeleteSection={(type) => setPendingSectionDelete(type)}
             onSearchEverywhere={(query) => setPaletteOpen(true, query)}
           />
@@ -380,6 +384,13 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             addGoal(values);
           }
         }}
+      />
+
+      <FieldsDialog
+        open={fieldsTypeId !== null}
+        onOpenChange={(open) => !open && setFieldsTypeId(null)}
+        doc={doc}
+        typeId={fieldsTypeId}
       />
 
       <SectionDialog

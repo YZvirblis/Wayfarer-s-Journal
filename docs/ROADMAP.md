@@ -38,7 +38,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Septim ledger (schema v3): running balance, month groups, filters by person / tag / goal, totals in view, one-line quick entry with `@person` autocomplete, inline editing, "Dealings" on every person
 - [x] Goals (schema v3): save / debt kinds, progress derived from the ledger, remaining / percent / days left / per-week figure, cards on the Overview and a Goals page with a quick payment line
 - [x] Relationship web: d3-force graph of People, Factions and Places around the character; ties from `[[links]]`, shared locations and ledger dealings; colour by section, size by ties, standing on People edges; hover, click-to-open, drag, zoom, tag filter
-- [ ] Custom field editor for entry types
+- [x] Custom field editor for entry types: add, remove (data-aware confirmation with the affected count), rename, reorder, kinds text / choice / number, choice options; built-ins editable except People's locked standing field
 - [ ] "Hide secrets" blur mode for screenshots/streaming
 - [ ] Portrait upload for characters and people
 - [ ] Reorder profile fields and sections by drag (the grip handle is decorative today)

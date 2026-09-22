@@ -4,6 +4,7 @@ import {
   Coins,
   Feather,
   Inbox,
+  ListChecks,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -45,6 +46,7 @@ interface SidebarProps {
   onCapture: () => void;
   onNewSection: () => void;
   onEditSection: (type: EntryType) => void;
+  onEditFields: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
@@ -118,6 +120,7 @@ export function Sidebar({
   onCapture,
   onNewSection,
   onEditSection,
+  onEditFields,
   onDeleteSection,
   onSwitchCharacter,
   onManageCharacters,
@@ -256,26 +259,34 @@ export function Sidebar({
               active={view.kind === 'type' && view.typeId === type.id}
               onClick={() => onNavigate({ kind: 'type', typeId: type.id })}
               trailing={
-                type.builtIn ? undefined : (
-                  <Menu>
-                    <MenuTrigger asChild>
-                      <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label={`${type.name} options`}>
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                      </IconButton>
-                    </MenuTrigger>
-                    <MenuContent>
+                <Menu>
+                  <MenuTrigger asChild>
+                    <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label={`${type.name} options`}>
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </IconButton>
+                  </MenuTrigger>
+                  <MenuContent>
+                    {type.builtIn ? null : (
                       <MenuItem onSelect={() => onEditSection(type)}>
                         <Pencil className="h-3.5 w-3.5 opacity-70" />
                         Rename &amp; restyle
                       </MenuItem>
-                      <MenuSeparator />
-                      <MenuItem danger onSelect={() => onDeleteSection(type)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Delete section
-                      </MenuItem>
-                    </MenuContent>
-                  </Menu>
-                )
+                    )}
+                    <MenuItem onSelect={() => onEditFields(type)}>
+                      <ListChecks className="h-3.5 w-3.5 opacity-70" />
+                      Edit fields…
+                    </MenuItem>
+                    {type.builtIn ? null : (
+                      <>
+                        <MenuSeparator />
+                        <MenuItem danger onSelect={() => onDeleteSection(type)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Delete section
+                        </MenuItem>
+                      </>
+                    )}
+                  </MenuContent>
+                </Menu>
               }
             />
           );

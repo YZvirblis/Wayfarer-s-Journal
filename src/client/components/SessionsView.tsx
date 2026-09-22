@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Eye, EyeOff, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CharacterDocument, Session } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -7,6 +7,7 @@ import { bodyPreview, formatCalendarLong, formatCalendarShort, formatMonth, rela
 import { PANE_QUERY, useMediaQuery } from '../lib/layout';
 import { parseLinks, resolveLink } from '../lib/links';
 import { handleListKey } from '../lib/listKeys';
+import { useSettings } from '../lib/settingsStore';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { MarkdownField } from './MarkdownField';
 import { WikiLink } from './WikiLink';
@@ -16,6 +17,7 @@ import { Divider } from './ui/Divider';
 import { EmptyState } from './ui/EmptyState';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from './ui/Menu';
 import { Tooltip } from './ui/Tooltip';
+import { Veil } from './ui/Veil';
 
 /** Newest first: by play date, then by when the record was written. */
 function sortSessions(sessions: Session[]): Session[] {
@@ -37,6 +39,7 @@ function SessionList({
 }) {
   const sorted = useMemo(() => sortSessions(sessions), [sessions]);
   const ids = sorted.map((session) => session.id);
+  const { hideSecrets } = useSettings();
 
   return (
     <div data-list-root className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
@@ -90,15 +93,20 @@ function SessionList({
                     )}
                   >
                     {active ? <span className="absolute inset-y-1.5 left-0 w-[2px] rounded-full bg-gold/80" /> : null}
-                    <span className="w-14 shrink-0 pt-0.5 font-display text-2xs uppercase leading-snug tracking-[0.1em] text-gold/80">
+                    <Veil hidden={hideSecrets && session.secret} className="flex flex-1 items-start gap-3">
+                    <span className="w-[4.75rem] shrink-0 pt-0.5 font-display text-2xs uppercase leading-snug tracking-[0.1em] text-gold/80">
                       {formatCalendarShort(session.date)}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className={cn('block truncate text-sm', active ? 'text-ink' : 'text-ink/85', !session.title && 'italic text-faint')}>
-                        {session.title || 'Untitled session'}
+                      <span className="flex items-center gap-1.5">
+                        <span className={cn('min-w-0 truncate text-sm', active ? 'text-ink' : 'text-ink/85', !session.title && 'italic text-faint')}>
+                          {session.title || 'Untitled session'}
+                        </span>
+                        {session.secret ? <EyeOff className="h-3 w-3 shrink-0 text-plum/80" /> : null}
                       </span>
                       {preview ? <span className="mt-0.5 block truncate text-xs text-faint">{preview}</span> : null}
                     </span>
+                    </Veil>
                   </button>
                 </li>
               );
@@ -126,6 +134,7 @@ function SessionDetail({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const title = useAutoCommit(session.title, (value) => updateSession(session.id, (draft) => void (draft.title = value)));
   const titleInput = useRef<HTMLInputElement | null>(null);
+  const { hideSecrets } = useSettings();
 
   useEffect(() => {
     if (focusTitle > 0) titleInput.current?.focus();
@@ -162,21 +171,35 @@ function SessionDetail({
               Session
             </span>
           )}
-          <Menu>
-            <MenuTrigger asChild>
-              <IconButton variant="ghost" size="sm" aria-label="Session options">
-                <MoreHorizontal className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-0.5">
+            <Tooltip label={session.secret ? 'Marked secret' : 'Mark as secret'}>
+              <IconButton
+                variant="ghost"
+                size="sm"
+                aria-label={session.secret ? 'Unmark secret' : 'Mark as secret'}
+                className={cn(session.secret && 'text-plum')}
+                onClick={() => updateSession(session.id, (draft) => void (draft.secret = !draft.secret))}
+              >
+                {session.secret ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </IconButton>
-            </MenuTrigger>
-            <MenuContent>
-              <MenuItem danger onSelect={() => setConfirmDelete(true)}>
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete session
-              </MenuItem>
-            </MenuContent>
-          </Menu>
+            </Tooltip>
+            <Menu>
+              <MenuTrigger asChild>
+                <IconButton variant="ghost" size="sm" aria-label="Session options">
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </IconButton>
+              </MenuTrigger>
+              <MenuContent>
+                <MenuItem danger onSelect={() => setConfirmDelete(true)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete session
+                </MenuItem>
+              </MenuContent>
+            </Menu>
+          </div>
         </div>
 
+        <Veil hidden={hideSecrets && session.secret} label="Secret session">
         <label className="group/date inline-flex items-center gap-2 text-sm text-muted">
           <span className="font-display text-base tracking-title text-ink/90">{formatCalendarLong(session.date)}</span>
           <input
@@ -225,6 +248,7 @@ function SessionDetail({
             </section>
           </>
         ) : null}
+        </Veil>
       </div>
 
       <ConfirmDialog

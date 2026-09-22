@@ -118,7 +118,7 @@ export function linkSources(doc: CharacterDocument): LinkSource[] {
       id: session.id,
       label: session.title || session.date,
       body: session.body,
-      secret: false,
+      secret: session.secret,
     })),
     ...doc.transactions.map((transaction): LinkSource => ({
       kind: 'transaction',

@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Bump SCHEMA_VERSION and add a migration in src/server/migrations.ts whenever
  * this file changes shape.
  */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 /** Curated accent palette. Tags and entry types store a key, not a hex value, so
  *  colours follow the active theme. */
@@ -117,6 +117,8 @@ export const sessionSchema = z.object({
   date: z.string(), // YYYY-MM-DD
   title: z.string(),
   body: z.string(),
+  /** Added in schemaVersion 5: a whole night can be nobody's business. */
+  secret: z.boolean().default(false),
   createdAt: isoDate,
   updatedAt: isoDate,
 });

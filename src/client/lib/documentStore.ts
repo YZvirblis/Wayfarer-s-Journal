@@ -292,7 +292,15 @@ export function appendCaptureToEntry(id: string, entryId: string): boolean {
 /* -------------------------------------------------------------------------- */
 
 export function createSession(date = localDate()): string {
-  const session: Session = { id: newId(), date, title: '', body: '', createdAt: stamp(), updatedAt: stamp() };
+  const session: Session = {
+    id: newId(),
+    date,
+    title: '',
+    body: '',
+    secret: false,
+    createdAt: stamp(),
+    updatedAt: stamp(),
+  };
   mutate((draft) => {
     draft.sessions.unshift(session);
   });

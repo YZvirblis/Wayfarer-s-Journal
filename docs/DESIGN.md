@@ -87,7 +87,7 @@ interface CharacterDocument {
   tags: Tag[];
   entryTypes: EntryType[];
   entries: Entry[];
-  // schemaVersion 2 adds captures and sessions; 3 adds transactions and goals; 4 adds Entry.portrait (see below)
+  // schemaVersion 2 adds captures and sessions; 3 adds transactions and goals; 4 adds Entry.portrait; 5 adds Session.secret
 }
 
 interface Profile {
@@ -158,13 +158,16 @@ interface CharacterDocument {
   sessions: Session[];
 }
 interface Capture { id: string; body: string /* markdown, may contain [[links]] */; createdAt: string; }
-interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; body: string /* markdown */; createdAt: string; updatedAt: string; }
+interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; body: string /* markdown */; secret: boolean /* v5 */; createdAt: string; updatedAt: string; }
 ```
 - **Sessions carry no `entryIds`.** What a session references is whatever its body links to with `[[Entry Title]]`, the same rule entries follow. There is one kind of link in the app, and a session shows up under an entry's backlinks like any other source.
 - **Migration 1 → 2** (`src/server/migrations.ts`): adds `captures: []` and `sessions: []` when absent, leaves every other key untouched, and is safe to run twice. It runs in memory on every read; the upgraded document reaches disk on the next save, and `saveCharacter` copies the v1 file into `data/backups/<id>/` before overwriting it. Verified against the example character and a real imported character on 2026-09-22.
 
 ### schemaVersion 4 (Phase 3)
 `Entry` gains an optional `portrait: string` (a data URL), matching the `profile.portrait` that existed since v1. The 3 → 4 migration is the identity: nothing needs transforming, but the bump makes an older build refuse the file instead of silently stripping portraits on its next save. Portraits are produced by `lib/portrait.ts`: centre-cropped to a square, scaled to at most 256px, encoded as JPEG at quality 0.86 in the browser, so a portrait costs roughly 10–25 kB inside the JSON and the file stays self-contained. `PortraitPicker` accepts a pasted image, a dropped one, or a file picker; `Sigil` shows the image when there is one and initials when there is not, everywhere a character or person appears (cards, switcher, Overview, People rows, detail pane, palette, web nodes).
+
+### schemaVersion 5 (Phase 4a)
+`Session` gains `secret: boolean` (default `false`). The 4 → 5 migration writes `secret: false` onto every existing session. This settles the hide-secrets open question: **sessions can be secret** (blurred in the list and the detail pane, left out of backlinks and the palette while the mode is on); **captures stay unblurred**, because a capture is a raw jot that has not been sorted yet and would gain nothing from a second flag; and **balances stay visible**, because the mode hides words, not arithmetic — a player who needs the total hidden can crop the screenshot, while blurring numbers would make the ledger unusable during play. Verified on both local characters on 2026-09-22 with v4 backups taken first.
 
 ### Links (Phase 2, no schema change)
 `[[Entry Title]]` anywhere in a markdown body (entry bodies, profile sections, captures, sessions) links to an entry. Links are plain text in the file; nothing is stored beside them, and backlinks are computed at runtime.
@@ -236,7 +239,7 @@ interface Goal {
 - **Small canvases** (under 900px wide): the tag chips become one horizontally scrolling row, only hubs (three or more ties), the character and the hovered neighbourhood keep their labels, and the settled graph is fitted to the canvas once per layout ("Fit to view" repeats it on demand). A view the player has zoomed or panned is never re-fitted behind their back.
 
 ### Hide-secrets mode (Phase 3)
-`settings.hideSecrets` (persisted in `settings.json`, toggled from the sidebar footer, the rail, or the palette) blurs everything marked secret: entries in lists and in the detail pane, profile sections, goals (cards and Overview tiles) and ledger lines. `ui/Veil.tsx` wraps each of them: a blurred, non-selectable copy under a "Secret · click to reveal" pill; a click (never a hover) reveals that one item until the mode is turned off and on again. A plum banner across the top of the main area says "Secrets hidden" while it is on. Secret entries, sections, transactions and goals are also left out of the relationship web, the "Mentioned in" panel, palette results, the Inbox's entry picker and a person's Dealings, so nothing leaks through a snippet or a count. Balances still include secret transactions; the mode hides words, not arithmetic.
+`settings.hideSecrets` (persisted in `settings.json`, toggled from the sidebar footer, the rail, or the palette) blurs everything marked secret: entries in lists and in the detail pane, profile sections, goals (cards and Overview tiles), ledger lines and, since v5, sessions. `ui/Veil.tsx` wraps each of them: a blurred, non-selectable copy under a "Secret · click to reveal" pill; a click (never a hover) reveals that one item until the mode is turned off and on again. A plum banner across the top of the main area says "Secrets hidden" while it is on. Secret entries, sections, transactions and goals are also left out of the relationship web, the "Mentioned in" panel, palette results, the Inbox's entry picker and a person's Dealings, so nothing leaks through a snippet or a count. Balances still include secret transactions; the mode hides words, not arithmetic.
 
 ### Layout modes (Phase 2)
 Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:

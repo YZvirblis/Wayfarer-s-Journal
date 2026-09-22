@@ -96,6 +96,7 @@ function buildCommands(
   }
 
   for (const session of doc.sessions) {
+    if (hideSecrets && session.secret) continue;
     commands.push({
       id: `session:${session.id}`,
       group: 'Sessions',

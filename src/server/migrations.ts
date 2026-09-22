@@ -36,6 +36,17 @@ const migrations: Record<number, (doc: RawDocument) => RawDocument> = {
    * bump exists so an older build refuses a file it would silently strip.
    */
   3: (doc) => ({ ...doc }),
+  /** 4 -> 5: sessions gain `secret`, defaulting to false. */
+  4: (doc) => ({
+    ...doc,
+    sessions: Array.isArray(doc.sessions)
+      ? doc.sessions.map((session) =>
+          typeof session === 'object' && session !== null
+            ? { secret: false, ...(session as Record<string, unknown>) }
+            : session,
+        )
+      : [],
+  }),
 };
 
 export class MigrationError extends Error {}

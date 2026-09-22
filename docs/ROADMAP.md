@@ -46,7 +46,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 
 ## Phase 4a — Harden and polish
 - [x] Narrow-width pass at 700px and 960px across ledger, goals, web, field editor, sessions and inbox — usable beside a game window
-- [ ] Sessions gain a `secret` flag (schema v5); captures stay unblurred, balances stay visible
+- [x] Sessions gain a `secret` flag (schema v5); captures stay unblurred, balances stay visible
 - [ ] Reorder sections in the sidebar
 - [ ] Code-split the web view (d3) and other heavy routes; drop unused font subsets; initial chunk well under 300 kB
 - [ ] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette

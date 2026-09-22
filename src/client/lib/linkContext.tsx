@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { Entry, EntryType } from '../../shared/schema';
+import type { LinkSource } from './links';
 
 /**
  * What rendered `[[links]]` and the editor's autocomplete need from the
@@ -11,6 +12,8 @@ export interface LinkContextValue {
   entries: Entry[];
   entryTypes: EntryType[];
   openEntry: (id: string) => void;
+  /** Jump to wherever a backlink came from: an entry, the Overview, the Inbox, a session. */
+  openSource: (source: LinkSource) => void;
   /** Offer to create an entry for a link that resolves to nothing. */
   createFromLink: (title: string, typeName?: string) => void;
 }
@@ -21,6 +24,7 @@ export const LinkContext = createContext<LinkContextValue>({
   entries: [],
   entryTypes: [],
   openEntry: noop,
+  openSource: noop,
   createFromLink: noop,
 });
 

@@ -45,16 +45,20 @@ export function formatDate(iso: string): string {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-/** First meaningful line of a markdown body, for list previews. */
-export function bodyPreview(body: string, limit = 130): string {
-  const text = body
+/** Markdown reduced to its words: links keep their text, emphasis and headings lose their markers. */
+export function stripMarkdown(markdown: string): string {
+  return markdown
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\[\[([^[\]|\n]+?)(?:\|[^[\]|\n]+?)?\]\]/g, '$1')
     .replace(/[*_`>#]/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/\s+/g, ' ');
+}
+
+/** First meaningful line of a markdown body, for list previews. */
+export function bodyPreview(body: string, limit = 130): string {
+  const text = stripMarkdown(body).trim();
   return text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
 }
 

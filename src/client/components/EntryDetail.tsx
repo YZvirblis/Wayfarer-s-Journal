@@ -8,6 +8,7 @@ import { colorClasses } from '../lib/palette';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { iconByName } from '../lib/icons';
 import { singularize } from '../lib/words';
+import { Backlinks } from './Backlinks';
 import { MarkdownField } from './MarkdownField';
 import { ProgressBar, STATUS_META, STATUS_ORDER } from './QuestStatus';
 import { TagRow } from './TagPicker';
@@ -279,6 +280,9 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect }: EntryDeta
           placeholder="What happened? What did they promise? Write it down before you forget."
           minHeight={220}
         />
+
+        <Divider className="my-6" />
+        <Backlinks doc={doc} entryId={entry.id} />
       </div>
 
       <ConfirmDialog

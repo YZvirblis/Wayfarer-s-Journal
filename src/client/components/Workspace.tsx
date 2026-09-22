@@ -11,7 +11,7 @@ import {
   useDocumentState,
 } from '../lib/documentStore';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
-import { normalizeTitle } from '../lib/links';
+import { normalizeTitle, type LinkSource } from '../lib/links';
 import type { View } from '../types';
 import { EntryTypeView } from './EntryTypeView';
 import { NewEntryDialog } from './NewEntryDialog';
@@ -94,14 +94,24 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     [entries, showEntry],
   );
 
+  const openSource = useCallback(
+    (source: LinkSource) => {
+      if (source.kind === 'entry') showEntry(source.typeId, source.id);
+      else if (source.kind === 'section') setView({ kind: 'overview' });
+      // Captures and sessions gain their own views later in Phase 2.
+    },
+    [showEntry],
+  );
+
   const linkContext = useMemo<LinkContextValue>(
     () => ({
       entries: doc?.entries ?? [],
       entryTypes: doc?.entryTypes ?? [],
       openEntry,
+      openSource,
       createFromLink: (title, typeName) => setLinkDraft({ title, ...(typeName ? { typeName } : {}) }),
     }),
-    [doc?.entries, doc?.entryTypes, openEntry],
+    [doc?.entries, doc?.entryTypes, openEntry, openSource],
   );
 
   if (loadError) {

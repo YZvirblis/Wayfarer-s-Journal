@@ -24,7 +24,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 
 ## Phase 2 — Connections & Capture
 - [x] `[[Entry Title]]` links with autocomplete in the editor (incl. `[[Title|Type]]` disambiguation, rename-rewrite, create-from-unresolved-link)
-- [ ] Backlinks panel ("Mentioned in…") on every entry
+- [x] Backlinks panel ("Mentioned in…") on every entry, with a context snippet per source
 - [ ] Ctrl+K command palette: search everything, jump anywhere, create entries
 - [ ] Quick-capture popup (global in-app hotkey) → inbox of unsorted captures
 - [ ] Convert a capture into an entry

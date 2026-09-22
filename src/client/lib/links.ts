@@ -1,4 +1,5 @@
 import type { CharacterDocument, Entry, EntryType } from '../../shared/schema';
+import { stripMarkdown } from './format';
 
 /**
  * `[[Entry Title]]` links. The optional qualifier `[[Title|Type]]` names the
@@ -70,6 +71,83 @@ export function titleCounts(entries: Entry[]): Map<string, number> {
     if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return counts;
+}
+
+/** Every markdown body in the document that can carry links, and where it lives. */
+export type LinkSource =
+  | { kind: 'entry'; id: string; label: string; typeId: string; body: string }
+  | { kind: 'section'; id: string; label: string; body: string }
+  | { kind: 'capture'; id: string; label: string; body: string }
+  | { kind: 'session'; id: string; label: string; body: string };
+
+export function linkSources(doc: CharacterDocument): LinkSource[] {
+  return [
+    ...doc.entries.map((entry): LinkSource => ({
+      kind: 'entry',
+      id: entry.id,
+      label: entry.title || 'Untitled',
+      typeId: entry.typeId,
+      body: entry.body,
+    })),
+    ...doc.profile.sections.map((section): LinkSource => ({
+      kind: 'section',
+      id: section.id,
+      label: section.title || 'Untitled section',
+      body: section.body,
+    })),
+    ...doc.captures.map((capture): LinkSource => ({
+      kind: 'capture',
+      id: capture.id,
+      label: 'Inbox',
+      body: capture.body,
+    })),
+    ...doc.sessions.map((session): LinkSource => ({
+      kind: 'session',
+      id: session.id,
+      label: session.title || session.date,
+      body: session.body,
+    })),
+  ];
+}
+
+export interface Backlink {
+  source: LinkSource;
+  /** The sentence around the first mention, split so the link text can be emphasised. */
+  before: string;
+  title: string;
+  after: string;
+  /** How many times the source mentions the entry. */
+  mentions: number;
+}
+
+const SNIPPET_RADIUS = 72;
+
+function snippetAround(body: string, link: ParsedLink): Pick<Backlink, 'before' | 'title' | 'after'> {
+  const lineStart = body.lastIndexOf('\n', link.start - 1) + 1;
+  const lineEndAt = body.indexOf('\n', link.end);
+  const lineEnd = lineEndAt === -1 ? body.length : lineEndAt;
+  const before = stripMarkdown(body.slice(lineStart, link.start)).trimStart();
+  const after = stripMarkdown(body.slice(link.end, lineEnd)).trimEnd();
+  return {
+    before: before.length > SNIPPET_RADIUS ? `…${before.slice(-SNIPPET_RADIUS)}` : before,
+    title: link.title,
+    after: after.length > SNIPPET_RADIUS ? `${after.slice(0, SNIPPET_RADIUS)}…` : after,
+  };
+}
+
+/** Everything that links to `entryId`, one row per source, computed on demand. */
+export function backlinksTo(doc: CharacterDocument, entryId: string): Backlink[] {
+  const backlinks: Backlink[] = [];
+  for (const source of linkSources(doc)) {
+    if (source.kind === 'entry' && source.id === entryId) continue;
+    const mentions = parseLinks(source.body).filter(
+      (link) => resolveLink(doc.entries, doc.entryTypes, link.title, link.typeName)?.id === entryId,
+    );
+    const first = mentions[0];
+    if (!first) continue;
+    backlinks.push({ source, ...snippetAround(source.body, first), mentions: mentions.length });
+  }
+  return backlinks;
 }
 
 /**

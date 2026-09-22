@@ -11,6 +11,7 @@ import {
   useDocumentState,
 } from '../lib/documentStore';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
+import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
 import { normalizeTitle, type LinkSource } from '../lib/links';
 import type { View } from '../types';
 import { EntryTypeView } from './EntryTypeView';
@@ -18,6 +19,7 @@ import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
 import { SectionDialog } from './SectionDialog';
 import { Sidebar } from './Sidebar';
+import { SidebarRail } from './SidebarRail';
 import { TagManager } from './TagManager';
 import { Button } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -47,6 +49,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [pendingSectionDelete, setPendingSectionDelete] = useState<EntryType | null>(null);
   /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
+  const wide = useMediaQuery(WIDE_QUERY);
 
   useEffect(() => {
     let cancelled = false;
@@ -160,20 +163,36 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   return (
     <LinkContext.Provider value={linkContext}>
     <div className="flex h-full">
-      <Sidebar
-        doc={doc}
-        characters={characters}
-        view={view}
-        activeTagIds={activeTagIds}
-        onNavigate={setView}
-        onToggleTag={toggleTag}
-        onOpenTagManager={() => setTagManagerOpen(true)}
-        onNewSection={() => setSectionDialog({ open: true, type: null })}
-        onEditSection={(type) => setSectionDialog({ open: true, type })}
-        onDeleteSection={(type) => setPendingSectionDelete(type)}
-        onSwitchCharacter={onSwitchCharacter}
-        onManageCharacters={onManageCharacters}
-      />
+      {wide ? (
+        <Sidebar
+          doc={doc}
+          characters={characters}
+          view={view}
+          activeTagIds={activeTagIds}
+          onNavigate={setView}
+          onToggleTag={toggleTag}
+          onOpenTagManager={() => setTagManagerOpen(true)}
+          onNewSection={() => setSectionDialog({ open: true, type: null })}
+          onEditSection={(type) => setSectionDialog({ open: true, type })}
+          onDeleteSection={(type) => setPendingSectionDelete(type)}
+          onSwitchCharacter={onSwitchCharacter}
+          onManageCharacters={onManageCharacters}
+        />
+      ) : (
+        <SidebarRail
+          doc={doc}
+          characters={characters}
+          view={view}
+          activeTagIds={activeTagIds}
+          onNavigate={setView}
+          onToggleTag={toggleTag}
+          onClearTags={() => setActiveTagIds([])}
+          onOpenTagManager={() => setTagManagerOpen(true)}
+          onNewSection={() => setSectionDialog({ open: true, type: null })}
+          onSwitchCharacter={onSwitchCharacter}
+          onManageCharacters={onManageCharacters}
+        />
+      )}
 
       <main className="flex min-w-0 flex-1">
         {view.kind === 'overview' ? (
@@ -188,6 +207,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             activeTagIds={activeTagIds}
             onToggleTag={toggleTag}
             onClearTags={() => setActiveTagIds([])}
+            onEditSection={(type) => setSectionDialog({ open: true, type })}
+            onDeleteSection={(type) => setPendingSectionDelete(type)}
           />
         ) : (
           <Centered>

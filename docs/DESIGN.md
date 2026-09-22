@@ -188,6 +188,17 @@ interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; bo
 3. **Overview:** profile fields and sections, rendered beautifully when not editing.
 4. **Tag manager:** rename, recolor, group, delete (removes the tag from all entries).
 
+### Layout modes (Phase 2)
+Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:
+
+| Width | Sidebar | Main area |
+|---|---|---|
+| ≥ 1200px (`wide`) | Full sidebar: switcher, counts, tags | List + detail side by side |
+| 960–1199px | Icon rail (`SidebarRail`): sigil menu, one icon per section with the count in its tooltip, tags in a popover, theme and save-state dots | List + detail side by side |
+| < 960px (`pane`) | Icon rail | One pane: the list, or the selected entry with a "← Section" back action. Creating or picking an entry opens it; deleting returns to the list |
+
+Custom-section rename/delete, which the rail cannot host, moves into the list header's options menu below `wide`. Detail-pane field columns follow the pane's width (an auto-fit grid), not the viewport's.
+
 ### UX rules
 - Empty states teach the user what to do next. No dead ends.
 - Every destructive action is confirmed. Deleting a character keeps its backups.
@@ -220,6 +231,7 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Narrow layouts use an icon rail rather than a slide-in drawer | Navigation stays one click away while the game is running; a drawer would cost a click to open and one to close on every switch |
 | 2026-09-22 | Links stay as `[[Title]]` text in bodies; nothing is stored beside them, and namesakes are resolved oldest-first | Text survives any edit, export, or hand-editing of the file. A stored id would break the moment the user edits the link in write mode. Oldest-first keeps existing links stable when a new entry borrows a title |
 | 2026-09-22 | `[[…]]` is handled as a remark plugin on the syntax tree, not by string replacement before rendering | Code blocks and inline code are left alone for free, and no second markdown grammar has to be maintained |
 | 2026-09-22 | Sessions have no `entryIds`; a session references entries only through `[[links]]` in its body | One linking mechanism instead of two. Backlinks already have to be computed from bodies, so a session becomes a backlink source for free, and there is no second list to keep in sync when an entry is renamed or deleted |

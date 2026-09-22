@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react';
 import type { CharacterDocument, EntryType } from '../../shared/schema';
 import { createEntry } from '../lib/documentStore';
 import { iconByName } from '../lib/icons';
+import { PANE_QUERY, useMediaQuery } from '../lib/layout';
 import { singularize } from '../lib/words';
 import { EntryDetail } from './EntryDetail';
 import { EntryList } from './EntryList';
@@ -16,6 +17,8 @@ interface EntryTypeViewProps {
   activeTagIds: string[];
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
+  onEditSection: (type: EntryType) => void;
+  onDeleteSection: (type: EntryType) => void;
 }
 
 export function EntryTypeView({
@@ -26,9 +29,13 @@ export function EntryTypeView({
   activeTagIds,
   onToggleTag,
   onClearTags,
+  onEditSection,
+  onDeleteSection,
 }: EntryTypeViewProps) {
   const entry = doc.entries.find((candidate) => candidate.id === selectedId && candidate.typeId === type.id) ?? null;
   const singular = singularize(type.name).toLowerCase();
+  // Below the `pane` breakpoint the list and the detail take turns in one pane.
+  const twoPanes = useMediaQuery(PANE_QUERY);
 
   function create() {
     onSelect(createEntry(type));
@@ -36,16 +43,20 @@ export function EntryTypeView({
 
   return (
     <div className="flex min-w-0 flex-1">
-      <EntryList
-        doc={doc}
-        type={type}
-        selectedId={entry?.id ?? null}
-        onSelect={onSelect}
-        onCreate={create}
-        activeTagIds={activeTagIds}
-        onToggleTag={onToggleTag}
-        onClearTags={onClearTags}
-      />
+      {twoPanes || !entry ? (
+        <EntryList
+          doc={doc}
+          type={type}
+          selectedId={entry?.id ?? null}
+          onSelect={onSelect}
+          onCreate={create}
+          activeTagIds={activeTagIds}
+          onToggleTag={onToggleTag}
+          onClearTags={onClearTags}
+          onEditSection={onEditSection}
+          onDeleteSection={onDeleteSection}
+        />
+      ) : null}
 
       {entry ? (
         <EntryDetail
@@ -55,8 +66,9 @@ export function EntryTypeView({
           entry={entry}
           onSelect={onSelect}
           onDeleted={() => onSelect(null)}
+          onBack={twoPanes ? undefined : () => onSelect(null)}
         />
-      ) : (
+      ) : twoPanes ? (
         <div className="flex min-w-0 flex-1 items-center justify-center">
           <EmptyState
             icon={iconByName(type.icon)}
@@ -70,7 +82,7 @@ export function EntryTypeView({
             }
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

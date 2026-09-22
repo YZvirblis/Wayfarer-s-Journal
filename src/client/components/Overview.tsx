@@ -153,7 +153,7 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
 
   return (
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-3xl px-10 pb-28 pt-10">
+      <div className="mx-auto w-full max-w-3xl px-5 pb-28 pt-6 pane:px-10 pane:pt-10">
         <header className="flex items-start gap-5">
           <Sigil name={doc.profile.name} size="lg" />
           <div className="min-w-0 flex-1 pt-1">

@@ -24,7 +24,7 @@ function TagRowEditor({ tag, usage, onDelete }: { tag: Tag; usage: number; onDel
   );
 
   return (
-    <div className="grid grid-cols-[1fr_7.5rem_auto_auto] items-center gap-2 rounded px-1 py-1.5 transition-colors hover:bg-ink/[0.02]">
+    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 rounded px-1 py-1.5 transition-colors hover:bg-ink/[0.02] sm:grid-cols-[1fr_7.5rem_auto_auto]">
       <div className="flex min-w-0 items-center gap-2">
         <span className={cn('h-2 w-2 shrink-0 rounded-full', colorClasses(tag.color).dot)} />
         <input
@@ -42,7 +42,7 @@ function TagRowEditor({ tag, usage, onDelete }: { tag: Tag; usage: number; onDel
         onBlur={group.flush}
         placeholder="group"
         aria-label="Tag group"
-        className="wj-quiet-field px-1.5 py-1 text-xs text-muted"
+        className="wj-quiet-field hidden px-1.5 py-1 text-xs text-muted sm:block"
       />
 
       <div className="flex items-center gap-1 px-1">

@@ -11,6 +11,12 @@ export default {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
+      // Layout modes (see src/client/lib/layout.ts): below `pane` the list and
+      // detail share one pane; below `wide` the sidebar collapses to an icon rail.
+      screens: {
+        pane: '960px',
+        wide: '1200px',
+      },
       colors: {
         base: token('--wj-bg'),
         panel: token('--wj-panel'),

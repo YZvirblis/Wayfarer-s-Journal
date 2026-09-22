@@ -29,6 +29,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [ ] Quick-capture popup (global in-app hotkey) → inbox of unsorted captures
 - [ ] Convert a capture into an entry
 - [ ] Session log: dated timeline of play sessions, linked to entries
+- [x] Narrow-window layout (~600–1000px): icon-rail sidebar below 1200px, single-pane list/detail with a back action below 960px
 - [ ] Keyboard navigation of the entry list (↑/↓ to move, Enter to open)
 - [ ] Search across every section, not just the open one
 
@@ -44,7 +45,6 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 
 ## Phase 4 — Release
 - [ ] Visual polish pass (spacing, motion, responsiveness, accessibility)
-- [ ] Responsive layout below ~1000px — the sidebar + list + detail panes assume a wide window
 - [ ] Code-split the client bundle (currently one ~540 kB chunk) and trim bundled font subsets to latin/latin-ext
 - [ ] Export: JSON (full backup) and Markdown (readable)
 - [ ] Import: JSON; optional plain-text journal import

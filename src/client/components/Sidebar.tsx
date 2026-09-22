@@ -1,14 +1,4 @@
-import {
-  ChevronsUpDown,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Tags,
-  Trash2,
-  UserRound,
-  Users,
-  type LucideIcon,
-} from 'lucide-react';
+import { ChevronsUpDown, MoreHorizontal, Pencil, Plus, Tags, Trash2, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import { PROFILE_FIELD_IDS } from '../../shared/defaults';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
@@ -16,6 +6,7 @@ import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
+import { CharacterMenu } from './CharacterMenu';
 import { SaveStatus } from './SaveStatus';
 import { Sigil } from './Sigil';
 import { TagChip } from './TagChip';
@@ -150,20 +141,12 @@ export function Sidebar({
               <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-faint" />
             </button>
           </MenuTrigger>
-          <MenuContent align="start" className="w-[16rem]">
-            {characters.map((character) => (
-              <MenuItem key={character.id} onSelect={() => onSwitchCharacter(character.id)}>
-                <Sigil name={character.name} size="sm" className="h-6 w-6 text-[0.6rem]" />
-                <span className="min-w-0 flex-1 truncate">{character.name}</span>
-                {character.id === doc.id ? <span className="text-[0.5rem] text-gold">◆</span> : null}
-              </MenuItem>
-            ))}
-            <MenuSeparator />
-            <MenuItem onSelect={onManageCharacters}>
-              <Users className="h-3.5 w-3.5 opacity-70" />
-              All characters…
-            </MenuItem>
-          </MenuContent>
+          <CharacterMenu
+            characters={characters}
+            currentId={doc.id}
+            onSwitchCharacter={onSwitchCharacter}
+            onManageCharacters={onManageCharacters}
+          />
         </Menu>
       </div>
 

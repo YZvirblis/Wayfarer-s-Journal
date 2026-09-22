@@ -1,4 +1,4 @@
-import { ArrowDownWideNarrow, EyeOff, Pin, Plus, Search, X } from 'lucide-react';
+import { ArrowDownWideNarrow, EyeOff, MoreHorizontal, Pencil, Pin, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { CharacterDocument, Entry, EntryType, Tag } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -9,7 +9,16 @@ import type { SortKey } from '../types';
 import { ProgressBar, StatusBadge, STATUS_ORDER } from './QuestStatus';
 import { TagChip } from './TagChip';
 import { Button, IconButton } from './ui/Button';
-import { Menu, MenuContent, MenuLabel, MenuRadioGroup, MenuRadioItem, MenuTrigger } from './ui/Menu';
+import {
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuLabel,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  MenuTrigger,
+} from './ui/Menu';
 import { Tooltip } from './ui/Tooltip';
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -45,6 +54,8 @@ interface EntryListProps {
   activeTagIds: string[];
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
+  onEditSection: (type: EntryType) => void;
+  onDeleteSection: (type: EntryType) => void;
 }
 
 export function EntryList({
@@ -56,6 +67,8 @@ export function EntryList({
   activeTagIds,
   onToggleTag,
   onClearTags,
+  onEditSection,
+  onDeleteSection,
 }: EntryListProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('updated');
@@ -89,13 +102,36 @@ export function EntryList({
   const activeTags = activeTagIds.map((id) => tagsById.get(id)).filter((tag): tag is Tag => Boolean(tag));
 
   return (
-    <div className="flex w-[22.5rem] shrink-0 flex-col border-r bg-panel/35">
+    <div className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
       <header className="px-4 pb-3 pt-4">
-        <div className="mb-3 flex items-baseline justify-between gap-3">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="truncate font-display text-lg tracking-title text-ink">{type.name}</h2>
-          <span className="shrink-0 text-2xs tabular-nums text-faint">
-            {visible.length === total ? total : `${visible.length} of ${total}`}
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="text-2xs tabular-nums text-faint">
+              {visible.length === total ? total : `${visible.length} of ${total}`}
+            </span>
+            {/* The full sidebar carries these; the icon rail cannot, so they live here below `wide`. */}
+            {type.builtIn ? null : (
+              <Menu>
+                <MenuTrigger asChild>
+                  <IconButton variant="ghost" size="sm" className="h-6 w-6 wide:hidden" aria-label={`${type.name} options`}>
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </IconButton>
+                </MenuTrigger>
+                <MenuContent>
+                  <MenuItem onSelect={() => onEditSection(type)}>
+                    <Pencil className="h-3.5 w-3.5 opacity-70" />
+                    Rename &amp; restyle
+                  </MenuItem>
+                  <MenuSeparator />
+                  <MenuItem danger onSelect={() => onDeleteSection(type)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete section
+                  </MenuItem>
+                </MenuContent>
+              </Menu>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5">

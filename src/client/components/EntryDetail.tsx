@@ -1,4 +1,4 @@
-import { ChevronDown, Copy, Eye, EyeOff, MoreHorizontal, Pin, PinOff, Target, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Copy, Eye, EyeOff, MoreHorizontal, Pin, PinOff, Target, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import type { CharacterDocument, Entry, EntryStatus, EntryType, FieldDef } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -129,9 +129,11 @@ interface EntryDetailProps {
   entry: Entry;
   onDeleted: () => void;
   onSelect: (id: string) => void;
+  /** Present when the detail pane has replaced the list (narrow layout). */
+  onBack?: () => void;
 }
 
-export function EntryDetail({ doc, type, entry, onDeleted, onSelect }: EntryDetailProps) {
+export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack }: EntryDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const title = useAutoCommit(entry.title, (value) => renameEntry(entry.id, value));
   const TypeIcon = iconByName(type.icon);
@@ -139,12 +141,27 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect }: EntryDeta
 
   return (
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-3xl px-10 pb-24 pt-7">
+      <div className="mx-auto w-full max-w-3xl px-5 pb-24 pt-5 pane:px-10 pane:pt-7">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span className={cn('inline-flex items-center gap-1.5 text-2xs uppercase tracking-[0.14em]', colors.text)}>
-            <TypeIcon className="h-3 w-3" strokeWidth={2} />
-            {singularize(type.name)}
-          </span>
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className={cn(
+                '-ml-2 inline-flex items-center gap-1.5 rounded py-1 pl-1.5 pr-2.5 text-2xs uppercase tracking-[0.14em] transition-colors hover:bg-ink/[0.04]',
+                colors.text,
+              )}
+            >
+              <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+              <TypeIcon className="h-3 w-3" strokeWidth={2} />
+              {type.name}
+            </button>
+          ) : (
+            <span className={cn('inline-flex items-center gap-1.5 text-2xs uppercase tracking-[0.14em]', colors.text)}>
+              <TypeIcon className="h-3 w-3" strokeWidth={2} />
+              {singularize(type.name)}
+            </span>
+          )}
 
           <div className="flex items-center gap-0.5">
             <Tooltip label={entry.secret ? 'Marked secret' : 'Mark as secret'}>
@@ -212,8 +229,9 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect }: EntryDeta
           <>
             <Divider className="my-6" />
             <div className="space-y-4">
+              {/* Field columns follow the pane's width, not the viewport's: one column until two fit. */}
               {type.fields.length > 0 ? (
-                <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(19rem,1fr))] gap-x-8 gap-y-3">
                   {type.fields.map((field) => {
                     const raw = entry.fields[field.key];
                     const value = raw === undefined ? '' : String(raw);

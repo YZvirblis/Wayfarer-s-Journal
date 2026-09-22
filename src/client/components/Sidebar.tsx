@@ -3,15 +3,12 @@ import {
   ChevronsUpDown,
   Coins,
   Feather,
+  GripVertical,
   Inbox,
-  ListChecks,
-  MoreHorizontal,
-  Pencil,
   Plus,
   Search,
   Tags,
   Target,
-  Trash2,
   UserRound,
   Waypoints,
   type LucideIcon,
@@ -21,7 +18,10 @@ import { PROFILE_FIELD_IDS } from '../../shared/defaults';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
+import { reorderEntryTypes } from '../lib/documentStore';
 import { CAPTURE_SHORTCUT, PALETTE_SHORTCUT } from '../lib/keys';
+import { useReorder } from '../lib/useReorder';
+import { SectionMenu } from './SectionMenu';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
@@ -32,7 +32,7 @@ import { TagChip } from './TagChip';
 import { ThemeToggle } from './ThemeToggle';
 import { IconButton } from './ui/Button';
 import { Divider } from './ui/Divider';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
+import { Menu, MenuTrigger } from './ui/Menu';
 import { Tooltip } from './ui/Tooltip';
 
 interface SidebarProps {
@@ -61,6 +61,8 @@ function NavRow({
   active,
   onClick,
   trailing,
+  handle,
+  dragging,
 }: {
   label: string;
   count?: number;
@@ -69,9 +71,23 @@ function NavRow({
   active: boolean;
   onClick: () => void;
   trailing?: ReactNode;
+  /** Grip props from useReorder; the row becomes draggable. */
+  handle?: ReturnType<ReturnType<typeof useReorder>['handleProps']>;
+  dragging?: boolean;
 }) {
   return (
-    <div className="group/row relative">
+    <div className={cn('group/row relative', dragging && 'rounded bg-gold/[0.06] ring-1 ring-gold/25')}>
+      {handle ? (
+        <span
+          {...handle}
+          className={cn(
+            'absolute left-0 top-1/2 z-10 flex h-6 w-3 -translate-y-1/2 cursor-grab touch-none items-center justify-center rounded text-faint/60 opacity-0 transition-opacity hover:text-gold focus-visible:opacity-100 group-hover/row:opacity-100 active:cursor-grabbing',
+            dragging && 'opacity-100 text-gold',
+          )}
+        >
+          <GripVertical className="h-3 w-3" aria-hidden />
+        </span>
+      ) : null}
       <button
         type="button"
         onClick={onClick}
@@ -138,6 +154,12 @@ export function Sidebar({
         (a, b) => (a.group ?? '￿').localeCompare(b.group ?? '￿') || a.name.localeCompare(b.name),
       ),
     [doc.tags],
+  );
+
+  const typesById = useMemo(() => new Map(doc.entryTypes.map((type) => [type.id, type] as const)), [doc.entryTypes]);
+  const sectionOrder = useReorder(
+    doc.entryTypes.map((type) => type.id),
+    (next) => reorderEntryTypes(next),
   );
 
   const trade = doc.profile.fields.find((field) => field.id === PROFILE_FIELD_IDS.trade)?.value;
@@ -248,48 +270,33 @@ export function Sidebar({
         />
 
         <p className="wj-label px-3 pb-1 pt-4">Journal</p>
-        {doc.entryTypes.map((type) => {
+        {sectionOrder.order.map((typeId, index) => {
+          const type = typesById.get(typeId);
+          if (!type) return null;
           const Icon = iconByName(type.icon);
           return (
-            <NavRow
-              key={type.id}
-              label={type.name}
-              icon={Icon}
-              color={colorClasses(type.color).text}
-              count={counts.get(type.id) ?? 0}
-              active={view.kind === 'type' && view.typeId === type.id}
-              onClick={() => onNavigate({ kind: 'type', typeId: type.id })}
-              trailing={
-                <Menu>
-                  <MenuTrigger asChild>
-                    <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label={`${type.name} options`}>
-                      <MoreHorizontal className="h-3.5 w-3.5" />
-                    </IconButton>
-                  </MenuTrigger>
-                  <MenuContent>
-                    {type.builtIn ? null : (
-                      <MenuItem onSelect={() => onEditSection(type)}>
-                        <Pencil className="h-3.5 w-3.5 opacity-70" />
-                        Rename &amp; restyle
-                      </MenuItem>
-                    )}
-                    <MenuItem onSelect={() => onEditFields(type)}>
-                      <ListChecks className="h-3.5 w-3.5 opacity-70" />
-                      Edit fields…
-                    </MenuItem>
-                    {type.builtIn ? null : (
-                      <>
-                        <MenuSeparator />
-                        <MenuItem danger onSelect={() => onDeleteSection(type)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                          Delete section
-                        </MenuItem>
-                      </>
-                    )}
-                  </MenuContent>
-                </Menu>
-              }
-            />
+            <div key={type.id} ref={sectionOrder.register(type.id)}>
+              <NavRow
+                label={type.name}
+                icon={Icon}
+                color={colorClasses(type.color).text}
+                count={counts.get(type.id) ?? 0}
+                active={view.kind === 'type' && view.typeId === type.id}
+                onClick={() => onNavigate({ kind: 'type', typeId: type.id })}
+                handle={sectionOrder.handleProps(type.id)}
+                dragging={sectionOrder.draggingId === type.id}
+                trailing={
+                  <SectionMenu
+                    type={type}
+                    index={index}
+                    total={sectionOrder.order.length}
+                    onEditSection={onEditSection}
+                    onEditFields={onEditFields}
+                    onDeleteSection={onDeleteSection}
+                  />
+                }
+              />
+            </div>
           );
         })}
 

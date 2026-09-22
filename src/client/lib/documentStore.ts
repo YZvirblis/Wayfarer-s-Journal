@@ -439,6 +439,28 @@ export function updateEntryType(id: string, recipe: (type: EntryType) => void): 
   });
 }
 
+/** Put the sections in the given order; ids not listed keep their place at the end. */
+export function reorderEntryTypes(ids: string[]): void {
+  mutate((draft) => {
+    const byId = new Map(draft.entryTypes.map((type) => [type.id, type] as const));
+    const ordered = ids.flatMap((id) => byId.get(id) ?? []);
+    const rest = draft.entryTypes.filter((type) => !ids.includes(type.id));
+    draft.entryTypes = [...ordered, ...rest];
+  });
+}
+
+/** Move one section up or down by a step. */
+export function moveEntryType(id: string, delta: number): void {
+  const ids = state.doc?.entryTypes.map((type) => type.id) ?? [];
+  const from = ids.indexOf(id);
+  const to = from + delta;
+  if (from === -1 || to < 0 || to >= ids.length) return;
+  const next = [...ids];
+  next.splice(from, 1);
+  next.splice(to, 0, id);
+  reorderEntryTypes(next);
+}
+
 /** How many entries of a type carry a non-empty value in a field. */
 export function fieldUsage(doc: CharacterDocument, typeId: string, key: string): number {
   return doc.entries.filter((entry) => {

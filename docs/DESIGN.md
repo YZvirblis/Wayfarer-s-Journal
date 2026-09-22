@@ -223,7 +223,7 @@ interface Goal {
 ### Screens (Phase 1)
 1. **Character select:** cards with name, race, trade, and last updated. Actions: create, duplicate, delete (two-step confirmation), load example character.
 2. **Main layout:**
-   - **Left sidebar:** character switcher; Overview; one item per entry type with counts; "+ New section"; tag list with colored chips (click to filter).
+   - **Left sidebar:** character switcher; Overview; one item per entry type with counts (reorderable by dragging the grip that appears on hover, or with Move up / Move down in the section's menu, which is also how the icon rail reorders); "+ New section"; tag list with colored chips (click to filter).
    - **Main area:** a two-pane list + detail view per entry type. The list has text search, tag filter, sort (updated / title), and pinned items first. Quests show status badges and progress bars.
    - **Detail pane:** editable title, type-specific fields, tag picker (pick existing or create inline), markdown body with edit/preview toggle, pin, secret flag, timestamps.
 3. **Overview:** profile fields and sections, rendered beautifully when not editing. Since Phase 3 both lists reorder by dragging their grip (`lib/useReorder.ts`: pointer events with a live draft order, committed once on release; ↑/↓ on a focused grip for keyboards).

@@ -1,8 +1,9 @@
 import { ArrowDownWideNarrow, EyeOff, MoreHorizontal, Pencil, Pin, Plus, Search, Trash2, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { CharacterDocument, Entry, EntryType, Tag } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { bodyPreview, relativeTime } from '../lib/format';
+import { handleListKey } from '../lib/listKeys';
 import { colorClasses } from '../lib/palette';
 import { singularize } from '../lib/words';
 import type { SortKey } from '../types';
@@ -50,12 +51,16 @@ interface EntryListProps {
   type: EntryType;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** Select and hand keyboard focus to the detail pane (Enter on a row). */
+  onOpen: (id: string) => void;
   onCreate: () => void;
   activeTagIds: string[];
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
   onEditSection: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
+  /** Hand the current query to the palette, which searches every section. */
+  onSearchEverywhere: (query: string) => void;
 }
 
 export function EntryList({
@@ -63,12 +68,14 @@ export function EntryList({
   type,
   selectedId,
   onSelect,
+  onOpen,
   onCreate,
   activeTagIds,
   onToggleTag,
   onClearTags,
   onEditSection,
   onDeleteSection,
+  onSearchEverywhere,
 }: EntryListProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('updated');
@@ -101,8 +108,19 @@ export function EntryList({
   const total = doc.entries.filter((entry) => entry.typeId === type.id).length;
   const activeTags = activeTagIds.map((id) => tagsById.get(id)).filter((tag): tag is Tag => Boolean(tag));
 
+  // How many entries in *other* sections the query would find — the list box
+  // only searches this section, the palette searches everything.
+  const needle = query.trim().toLowerCase();
+  const elsewhere = needle
+    ? doc.entries.filter((entry) => entry.typeId !== type.id && matchesQuery(entry, tagNames, needle)).length
+    : 0;
+
+  const visibleIds = visible.map((entry) => entry.id);
+  const onRowKey = (event: ReactKeyboardEvent<HTMLElement>) =>
+    handleListKey(event, visibleIds, selectedId, onSelect, onOpen);
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
+    <div data-list-root className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
       <header className="px-4 pb-3 pt-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="truncate font-display text-lg tracking-title text-ink">{type.name}</h2>
@@ -140,6 +158,10 @@ export function EntryList({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                // ↓ from the search box walks into the list; Enter opens the selection.
+                if (event.key === 'ArrowDown' || event.key === 'Enter') onRowKey(event);
+              }}
               placeholder={`Search ${type.name.toLowerCase()}…`}
               aria-label={`Search ${type.name}`}
               className="wj-field h-8 py-0 pl-8 pr-7 text-sm"
@@ -211,9 +233,15 @@ export function EntryList({
                 New {singularize(type.name).toLowerCase()}
               </Button>
             ) : null}
+            {elsewhere > 0 ? (
+              <Button variant="secondary" size="sm" className="mt-4" onClick={() => onSearchEverywhere(query.trim())}>
+                <Search className="h-3 w-3" />
+                {elsewhere} elsewhere — search everywhere
+              </Button>
+            ) : null}
           </div>
         ) : (
-          <ul className="space-y-0.5">
+          <ul className="space-y-0.5" role="listbox" aria-label={type.name}>
             {visible.map((entry) => {
               const active = entry.id === selectedId;
               const summary = fieldSummary(entry, type);
@@ -222,7 +250,13 @@ export function EntryList({
                 <li key={entry.id}>
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={active}
+                    data-row-id={entry.id}
+                    tabIndex={active || (!selectedId && entry.id === visibleIds[0]) ? 0 : -1}
                     onClick={() => onSelect(entry.id)}
+                    onDoubleClick={() => onOpen(entry.id)}
+                    onKeyDown={onRowKey}
                     className={cn(
                       'relative w-full rounded px-3 py-2.5 text-left transition-colors duration-150',
                       active ? 'bg-gold/[0.09]' : 'hover:bg-ink/[0.035]',
@@ -272,6 +306,16 @@ export function EntryList({
             })}
           </ul>
         )}
+        {visible.length > 0 && elsewhere > 0 ? (
+          <button
+            type="button"
+            onClick={() => onSearchEverywhere(query.trim())}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded border border-dashed border-line/20 px-3 py-2 text-2xs text-faint transition-colors hover:border-gold/35 hover:text-gold"
+          >
+            <Search className="h-3 w-3" />
+            {elsewhere} more in other sections — search everywhere
+          </button>
+        ) : null}
       </div>
     </div>
   );

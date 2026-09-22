@@ -1,6 +1,6 @@
 {
   "id": "example-sivrid",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "createdAt": "2026-06-02T19:14:00.000Z",
   "updatedAt": "2026-09-19T21:40:00.000Z",
   "profile": {
@@ -537,6 +537,23 @@
       "secret": false,
       "createdAt": "2026-09-11T17:10:00.000Z",
       "updatedAt": "2026-09-11T17:10:00.000Z"
+    }
+  ],
+  "captures": [
+    {
+      "id": "c-kettle-room",
+      "body": "[[Brenna Crow-Eye]] says the back room at [[The Kettle & Crow]] is free on Loredas nights. Ask her rate before the Compact men do.",
+      "createdAt": "2026-09-19T21:38:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s-ledger-night",
+      "date": "2026-09-19",
+      "title": "The night the ledger came up",
+      "body": "Back in Dawnstar for two days between runs. [[Sigunn Coal-Hand]] finally said out loud that the ledger was taken, not lost — someone knew which drawer.\n\nRode down to Whiterun with the last of the shield-bands. [[Brenna Crow-Eye]] had a full house at [[The Kettle & Crow]]; a Riften man at the corner table asked too casually whether the Coal-Hand forge still kept its own books. I did not answer. I am fairly sure it was one of [[The Coin-Counter]]'s people.\n\n**To do:** pick up [[Find Sigunn's stolen ledger]] properly. Start with who knew about the drawer.",
+      "createdAt": "2026-09-19T21:40:00.000Z",
+      "updatedAt": "2026-09-19T21:40:00.000Z"
     }
   ]
 }

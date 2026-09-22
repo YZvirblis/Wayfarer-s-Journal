@@ -256,9 +256,11 @@ interface CommandPaletteProps {
   doc: CharacterDocument;
   characters: CharacterSummary[];
   actions: PaletteActions;
+  /** Text to start with, e.g. a list search handed over to search every section. */
+  initialQuery?: string;
 }
 
-export function CommandPalette({ open, onOpenChange, doc, characters, actions }: CommandPaletteProps) {
+export function CommandPalette({ open, onOpenChange, doc, characters, actions, initialQuery = '' }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const list = useRef<HTMLDivElement | null>(null);
@@ -266,10 +268,10 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions }:
 
   useEffect(() => {
     if (open) {
-      setQuery('');
+      setQuery(initialQuery);
       setActiveIndex(0);
     }
-  }, [open]);
+  }, [open, initialQuery]);
 
   const results = useMemo(
     () => rank(buildCommands(doc, characters, query, theme, actions), query),

@@ -1,11 +1,12 @@
 import { ArrowLeft, CalendarDays, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CharacterDocument, Session } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { createSession, deleteSession, updateSession } from '../lib/documentStore';
 import { bodyPreview, formatCalendarLong, formatCalendarShort, formatMonth, relativeTime } from '../lib/format';
 import { PANE_QUERY, useMediaQuery } from '../lib/layout';
 import { parseLinks, resolveLink } from '../lib/links';
+import { handleListKey } from '../lib/listKeys';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { MarkdownField } from './MarkdownField';
 import { WikiLink } from './WikiLink';
@@ -25,17 +26,20 @@ function SessionList({
   sessions,
   selectedId,
   onSelect,
+  onOpen,
   onCreate,
 }: {
   sessions: Session[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onOpen: (id: string) => void;
   onCreate: () => void;
 }) {
   const sorted = useMemo(() => sortSessions(sessions), [sessions]);
+  const ids = sorted.map((session) => session.id);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
+    <div data-list-root className="flex min-w-0 flex-1 flex-col bg-panel/35 pane:w-[22.5rem] pane:flex-none pane:border-r">
       <header className="flex items-center justify-between gap-3 px-4 pb-3 pt-4">
         <div className="flex items-baseline gap-2">
           <h2 className="font-display text-lg tracking-title text-ink">Sessions</h2>
@@ -61,7 +65,7 @@ function SessionList({
             </Button>
           </div>
         ) : (
-          <ol className="space-y-0.5">
+          <ol className="space-y-0.5" role="listbox" aria-label="Sessions">
             {sorted.map((session, index) => {
               const month = formatMonth(session.date);
               const previous = sorted[index - 1];
@@ -73,7 +77,13 @@ function SessionList({
                   {showMonth ? <p className="wj-label px-3 pb-1 pt-3">{month}</p> : null}
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={active}
+                    data-row-id={session.id}
+                    tabIndex={active || (!selectedId && index === 0) ? 0 : -1}
                     onClick={() => onSelect(session.id)}
+                    onDoubleClick={() => onOpen(session.id)}
+                    onKeyDown={(event) => handleListKey(event, ids, selectedId, onSelect, onOpen)}
                     className={cn(
                       'relative flex w-full items-start gap-3 rounded px-3 py-2.5 text-left transition-colors duration-150',
                       active ? 'bg-gold/[0.09]' : 'hover:bg-ink/[0.035]',
@@ -105,14 +115,21 @@ function SessionDetail({
   session,
   onDeleted,
   onBack,
+  focusTitle,
 }: {
   doc: CharacterDocument;
   session: Session;
   onDeleted: () => void;
   onBack?: () => void;
+  focusTitle: number;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const title = useAutoCommit(session.title, (value) => updateSession(session.id, (draft) => void (draft.title = value)));
+  const titleInput = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (focusTitle > 0) titleInput.current?.focus();
+  }, [focusTitle]);
 
   // Every entry this session's body links to, once each, in order of first mention.
   const mentioned = useMemo(() => {
@@ -175,6 +192,7 @@ function SessionDetail({
         </label>
 
         <input
+          ref={titleInput}
           value={title.value}
           onChange={(event) => title.onChange(event.target.value)}
           onBlur={title.flush}
@@ -236,15 +254,32 @@ interface SessionsViewProps {
 export function SessionsView({ doc, selectedId, onSelect }: SessionsViewProps) {
   const session = doc.sessions.find((candidate) => candidate.id === selectedId) ?? null;
   const twoPanes = useMediaQuery(PANE_QUERY);
+  const [focusTitle, setFocusTitle] = useState(0);
+
+  function select(id: string | null) {
+    setFocusTitle(0);
+    onSelect(id);
+  }
+
+  function open(id: string) {
+    onSelect(id);
+    setFocusTitle((tick) => tick + 1);
+  }
 
   function create() {
-    onSelect(createSession());
+    open(createSession());
   }
 
   return (
     <div className="flex min-w-0 flex-1">
       {twoPanes || !session ? (
-        <SessionList sessions={doc.sessions} selectedId={session?.id ?? null} onSelect={onSelect} onCreate={create} />
+        <SessionList
+          sessions={doc.sessions}
+          selectedId={session?.id ?? null}
+          onSelect={select}
+          onOpen={open}
+          onCreate={create}
+        />
       ) : null}
 
       {session ? (
@@ -252,8 +287,9 @@ export function SessionsView({ doc, selectedId, onSelect }: SessionsViewProps) {
           key={session.id}
           doc={doc}
           session={session}
-          onDeleted={() => onSelect(null)}
-          onBack={twoPanes ? undefined : () => onSelect(null)}
+          onDeleted={() => select(null)}
+          onBack={twoPanes ? undefined : () => select(null)}
+          focusTitle={focusTitle}
         />
       ) : twoPanes ? (
         <div className="flex min-w-0 flex-1 items-center justify-center">

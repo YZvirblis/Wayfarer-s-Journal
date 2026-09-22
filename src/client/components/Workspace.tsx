@@ -58,8 +58,13 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
-  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [palette, setPalette] = useState<{ open: boolean; query: string }>({ open: false, query: '' });
   const [captureOpen, setCaptureOpen] = useState(false);
+  const setPaletteOpen = useCallback(
+    (open: boolean | ((current: boolean) => boolean), query = '') =>
+      setPalette((current) => ({ open: typeof open === 'function' ? open(current.open) : open, query })),
+    [],
+  );
 
   // Global shortcuts (see lib/keys.ts). Each one closes the other's dialog so they never stack.
   useEffect(() => {
@@ -76,7 +81,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [setPaletteOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,7 +180,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const openCapture = useCallback(() => {
     setPaletteOpen(false);
     setCaptureOpen(true);
-  }, []);
+  }, [setPaletteOpen]);
 
   if (loadError) {
     return (
@@ -281,6 +286,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             onClearTags={() => setActiveTagIds([])}
             onEditSection={(type) => setSectionDialog({ open: true, type })}
             onDeleteSection={(type) => setPendingSectionDelete(type)}
+            onSearchEverywhere={(query) => setPaletteOpen(true, query)}
           />
         ) : (
           <Centered>
@@ -292,11 +298,12 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       <TagManager open={tagManagerOpen} onOpenChange={setTagManagerOpen} doc={doc} />
 
       <CommandPalette
-        open={paletteOpen}
+        open={palette.open}
         onOpenChange={setPaletteOpen}
         doc={doc}
         characters={characters}
         actions={paletteActions}
+        initialQuery={palette.query}
       />
 
       <QuickCapture open={captureOpen} onOpenChange={setCaptureOpen} onOpenInbox={() => setView({ kind: 'inbox' })} />

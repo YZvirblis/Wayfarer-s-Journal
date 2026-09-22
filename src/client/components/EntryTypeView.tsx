@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import type { CharacterDocument, EntryType } from '../../shared/schema';
 import { createEntry } from '../lib/documentStore';
 import { iconByName } from '../lib/icons';
@@ -19,6 +20,7 @@ interface EntryTypeViewProps {
   onClearTags: () => void;
   onEditSection: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
+  onSearchEverywhere: (query: string) => void;
 }
 
 export function EntryTypeView({
@@ -31,14 +33,27 @@ export function EntryTypeView({
   onClearTags,
   onEditSection,
   onDeleteSection,
+  onSearchEverywhere,
 }: EntryTypeViewProps) {
   const entry = doc.entries.find((candidate) => candidate.id === selectedId && candidate.typeId === type.id) ?? null;
   const singular = singularize(type.name).toLowerCase();
   // Below the `pane` breakpoint the list and the detail take turns in one pane.
   const twoPanes = useMediaQuery(PANE_QUERY);
+  // Bumped when the list "opens" an entry (Enter / double-click) so the detail title takes focus.
+  const [focusTitle, setFocusTitle] = useState(0);
+
+  function select(id: string | null) {
+    setFocusTitle(0);
+    onSelect(id);
+  }
+
+  function open(id: string) {
+    onSelect(id);
+    setFocusTitle((tick) => tick + 1);
+  }
 
   function create() {
-    onSelect(createEntry(type));
+    open(createEntry(type));
   }
 
   return (
@@ -48,13 +63,15 @@ export function EntryTypeView({
           doc={doc}
           type={type}
           selectedId={entry?.id ?? null}
-          onSelect={onSelect}
+          onSelect={select}
+          onOpen={open}
           onCreate={create}
           activeTagIds={activeTagIds}
           onToggleTag={onToggleTag}
           onClearTags={onClearTags}
           onEditSection={onEditSection}
           onDeleteSection={onDeleteSection}
+          onSearchEverywhere={onSearchEverywhere}
         />
       ) : null}
 
@@ -64,9 +81,10 @@ export function EntryTypeView({
           doc={doc}
           type={type}
           entry={entry}
-          onSelect={onSelect}
-          onDeleted={() => onSelect(null)}
-          onBack={twoPanes ? undefined : () => onSelect(null)}
+          onSelect={select}
+          onDeleted={() => select(null)}
+          onBack={twoPanes ? undefined : () => select(null)}
+          focusTitle={focusTitle}
         />
       ) : twoPanes ? (
         <div className="flex min-w-0 flex-1 items-center justify-center">

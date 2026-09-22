@@ -30,8 +30,9 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Convert a capture into an entry of any type, append it to an existing entry, or dismiss it
 - [x] Session log: dated timeline of play sessions; entries linked from a session's body list it under "Mentioned in"
 - [x] Narrow-window layout (~600–1000px): icon-rail sidebar below 1200px, single-pane list/detail with a back action below 960px
-- [ ] Keyboard navigation of the entry list (↑/↓ to move, Enter to open)
-- [ ] Search across every section, not just the open one
+- [x] Keyboard navigation of the entry and session lists (↑/↓/Home/End to move, Enter or double-click to open with focus in the detail title; ↓ from the search box walks into the list)
+- [x] ~~Search across every section, not just the open one~~ — superseded by the Ctrl+K palette; the list box shows "N more in other sections — search everywhere", which opens the palette with the query
+- [x] Example character ships with a sample capture and a sample session (file is schemaVersion 2)
 
 ## Phase 3 — Depth
 - [ ] Septim ledger: income/expenses linked to people and tags

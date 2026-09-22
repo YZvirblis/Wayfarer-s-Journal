@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronDown, Copy, Eye, EyeOff, MoreHorizontal, Pin, PinOff, Target, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CharacterDocument, Entry, EntryStatus, EntryType, FieldDef } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { deleteEntry, duplicateEntry, renameEntry, updateEntry } from '../lib/documentStore';
@@ -131,13 +131,20 @@ interface EntryDetailProps {
   onSelect: (id: string) => void;
   /** Present when the detail pane has replaced the list (narrow layout). */
   onBack?: () => void;
+  /** Non-zero, and changing, when the list handed focus over (Enter / double-click / new entry). */
+  focusTitle?: number;
 }
 
-export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack }: EntryDetailProps) {
+export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, focusTitle = 0 }: EntryDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const title = useAutoCommit(entry.title, (value) => renameEntry(entry.id, value));
+  const titleInput = useRef<HTMLInputElement | null>(null);
   const TypeIcon = iconByName(type.icon);
   const colors = colorClasses(type.color);
+
+  useEffect(() => {
+    if (focusTitle > 0) titleInput.current?.focus();
+  }, [focusTitle]);
 
   return (
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
@@ -213,6 +220,7 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack }: E
         </div>
 
         <input
+          ref={titleInput}
           value={title.value}
           onChange={(event) => title.onChange(event.target.value)}
           onBlur={title.flush}

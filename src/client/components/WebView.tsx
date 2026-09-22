@@ -27,11 +27,12 @@ import { Tooltip } from './ui/Tooltip';
 const radius = (node: GraphNode): number =>
   node.kind === 'self' ? 20 : Math.min(17, 6 + 2.4 * Math.sqrt(node.degree));
 
-const STANDING_ALPHA: Record<string, number> = { Close: 0.85, Known: 0.55, Met: 0.32 };
+const STANDING_ALPHA: Record<string, number> = { Close: 0.75, Known: 0.5, Met: 0.3 };
 
 function edgeStyle(edge: GraphEdge): { stroke: string; width: number; dash?: string } {
-  const alpha = (edge.standing && STANDING_ALPHA[edge.standing]) ?? 0.45;
-  const token = edge.kind === 'coin' ? '--wj-gold' : edge.kind === 'location' ? '--wj-sage' : '--wj-ink';
+  const alpha = (edge.standing && STANDING_ALPHA[edge.standing]) ?? 0.42;
+  // The line token is a warm mid-tone in both themes; ink would go near-black on parchment.
+  const token = edge.kind === 'coin' ? '--wj-gold' : edge.kind === 'location' ? '--wj-sage' : '--wj-line';
   return {
     stroke: `rgb(var(${token}) / ${alpha})`,
     width: 1 + Math.min(2, edge.weight * 0.4) + (edge.standing === 'Close' ? 0.6 : 0),

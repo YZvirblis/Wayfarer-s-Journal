@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Divider } from './Divider';
 
@@ -21,11 +21,25 @@ interface ModalProps {
 }
 
 export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md' }: ModalProps) {
+  const content = useRef<HTMLDivElement | null>(null);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/60 backdrop-blur-[2px]" />
         <Dialog.Content
+          ref={content}
+          // Land on the first thing worth typing into, not the Close button in the corner.
+          onOpenAutoFocus={(event) => {
+            const first = content.current?.querySelector<HTMLElement>(
+              'input:not([type="hidden"]):not([type="file"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [data-autofocus]',
+            );
+            const target = first ?? content.current?.querySelector<HTMLElement>('[data-autofocus-fallback]');
+            if (target) {
+              event.preventDefault();
+              target.focus();
+            }
+          }}
           className={cn(
             'fixed left-1/2 top-1/2 z-50 animate-modal-in rounded-card border bg-panel shadow-lifted',
             WIDTHS[size],

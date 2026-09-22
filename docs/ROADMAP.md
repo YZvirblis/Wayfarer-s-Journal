@@ -52,7 +52,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette
 - [x] Import JSON as a new character: validate, migrate, preview what was found, never overwrite (character menu, palette, and the character-select screen)
 - [x] Restore from backup in the UI: list with timestamps and counts, restore as new or replace current (two-step, current backed up first)
-- [ ] Polish pass: spacing, typography, focus states, transitions, empty states, keyboard access for dialogs, both themes on every Phase 2 and 3 view
+- [x] Polish pass: dialogs focus their first field, softer web edges on Parchment, both themes checked on web, ledger, goals, sessions, inbox and palette
 - [ ] Dark-theme screenshots of the example at 1440px in `docs/screenshots/`: web (hero), entry detail with backlinks, ledger with goals, palette open, character select
 
 ## Phase 4b — Release

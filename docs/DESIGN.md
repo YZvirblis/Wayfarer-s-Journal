@@ -279,7 +279,7 @@ Custom-section rename/delete, which the rail cannot host, moves into the list he
 ### UX rules
 - Empty states teach the user what to do next. No dead ends.
 - Every destructive action is confirmed. Deleting a character keeps its backups. Dismissing a capture uses a two-step inline button instead of a modal.
-- Keyboard-friendly throughout. Ctrl+K opens the command palette, Ctrl+/ opens quick capture; both shortcuts are printed in the UI.
+- Keyboard-friendly throughout. Ctrl+K opens the command palette, Ctrl+/ opens quick capture; both shortcuts are printed in the UI. Every modal (`ui/Modal.tsx`) lands focus on its first field — or, for confirmations, the confirm button — rather than the Close button, traps focus while open, and closes on Escape. Lists answer ↑/↓/Enter; grips answer ↑/↓.
 - Autosave everywhere. There are no Save buttons.
 
 ## 6. Visual Design

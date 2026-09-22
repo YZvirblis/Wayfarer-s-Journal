@@ -37,7 +37,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant="danger"
-            autoFocus
+            data-autofocus
             onClick={() => {
               onConfirm();
               onOpenChange(false);

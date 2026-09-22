@@ -44,18 +44,25 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Reorder profile fields and sections by dragging the grip (pointer events, so touch works) or with ↑/↓ on the grip
 - [ ] Reorder sections in the sidebar
 
-## Phase 4 — Release
-- [ ] Visual polish pass (spacing, motion, responsiveness, accessibility)
-- [ ] Code-split the client bundle (currently one ~540 kB chunk) and trim bundled font subsets to latin/latin-ext
-- [ ] Export: JSON (full backup) and Markdown (readable)
-- [ ] Import: JSON; optional plain-text journal import
-- [ ] Restore from backup in the UI
-- [ ] Electron packaging → portable Windows .exe
-- [ ] True global (OS-level) quick-capture hotkey via Electron — the browser cannot see keys while the game window is focused, so the Phase 2 in-app shortcut only works when the journal has focus
-- [ ] GitHub Actions: build and attach .exe to Releases
+## Phase 4a — Harden and polish
+- [x] Narrow-width pass at 700px and 960px across ledger, goals, web, field editor, sessions and inbox — usable beside a game window
+- [ ] Sessions gain a `secret` flag (schema v5); captures stay unblurred, balances stay visible
+- [ ] Reorder sections in the sidebar
+- [ ] Code-split the web view (d3) and other heavy routes; drop unused font subsets; initial chunk well under 300 kB
+- [ ] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette
+- [ ] Import JSON as a new character: validate, migrate, preview what was found, never overwrite
+- [ ] Restore from backup in the UI: list with timestamps and counts, restore as new or replace current (two-step, current backed up first)
+- [ ] Polish pass: spacing, typography, focus states, transitions, empty states, keyboard access for dialogs, both themes on every Phase 2 and 3 view
+- [ ] Dark-theme screenshots of the example at 1440px in `docs/screenshots/`: web (hero), entry detail with backlinks, ledger with goals, palette open, character select
+
+## Phase 4b — Release
+- [ ] Electron packaging → portable Windows .exe with `data/` next to the exe
+- [ ] OS-level global quick-capture hotkey via Electron `globalShortcut`, opening a small always-on-top capture window — the browser cannot see keys while the game window is focused
+- [ ] GitHub Actions: build and attach the .exe to Releases
 - [ ] README: hero screenshot, GIF demo, features, download, FAQ
 - [ ] CONTRIBUTING.md, issue templates
 - [ ] v1.0.0 release
+- [ ] Optional plain-text journal import
 
 ## Phase 5 — Launch
 - [ ] Screenshots/GIF using the example character (no real secrets)

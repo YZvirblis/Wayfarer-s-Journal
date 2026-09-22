@@ -71,6 +71,8 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [hover, setHover] = useState<{ id: string; x: number; y: number } | null>(null);
   const [, bump] = useState(0);
+  // Fit the settled graph to the canvas once per layout; never yank a view the player has moved.
+  const fitted = useRef(false);
 
   const { hideSecrets } = useSettings();
   const graph = useMemo(() => buildGraph(doc, { tagIds: activeTagIds, hideSecrets }), [doc, activeTagIds, hideSecrets]);
@@ -96,6 +98,25 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
   const applyTransform = () => {
     const { k, x, y } = transform.current;
     layer.current?.setAttribute('transform', `translate(${x} ${y}) scale(${k})`);
+  };
+
+  /** Zoom and pan so every node (with its label) sits inside the canvas. */
+  const fitToView = () => {
+    const xs = graph.nodes.map((node) => node.x ?? 0);
+    const ys = graph.nodes.map((node) => node.y ?? 0);
+    if (xs.length === 0 || !size.width || !size.height) return;
+    const pad = 36;
+    const minX = Math.min(...xs) - pad;
+    const maxX = Math.max(...xs) + pad;
+    const minY = Math.min(...ys) - pad;
+    const maxY = Math.max(...ys) + pad + 12;
+    const k = Math.min(1.35, Math.max(0.35, Math.min(size.width / (maxX - minX), size.height / (maxY - minY))));
+    transform.current = {
+      k,
+      x: (size.width - (maxX + minX) * k) / 2,
+      y: (size.height - (maxY + minY) * k) / 2,
+    };
+    applyTransform();
   };
 
   // The simulation. Positions are written straight to the DOM on every tick;
@@ -166,8 +187,14 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
           nodeElements.get(node.id)?.setAttribute('transform', `translate(${node.x ?? 0} ${node.y ?? 0})`);
           memory.current.set(node.id, { x: node.x ?? 0, y: node.y ?? 0 });
         }
+      })
+      .on('end', () => {
+        if (fitted.current) return;
+        fitted.current = true;
+        fitToView();
       });
     simulation.current = sim;
+    fitted.current = false;
     applyTransform();
     return () => {
       sim.stop();
@@ -254,11 +281,6 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
     applyTransform();
   }
 
-  function resetView() {
-    transform.current = { k: 1, x: 0, y: 0 };
-    applyTransform();
-  }
-
   function shake() {
     for (const node of graph.nodes) {
       if (node.kind !== 'self') {
@@ -266,6 +288,7 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
         node.fy = null;
       }
     }
+    fitted.current = false;
     simulation.current?.alpha(0.8).restart();
     bump((n) => n + 1);
   }
@@ -285,7 +308,10 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
     return set;
   }, [hover, graph.edges]);
 
-  const showAllLabels = graph.nodes.length <= 90;
+  // A small canvas cannot carry every name; hubs and the hovered neighbourhood keep theirs.
+  const compact = size.width < 900;
+  const showAllLabels = graph.nodes.length <= 90 && !compact;
+  const labelDegree = compact ? 3 : 2;
   const hovered = hover ? nodesById.get(hover.id) : undefined;
   const counts = { people: 0, factions: 0, places: 0 };
   for (const node of graph.nodes) {
@@ -310,8 +336,8 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
               <RefreshCw className="h-3.5 w-3.5" />
             </IconButton>
           </Tooltip>
-          <Tooltip label="Reset zoom">
-            <IconButton variant="secondary" size="sm" aria-label="Reset zoom" onClick={resetView}>
+          <Tooltip label="Fit to view">
+            <IconButton variant="secondary" size="sm" aria-label="Fit to view" onClick={fitToView}>
               <Maximize2 className="h-3.5 w-3.5" />
             </IconButton>
           </Tooltip>
@@ -320,9 +346,17 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
 
       {tagsInWeb.length > 0 ? (
         <div className="px-5 pt-3 pane:px-8">
-          <div className="flex flex-wrap items-center gap-1">
+          {/* One scrolling line on a narrow window; wraps freely when there is room. */}
+          <div className="wj-scroll flex items-center gap-1 overflow-x-auto pb-1 pane:flex-wrap pane:overflow-visible pane:pb-0">
             {tagsInWeb.map((tag) => (
-              <TagChip key={tag.id} tag={tag} size="sm" active={activeTagIds.includes(tag.id)} onClick={() => onToggleTag(tag.id)} />
+              <TagChip
+                key={tag.id}
+                tag={tag}
+                size="sm"
+                active={activeTagIds.includes(tag.id)}
+                onClick={() => onToggleTag(tag.id)}
+                className="shrink-0"
+              />
             ))}
             {activeTagIds.length > 0 ? (
               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-2xs text-faint" onClick={onClearTags}>
@@ -333,7 +367,7 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
         </div>
       ) : null}
 
-      <div ref={container} className="min-h-0 flex-1 pb-8">
+      <div ref={container} className="min-h-0 flex-1 pb-9">
         {graph.nodes.length < 2 ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState
@@ -390,7 +424,8 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
                   const token = NODE_TOKEN[node.color] ?? '--wj-gold';
                   const isHover = hover?.id === node.id;
                   const dim = neighbourhood ? !neighbourhood.has(node.id) : false;
-                  const label = showAllLabels || node.degree >= 2 || (neighbourhood?.has(node.id) ?? false);
+                  const label =
+                    node.kind === 'self' || showAllLabels || node.degree >= labelDegree || (neighbourhood?.has(node.id) ?? false);
                   return (
                     <g
                       key={node.id}
@@ -475,7 +510,7 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
       ) : null}
 
       {graph.nodes.length >= 2 ? (
-        <div className="pointer-events-none absolute bottom-4 left-5 z-10 flex flex-wrap items-center gap-x-4 gap-y-1 text-2xs text-faint pane:left-8">
+        <div className="pointer-events-none absolute bottom-3 left-5 right-3 z-10 flex items-center gap-x-4 overflow-hidden whitespace-nowrap text-2xs text-faint pane:left-8">
           <Legend color="gold" label="People" />
           <Legend color="frost" label="Factions" />
           <Legend color="sage" label="Places" />
@@ -488,7 +523,7 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
           <span className="inline-flex items-center gap-1.5">
             <span className="h-px w-4 bg-gold/70" /> coin
           </span>
-          <span className="hidden sm:inline">drag to move · wheel to zoom · click to open</span>
+          <span className="hidden pane:inline">drag to move · wheel to zoom · click to open</span>
         </div>
       ) : null}
     </div>

@@ -137,7 +137,7 @@ export function SidebarRail({
 
       <span className="my-1.5 h-px w-4 bg-line/10" />
 
-      <nav className="wj-scroll flex min-h-0 flex-1 flex-col items-center gap-0.5 overflow-y-auto">
+      <nav className="wj-scroll flex min-h-0 flex-1 flex-col items-center gap-0.5 overflow-x-hidden overflow-y-auto">
         <RailButton
           label="Overview"
           icon={UserRound}

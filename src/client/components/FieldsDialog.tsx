@@ -60,19 +60,19 @@ function FieldRow({
 
   return (
     <li className="grid grid-cols-[auto_1fr_auto] items-start gap-2 rounded px-1 py-2 transition-colors hover:bg-ink/[0.02] sm:grid-cols-[auto_1fr_7rem_auto]">
-      <div className="flex flex-col text-muted">
-        <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label="Move up" disabled={index === 0} onClick={() => move(-1)}>
-          <ChevronUp className="h-4 w-4" strokeWidth={2} />
+      <div className="flex w-7 shrink-0 flex-col items-center text-muted">
+        <IconButton variant="ghost" size="sm" className="h-6 w-7" aria-label="Move up" disabled={index === 0} onClick={() => move(-1)}>
+          <ChevronUp className="h-4 w-4 shrink-0" strokeWidth={2} />
         </IconButton>
         <IconButton
           variant="ghost"
           size="sm"
-          className="h-6 w-6"
+          className="h-6 w-7"
           aria-label="Move down"
           disabled={index === type.fields.length - 1}
           onClick={() => move(1)}
         >
-          <ChevronDown className="h-4 w-4" strokeWidth={2} />
+          <ChevronDown className="h-4 w-4 shrink-0" strokeWidth={2} />
         </IconButton>
       </div>
 
@@ -128,8 +128,8 @@ function FieldRow({
         </Tooltip>
       ) : (
         <Tooltip label="Remove field">
-          <IconButton variant="ghost" size="sm" className="text-muted hover:text-rose" aria-label={`Remove ${field.label}`} onClick={onRemove}>
-            <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+          <IconButton variant="ghost" size="sm" className="shrink-0 text-muted hover:text-rose" aria-label={`Remove ${field.label}`} onClick={onRemove}>
+            <Trash2 className="h-4 w-4 shrink-0" strokeWidth={1.75} />
           </IconButton>
         </Tooltip>
       )}

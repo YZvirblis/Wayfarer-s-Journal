@@ -5,6 +5,7 @@ export type View =
   | { kind: 'inbox' }
   | { kind: 'sessions'; sessionId: string | null }
   | { kind: 'ledger'; counterpartyId: string | null }
-  | { kind: 'goals' };
+  | { kind: 'goals' }
+  | { kind: 'web' };
 
 export type SortKey = 'updated' | 'title' | 'created';

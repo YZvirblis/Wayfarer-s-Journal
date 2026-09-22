@@ -17,6 +17,7 @@ export interface LinkContextValue {
   /** The ledger, optionally filtered to one person's dealings. */
   openLedger: (counterpartyId?: string) => void;
   openGoals: () => void;
+  openOverview: () => void;
   /** Offer to create an entry for a link that resolves to nothing. */
   createFromLink: (title: string, typeName?: string) => void;
 }
@@ -30,6 +31,7 @@ export const LinkContext = createContext<LinkContextValue>({
   openSource: noop,
   openLedger: noop,
   openGoals: noop,
+  openOverview: noop,
   createFromLink: noop,
 });
 

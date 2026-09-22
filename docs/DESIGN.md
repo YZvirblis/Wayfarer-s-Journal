@@ -22,6 +22,7 @@ It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene,
 |---|---|
 | Frontend | Vite + React + TypeScript + Tailwind CSS |
 | Icons | lucide-react |
+| Graph layout | d3-force (Phase 3), SVG rendered by hand |
 | UI primitives | Radix (headless, accessible) where useful |
 | Backend | Small Node server (Express or Fastify), TypeScript, `tsx` in dev |
 | Validation | zod schemas shared between client and server |
@@ -222,6 +223,14 @@ interface Goal {
 3. **Overview:** profile fields and sections, rendered beautifully when not editing.
 4. **Tag manager:** rename, recolor, group, delete (removes the tag from all entries).
 
+### Relationship web (Phase 3)
+`components/WebView.tsx` draws People, Factions and Places as a force-directed graph with the character pinned at the centre. `lib/graph.ts` builds it from the document, with nothing stored:
+
+- **Ties:** a `[[link]]` in either direction between two node entries ("mentions"); a person whose *usually found* field names a Place, or two people who share a location string with no such Place ("same place", dashed); and a ledger counterparty, tied to the character ("coin", gold). Ties are merged, and their weight (mentions, dealings) thickens the line.
+- **Look:** node colour is the section colour, size grows with the number of ties, People edges take their opacity from the person's standing (Close, Known, Met). Hovering dims everything outside the neighbourhood and shows title, role and tie count; clicking opens the entry. Drag to move, wheel to zoom, drag the background to pan, "shake" to relayout.
+- **Performance:** d3-force (the only new dependency, ~20 kB) runs the simulation; positions are written straight to SVG attributes on each tick, and React only re-renders when the data or the hover changes. Node positions are remembered across filter changes so the web does not jump.
+- **Filter** by tag reuses the sidebar's tag filter state.
+
 ### Layout modes (Phase 2)
 Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:
 
@@ -276,6 +285,7 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | The relationship web uses `d3-force` alone, rendering to SVG by hand, with the character pinned at the centre | A full graph library would add hundreds of kB for features the web does not need; SVG keeps nodes clickable and the picture crisp for screenshots. Pinning the character gives every graph the same readable shape |
 | 2026-09-22 | Transactions carry `secret` from the start (v3), although the ledger spec did not list it | Hide-secrets mode (Phase 3 item 5) has to blur transactions too; adding the flag now avoids a fourth schema bump one item later |
 | 2026-09-22 | A debt goal's progress is the negative sum of its transactions; a save goal's is the plain sum | Repayments are expenses in the ledger. Deriving progress this way keeps the ledger the single source of truth and lets one transaction serve both the balance and the goal |
 | 2026-09-22 | Ledger counterparties are picked from People only (not any entry) | The relationship web reads counterparties as edges between people; a place or faction as a counterparty would need a different edge type. Fields can broaden it later without a migration |

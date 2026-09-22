@@ -12,6 +12,7 @@ import {
   Target,
   UserRound,
   Users,
+  Waypoints,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -36,6 +37,7 @@ export interface PaletteActions {
   openLedger: () => void;
   openGoals: () => void;
   newGoal: () => void;
+  openWeb: () => void;
   quickCapture: () => void;
   toggleTag: (tagId: string) => void;
   createEntry: (type: EntryType, title: string) => void;
@@ -134,6 +136,15 @@ function buildCommands(
     icon: Target,
     iconClass: 'text-gold',
     run: actions.openGoals,
+  });
+  commands.push({
+    id: 'go:web',
+    group: 'Go to',
+    label: 'Relationship web',
+    keywords: 'graph map network connections people factions places',
+    icon: Waypoints,
+    iconClass: 'text-gold',
+    run: actions.openWeb,
   });
   commands.push({
     id: 'go:inbox',

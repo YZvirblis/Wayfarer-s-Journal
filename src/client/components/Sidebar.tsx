@@ -12,6 +12,7 @@ import {
   Target,
   Trash2,
   UserRound,
+  Waypoints,
   type LucideIcon,
 } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
@@ -233,6 +234,13 @@ export function Sidebar({
           count={doc.goals.length}
           active={view.kind === 'goals'}
           onClick={() => onNavigate({ kind: 'goals' })}
+        />
+        <NavRow
+          label="Web"
+          icon={Waypoints}
+          color="text-gold"
+          active={view.kind === 'web'}
+          onClick={() => onNavigate({ kind: 'web' })}
         />
 
         <p className="wj-label px-3 pb-1 pt-4">Journal</p>

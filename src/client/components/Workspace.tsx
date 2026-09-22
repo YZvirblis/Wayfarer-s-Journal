@@ -34,6 +34,7 @@ import { SessionsView } from './SessionsView';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
 import { TagManager } from './TagManager';
+import { WebView } from './WebView';
 import { Button } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 
@@ -176,6 +177,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       openLedger: () => openLedger(),
       openGoals,
       newGoal,
+      openWeb: () => setView({ kind: 'web' }),
       quickCapture: () => setCaptureOpen(true),
       toggleTag,
       createEntry: (type, title) => showEntry(type.id, createEntry(type, title)),
@@ -194,9 +196,10 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       openSource,
       openLedger,
       openGoals,
+      openOverview: () => openOverview(),
       createFromLink: (title, typeName) => setLinkDraft({ title, ...(typeName ? { typeName } : {}) }),
     }),
-    [doc?.entries, doc?.entryTypes, openEntry, openSource, openLedger, openGoals],
+    [doc?.entries, doc?.entryTypes, openEntry, openSource, openLedger, openGoals, openOverview],
   );
 
   const openCapture = useCallback(() => {
@@ -302,6 +305,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             counterpartyId={view.counterpartyId}
             onFilterCounterparty={(counterpartyId) => setView({ kind: 'ledger', counterpartyId })}
           />
+        ) : view.kind === 'web' ? (
+          <WebView doc={doc} activeTagIds={activeTagIds} onToggleTag={toggleTag} onClearTags={() => setActiveTagIds([])} />
         ) : view.kind === 'goals' ? (
           <GoalsView
             doc={doc}

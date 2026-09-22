@@ -10,6 +10,7 @@ import {
   Feather,
   FileText,
   Inbox,
+  Info,
   Moon,
   Search,
   Sun,
@@ -55,6 +56,7 @@ export interface PaletteActions {
   exportMarkdown: () => void;
   importCharacter: () => void;
   backups: () => void;
+  about: () => void;
 }
 
 type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
@@ -326,6 +328,14 @@ function buildCommands(
     hint: 'Last 20 saves',
     icon: Archive,
     run: actions.backups,
+  });
+  commands.push({
+    id: 'journal:about',
+    group: 'Journal',
+    label: "About Wayfarer's Journal",
+    keywords: 'version help github coffee licence license credits',
+    icon: Info,
+    run: actions.about,
   });
 
   return commands;

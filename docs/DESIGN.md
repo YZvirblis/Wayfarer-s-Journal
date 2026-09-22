@@ -254,6 +254,9 @@ Reachable from the character switcher menu, the palette, and (import only) the c
 - **Export as Markdown** (`lib/exportMarkdown.ts`) writes one readable file: profile, every section in sidebar order (quests with status and progress), sessions, a ledger summary (on hand, earned, spent, net per month, every line), goals with progress, and the inbox. Hide-secrets mode decides whether secret items go in, and the confirmation dialog says so in plain words with the count. `[[links]]` are kept as text.
 - **Import** (`ImportCharacterDialog`) reads a `.json` file, asks the server to validate and migrate it without writing (`commit: false`), shows what it found — name, race, trade, counts of everything, the file format it was written by, and whether a character of that name already exists — and only then saves it as a new character, keeping the original `createdAt` but nothing else of its identity. Imports never overwrite.
 
+### About (Phase 4b)
+`AboutDialog` (sidebar footer, rail, palette, character-select footer) shows the name, the version (`__APP_VERSION__`, injected by Vite from `package.json` at build time so nothing reads it at runtime), a one-line description, three plain links (repository, Buy me a coffee, licence) that open in the system browser, and the credit. It loads no external scripts and reports nothing anywhere; `lib/appInfo.ts` holds the strings.
+
 ### Restore from backup (Phase 4a)
 `BackupsDialog` (character menu, palette) lists the last twenty saves with time, age, name, file format and counts of entries, tags, ledger lines, sessions and goals. **Restore as new** creates a separate character and opens it. **Replace current** asks a second time in a modal that says the current version will be backed up first, then writes the backup over the file; the store reloads from the server's response so the screen matches the disk. Nothing is ever deleted by a restore.
 

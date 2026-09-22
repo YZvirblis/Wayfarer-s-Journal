@@ -4,6 +4,7 @@ import {
   Coins,
   Feather,
   Inbox,
+  Info,
   Plus,
   Search,
   Tags,
@@ -25,7 +26,7 @@ import { SecretsToggle } from './SecretsToggle';
 import { Sigil } from './Sigil';
 import { TagChip } from './TagChip';
 import { ThemeToggle } from './ThemeToggle';
-import { Button } from './ui/Button';
+import { Button, IconButton } from './ui/Button';
 import { Menu, MenuTrigger } from './ui/Menu';
 import { Tooltip } from './ui/Tooltip';
 
@@ -47,6 +48,7 @@ interface SidebarRailProps {
   onExportMarkdown: () => void;
   onImport: () => void;
   onBackups: () => void;
+  onAbout: () => void;
 }
 
 function RailButton({
@@ -103,6 +105,7 @@ export function SidebarRail({
   onExportMarkdown,
   onImport,
   onBackups,
+  onAbout,
 }: SidebarRailProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -271,6 +274,11 @@ export function SidebarRail({
       <span className="my-2 h-px w-6 bg-line/15" />
       <SecretsToggle side="right" />
       <ThemeToggle />
+      <Tooltip label="About Wayfarer's Journal" side="right">
+        <IconButton variant="ghost" size="sm" aria-label="About" onClick={onAbout}>
+          <Info className="h-3.5 w-3.5" />
+        </IconButton>
+      </Tooltip>
       <SaveStatus compact className="mt-1" />
     </aside>
   );

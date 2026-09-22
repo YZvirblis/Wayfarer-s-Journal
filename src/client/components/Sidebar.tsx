@@ -5,6 +5,7 @@ import {
   Feather,
   GripVertical,
   Inbox,
+  Info,
   Plus,
   Search,
   Tags,
@@ -55,6 +56,7 @@ interface SidebarProps {
   onExportMarkdown: () => void;
   onImport: () => void;
   onBackups: () => void;
+  onAbout: () => void;
 }
 
 function NavRow({
@@ -149,6 +151,7 @@ export function Sidebar({
   onExportMarkdown,
   onImport,
   onBackups,
+  onAbout,
 }: SidebarProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -359,6 +362,11 @@ export function Sidebar({
         <div className="flex items-center gap-0.5">
           <SecretsToggle />
           <ThemeToggle />
+          <Tooltip label="About Wayfarer's Journal" side="top">
+            <IconButton variant="ghost" size="sm" aria-label="About" onClick={onAbout}>
+              <Info className="h-3.5 w-3.5" />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>
     </aside>

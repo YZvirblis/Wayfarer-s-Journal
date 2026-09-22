@@ -1,5 +1,6 @@
-import { AlertTriangle, BookOpen, Copy, MoreHorizontal, Plus, Sparkles, Trash2, Upload } from 'lucide-react';
+import { AlertTriangle, BookOpen, Copy, Info, MoreHorizontal, Plus, Sparkles, Trash2, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { AboutDialog } from './AboutDialog';
 import { ImportCharacterDialog } from './ImportCharacterDialog';
 import type { CharacterSummary } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
@@ -86,6 +87,7 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [about, setAbout] = useState(false);
 
   async function run(action: () => Promise<string | void>): Promise<void> {
     setBusy(true);
@@ -202,8 +204,12 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
           )}
         </div>
 
-        <footer className="flex items-center justify-center pt-14">
+        <footer className="flex items-center justify-center gap-4 pt-14">
           <ThemeToggle labelled />
+          <Button variant="ghost" size="sm" className="text-faint hover:text-gold" onClick={() => setAbout(true)}>
+            <Info className="h-3.5 w-3.5" />
+            About
+          </Button>
         </footer>
       </div>
 
@@ -258,6 +264,8 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
         onOpenChange={setImporting}
         onImported={(id) => void run(async () => id)}
       />
+
+      <AboutDialog open={about} onOpenChange={setAbout} />
 
       <ConfirmDialog
         open={pendingDelete !== null}

@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import {
+  Archive,
   CalendarDays,
   CirclePlus,
   Coins,
@@ -53,6 +54,7 @@ export interface PaletteActions {
   exportJson: () => void;
   exportMarkdown: () => void;
   importCharacter: () => void;
+  backups: () => void;
 }
 
 type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
@@ -315,6 +317,15 @@ function buildCommands(
     hint: 'As a new character',
     icon: Upload,
     run: actions.importCharacter,
+  });
+  commands.push({
+    id: 'journal:backups',
+    group: 'Journal',
+    label: 'Restore from backup…',
+    keywords: 'backups restore undo earlier version history',
+    hint: 'Last 20 saves',
+    icon: Archive,
+    run: actions.backups,
   });
 
   return commands;

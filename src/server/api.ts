@@ -5,9 +5,11 @@ import {
   duplicateCharacter,
   importCharacter,
   importExampleCharacter,
+  listBackups,
   listCharacters,
   readCharacter,
   readSettings,
+  restoreBackup,
   saveCharacter,
   StorageError,
   writeSettings,
@@ -87,6 +89,22 @@ export function createApiRouter(): Router {
     '/characters/:id/duplicate',
     wrap(async (req, res) => {
       res.status(201).json(await duplicateCharacter(requireId(req)));
+    }),
+  );
+
+  api.get(
+    '/characters/:id/backups',
+    wrap(async (req, res) => {
+      res.json(await listBackups(requireId(req)));
+    }),
+  );
+
+  api.post(
+    '/characters/:id/restore',
+    wrap(async (req, res) => {
+      const file = typeof req.body?.file === 'string' ? req.body.file : '';
+      const mode = req.body?.mode === 'replace' ? 'replace' : 'new';
+      res.status(mode === 'new' ? 201 : 200).json(await restoreBackup(requireId(req), file, mode));
     }),
   );
 

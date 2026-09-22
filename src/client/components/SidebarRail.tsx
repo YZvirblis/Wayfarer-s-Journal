@@ -46,6 +46,7 @@ interface SidebarRailProps {
   onExportJson: () => void;
   onExportMarkdown: () => void;
   onImport: () => void;
+  onBackups: () => void;
 }
 
 function RailButton({
@@ -101,6 +102,7 @@ export function SidebarRail({
   onExportJson,
   onExportMarkdown,
   onImport,
+  onBackups,
 }: SidebarRailProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -136,6 +138,7 @@ export function SidebarRail({
           onExportJson={onExportJson}
           onExportMarkdown={onExportMarkdown}
           onImport={onImport}
+          onBackups={onBackups}
         />
       </Menu>
 

@@ -75,6 +75,8 @@ data/                          (gitignored; location overridable via env var)
 | DELETE | `/api/characters/:id` | Delete a character (backups are kept) |
 | POST | `/api/characters/:id/duplicate` | Duplicate a character |
 | POST | `/api/characters/example` | Copy the example character into data |
+| GET | `/api/characters/:id/backups` | Phase 4a. The character's backups, newest first, each parsed for its timestamp (from the file name), name, format and counts; an unreadable file is listed but flagged |
+| POST | `/api/characters/:id/restore` | Phase 4a. Body `{ file, mode: 'new' \| 'replace' }`. `new` saves the backup as a separate character ("… (restored)"); `replace` saves it over the current file, which `saveCharacter` backs up first, so the replaced version becomes the newest backup |
 | POST | `/api/characters/import` | Phase 4a. Body `{ document, commit }`. Validates and migrates the document; with `commit: false` returns only an `ImportSummary` (name, counts, file format before/after, duplicate-name flag); with `commit: true` saves it under a **new** id and returns the saved document. Never overwrites |
 | GET/PUT | `/api/settings` | App settings |
 
@@ -248,6 +250,9 @@ Reachable from the character switcher menu, the palette, and (import only) the c
 - **Export as JSON** downloads the full document as-is (`lib/download.ts`), named `<slug>-<date>.json`. It is the backup format; anything the app can read, it can read back.
 - **Export as Markdown** (`lib/exportMarkdown.ts`) writes one readable file: profile, every section in sidebar order (quests with status and progress), sessions, a ledger summary (on hand, earned, spent, net per month, every line), goals with progress, and the inbox. Hide-secrets mode decides whether secret items go in, and the confirmation dialog says so in plain words with the count. `[[links]]` are kept as text.
 - **Import** (`ImportCharacterDialog`) reads a `.json` file, asks the server to validate and migrate it without writing (`commit: false`), shows what it found — name, race, trade, counts of everything, the file format it was written by, and whether a character of that name already exists — and only then saves it as a new character, keeping the original `createdAt` but nothing else of its identity. Imports never overwrite.
+
+### Restore from backup (Phase 4a)
+`BackupsDialog` (character menu, palette) lists the last twenty saves with time, age, name, file format and counts of entries, tags, ledger lines, sessions and goals. **Restore as new** creates a separate character and opens it. **Replace current** asks a second time in a modal that says the current version will be backed up first, then writes the backup over the file; the store reloads from the server's response so the screen matches the disk. Nothing is ever deleted by a restore.
 
 ### Layout modes (Phase 2)
 Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:

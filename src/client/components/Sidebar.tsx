@@ -54,6 +54,7 @@ interface SidebarProps {
   onExportJson: () => void;
   onExportMarkdown: () => void;
   onImport: () => void;
+  onBackups: () => void;
 }
 
 function NavRow({
@@ -147,6 +148,7 @@ export function Sidebar({
   onExportJson,
   onExportMarkdown,
   onImport,
+  onBackups,
 }: SidebarProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -202,6 +204,7 @@ export function Sidebar({
             onExportJson={onExportJson}
             onExportMarkdown={onExportMarkdown}
             onImport={onImport}
+            onBackups={onBackups}
           />
         </Menu>
       </div>

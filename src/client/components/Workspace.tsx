@@ -50,6 +50,7 @@ const ExportMarkdownDialog = lazy(() =>
 const ImportCharacterDialog = lazy(() =>
   import('./ImportCharacterDialog').then((module) => ({ default: module.ImportCharacterDialog })),
 );
+const BackupsDialog = lazy(() => import('./BackupsDialog').then((module) => ({ default: module.BackupsDialog })));
 
 function Loading() {
   return (
@@ -90,6 +91,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [fieldsTypeId, setFieldsTypeId] = useState<string | null>(null);
   const [exportMdOpen, setExportMdOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [backupsOpen, setBackupsOpen] = useState(false);
   const { hideSecrets } = useSettings();
 
   const exportJson = useCallback(() => {
@@ -220,6 +222,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       exportJson,
       exportMarkdown: () => setExportMdOpen(true),
       importCharacter: () => setImportOpen(true),
+      backups: () => setBackupsOpen(true),
     }),
     [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters, exportJson],
   );
@@ -309,6 +312,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onExportJson={exportJson}
           onExportMarkdown={() => setExportMdOpen(true)}
           onImport={() => setImportOpen(true)}
+          onBackups={() => setBackupsOpen(true)}
         />
       ) : (
         <SidebarRail
@@ -328,6 +332,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onExportJson={exportJson}
           onExportMarkdown={() => setExportMdOpen(true)}
           onImport={() => setImportOpen(true)}
+          onBackups={() => setBackupsOpen(true)}
         />
       )}
 
@@ -412,6 +417,20 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
 
         {exportMdOpen ? <ExportMarkdownDialog open onOpenChange={setExportMdOpen} doc={doc} /> : null}
         {importOpen ? <ImportCharacterDialog open onOpenChange={setImportOpen} onImported={onImported} /> : null}
+        {backupsOpen ? (
+          <BackupsDialog
+            open
+            onOpenChange={setBackupsOpen}
+            doc={doc}
+            onRestoredAsNew={onImported}
+            onReplaced={(restored) => {
+              // The file on disk is now the restored version; make the store match it.
+              setSelection({});
+              setView({ kind: 'overview' });
+              openDocument(restored);
+            }}
+          />
+        ) : null}
 
         {goalDialog.open ? (
           <GoalDialog

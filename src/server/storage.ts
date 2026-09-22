@@ -6,9 +6,11 @@ import {
   settingsSchema,
   DEFAULT_SETTINGS,
   SCHEMA_VERSION,
+  type BackupInfo,
   type CharacterDocument,
   type CharacterSummary,
   type ImportResult,
+  type RestoreMode,
   type Settings,
 } from '../shared/schema';
 import { createCharacterDocument, newId, profileFieldValue, PROFILE_FIELD_IDS, toSummary } from '../shared/defaults';
@@ -229,6 +231,78 @@ export async function importCharacter(raw: unknown, commit: boolean): Promise<Im
   if (!commit) return { summary };
   const document = await saveCharacter({ ...reborn(doc, doc.profile.name), createdAt: doc.createdAt });
   return { summary, document };
+}
+
+const BACKUP_NAME = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z\.json$/;
+const SAFE_BACKUP = /^[A-Za-z0-9_-]+\.json$/;
+
+/** `2026-09-22T02-01-20-822Z.json` → `2026-09-22T02:01:20.822Z` */
+function backupTimestamp(file: string): string {
+  const match = BACKUP_NAME.exec(file);
+  return match ? `${match[1]}T${match[2]}:${match[3]}:${match[4]}.${match[5]}Z` : '';
+}
+
+/** Every backup of a character, newest first, with enough detail to choose one. */
+export async function listBackups(id: string): Promise<BackupInfo[]> {
+  characterFile(id); // validates the id
+  const dir = path.join(BACKUPS_DIR, id);
+  let files: string[];
+  try {
+    files = (await fs.readdir(dir)).filter((name) => BACKUP_NAME.test(name)).sort().reverse();
+  } catch {
+    return [];
+  }
+  const backups: BackupInfo[] = [];
+  for (const file of files) {
+    const savedAt = backupTimestamp(file);
+    try {
+      const doc = parseDocument(await readJson(path.join(dir, file)), file);
+      backups.push({
+        file,
+        savedAt,
+        schemaVersion: doc.schemaVersion,
+        name: doc.profile.name,
+        counts: {
+          entries: doc.entries.length,
+          tags: doc.tags.length,
+          transactions: doc.transactions.length,
+          sessions: doc.sessions.length,
+          goals: doc.goals.length,
+        },
+      });
+    } catch {
+      backups.push({
+        file,
+        savedAt,
+        schemaVersion: 0,
+        name: '(unreadable)',
+        counts: { entries: 0, tags: 0, transactions: 0, sessions: 0, goals: 0 },
+        unreadable: true,
+      });
+    }
+  }
+  return backups;
+}
+
+/**
+ * Bring a backup back. `new` saves it as a separate character; `replace`
+ * writes it over the current file — and since every save copies the existing
+ * file aside first, the version being replaced becomes the newest backup.
+ */
+export async function restoreBackup(id: string, file: string, mode: RestoreMode): Promise<CharacterDocument> {
+  characterFile(id);
+  if (!SAFE_BACKUP.test(file) || !BACKUP_NAME.test(file)) throw new StorageError('That is not a backup file name.', 400);
+  const source = path.join(BACKUPS_DIR, id, file);
+  let raw: unknown;
+  try {
+    raw = await readJson(source);
+  } catch (error) {
+    if (error instanceof StorageError) throw error;
+    throw new StorageError('That backup no longer exists.', 404);
+  }
+  const doc = parseDocument(raw, file);
+  if (mode === 'replace') return saveCharacter({ ...doc, id });
+  return saveCharacter({ ...reborn(doc, `${doc.profile.name} (restored)`), createdAt: doc.createdAt });
 }
 
 export async function readSettings(): Promise<Settings> {

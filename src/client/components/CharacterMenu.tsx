@@ -1,4 +1,4 @@
-import { Download, FileText, Upload, Users } from 'lucide-react';
+import { Archive, Download, FileText, Upload, Users } from 'lucide-react';
 import type { CharacterSummary } from '../../shared/schema';
 import { Sigil } from './Sigil';
 import { MenuContent, MenuItem, MenuSeparator } from './ui/Menu';
@@ -12,6 +12,7 @@ export function CharacterMenu({
   onExportJson,
   onExportMarkdown,
   onImport,
+  onBackups,
   align = 'start',
 }: {
   characters: CharacterSummary[];
@@ -21,6 +22,7 @@ export function CharacterMenu({
   onExportJson: () => void;
   onExportMarkdown: () => void;
   onImport: () => void;
+  onBackups: () => void;
   align?: 'start' | 'center' | 'end';
 }) {
   return (
@@ -44,6 +46,10 @@ export function CharacterMenu({
       <MenuItem onSelect={onImport}>
         <Upload className="h-3.5 w-3.5 opacity-70" />
         Import a character…
+      </MenuItem>
+      <MenuItem onSelect={onBackups}>
+        <Archive className="h-3.5 w-3.5 opacity-70" />
+        Restore from backup…
       </MenuItem>
       <MenuSeparator />
       <MenuItem onSelect={onManageCharacters}>

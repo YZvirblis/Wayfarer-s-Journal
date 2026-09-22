@@ -207,6 +207,20 @@ export interface ImportSummary {
   duplicateName: boolean;
 }
 
+/** One file in `data/backups/<characterId>/`, as shown in the restore dialog. */
+export interface BackupInfo {
+  file: string;
+  /** ISO timestamp recovered from the file name. */
+  savedAt: string;
+  schemaVersion: number;
+  name: string;
+  counts: { entries: number; tags: number; transactions: number; sessions: number; goals: number };
+  /** The file could not be parsed; it is listed but cannot be restored. */
+  unreadable?: boolean;
+}
+
+export type RestoreMode = 'new' | 'replace';
+
 export interface ImportResult {
   summary: ImportSummary;
   /** Present when the import was committed. */

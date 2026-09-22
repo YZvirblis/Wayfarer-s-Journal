@@ -87,7 +87,7 @@ interface CharacterDocument {
   tags: Tag[];
   entryTypes: EntryType[];
   entries: Entry[];
-  // schemaVersion 2 adds captures and sessions; schemaVersion 3 adds transactions and goals (see below)
+  // schemaVersion 2 adds captures and sessions; 3 adds transactions and goals; 4 adds Entry.portrait (see below)
 }
 
 interface Profile {
@@ -162,6 +162,9 @@ interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; bo
 ```
 - **Sessions carry no `entryIds`.** What a session references is whatever its body links to with `[[Entry Title]]`, the same rule entries follow. There is one kind of link in the app, and a session shows up under an entry's backlinks like any other source.
 - **Migration 1 → 2** (`src/server/migrations.ts`): adds `captures: []` and `sessions: []` when absent, leaves every other key untouched, and is safe to run twice. It runs in memory on every read; the upgraded document reaches disk on the next save, and `saveCharacter` copies the v1 file into `data/backups/<id>/` before overwriting it. Verified against the example character and a real imported character on 2026-09-22.
+
+### schemaVersion 4 (Phase 3)
+`Entry` gains an optional `portrait: string` (a data URL), matching the `profile.portrait` that existed since v1. The 3 → 4 migration is the identity: nothing needs transforming, but the bump makes an older build refuse the file instead of silently stripping portraits on its next save. Portraits are produced by `lib/portrait.ts`: centre-cropped to a square, scaled to at most 256px, encoded as JPEG at quality 0.86 in the browser, so a portrait costs roughly 10–25 kB inside the JSON and the file stays self-contained. `PortraitPicker` accepts a pasted image, a dropped one, or a file picker; `Sigil` shows the image when there is one and initials when there is not, everywhere a character or person appears (cards, switcher, Overview, People rows, detail pane, palette, web nodes).
 
 ### Links (Phase 2, no schema change)
 `[[Entry Title]]` anywhere in a markdown body (entry bodies, profile sections, captures, sessions) links to an entry. Links are plain text in the file; nothing is stored beside them, and backlinks are computed at runtime.
@@ -288,6 +291,7 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Portraits are stored inline as ≤256px JPEG data URLs, and adding the field bumped the schema to v4 even though the migration is empty | One JSON file per character stays the whole truth (backups, duplicates and exports carry the images for free); the bump keeps the "format changed → version changed" rule honest, so an older build cannot strip portraits by accident |
 | 2026-09-22 | The relationship web uses `d3-force` alone, rendering to SVG by hand, with the character pinned at the centre | A full graph library would add hundreds of kB for features the web does not need; SVG keeps nodes clickable and the picture crisp for screenshots. Pinning the character gives every graph the same readable shape |
 | 2026-09-22 | Transactions carry `secret` from the start (v3), although the ledger spec did not list it | Hide-secrets mode (Phase 3 item 5) has to blur transactions too; adding the flag now avoids a fourth schema bump one item later |
 | 2026-09-22 | A debt goal's progress is the negative sum of its transactions; a save goal's is the plain sum | Repayments are expenses in the ledger. Deriving progress this way keeps the ledger the single source of truth and lets one transaction serve both the balance and the goal |

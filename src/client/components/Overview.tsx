@@ -11,7 +11,7 @@ import { useSettings } from '../lib/settingsStore';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { GoalTile } from './GoalCard';
 import { MarkdownField } from './MarkdownField';
-import { Sigil } from './Sigil';
+import { PortraitPicker } from './PortraitPicker';
 import { Button, IconButton } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { Divider } from './ui/Divider';
@@ -165,7 +165,16 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-3xl px-5 pb-28 pt-6 pane:px-10 pane:pt-10">
         <header className="flex items-start gap-5">
-          <Sigil name={doc.profile.name} size="lg" />
+          <PortraitPicker
+            name={doc.profile.name}
+            portrait={doc.profile.portrait}
+            onChange={(portrait) =>
+              updateProfile((profile) => {
+                if (portrait) profile.portrait = portrait;
+                else delete profile.portrait;
+              })
+            }
+          />
           <div className="min-w-0 flex-1 pt-1">
             <input
               value={name.value}

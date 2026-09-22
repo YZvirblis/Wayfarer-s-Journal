@@ -61,6 +61,7 @@ interface Command {
   icon: LucideIcon;
   iconClass?: string;
   sigil?: string;
+  portrait?: string;
   run: () => void;
 }
 
@@ -89,6 +90,7 @@ function buildCommands(
       hint: singularize(type.name),
       icon: iconByName(type.icon),
       iconClass: colorClasses(type.color).text,
+      ...(entry.portrait ? { sigil: entry.title, portrait: entry.portrait } : {}),
       run: () => actions.openEntry(type.id, entry.id),
     });
   }
@@ -250,6 +252,7 @@ function buildCommands(
       hint: 'Switch to',
       icon: Users,
       sigil: character.name,
+      ...(character.portrait ? { portrait: character.portrait } : {}),
       run: () => actions.switchCharacter(character.id),
     });
   }
@@ -408,7 +411,7 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions, i
                       )}
                     >
                       {command.sigil ? (
-                        <Sigil name={command.sigil} size="sm" className="h-5 w-5 text-[0.5rem]" />
+                        <Sigil name={command.sigil} portrait={command.portrait} size="sm" className="h-5 w-5 text-[0.5rem]" />
                       ) : (
                         <Icon className={cn('h-4 w-4 shrink-0', command.iconClass ?? 'text-muted')} strokeWidth={1.75} />
                       )}

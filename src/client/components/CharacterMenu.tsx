@@ -21,7 +21,7 @@ export function CharacterMenu({
     <MenuContent align={align} className="w-[16rem]">
       {characters.map((character) => (
         <MenuItem key={character.id} onSelect={() => onSwitchCharacter(character.id)}>
-          <Sigil name={character.name} size="sm" className="h-6 w-6 text-[0.6rem]" />
+          <Sigil name={character.name} portrait={character.portrait} size="sm" className="h-6 w-6 text-[0.6rem]" />
           <span className="min-w-0 flex-1 truncate">{character.name}</span>
           {character.id === currentId ? <span className="text-[0.5rem] text-gold">◆</span> : null}
         </MenuItem>

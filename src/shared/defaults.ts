@@ -152,5 +152,6 @@ export function toSummary(doc: CharacterDocument): CharacterSummary {
     trade: profileFieldValue(doc, PROFILE_FIELD_IDS.trade, 'Trade'),
     entryCount: doc.entries.length,
     updatedAt: doc.updatedAt,
+    ...(doc.profile.portrait ? { portrait: doc.profile.portrait } : {}),
   };
 }

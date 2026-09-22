@@ -14,13 +14,15 @@ function initials(name: string): string {
   return (second ? `${first}${second}` : first).toUpperCase();
 }
 
-/** Stands in for a portrait until Phase 3 adds real image uploads. */
+/** A portrait when there is one, initials in a gilt frame when there is not. */
 export function Sigil({
   name,
+  portrait,
   size = 'md',
   className,
 }: {
   name: string;
+  portrait?: string;
   size?: keyof typeof SIZES;
   className?: string;
 }) {
@@ -28,13 +30,13 @@ export function Sigil({
     <span
       aria-hidden
       className={cn(
-        'relative flex shrink-0 select-none items-center justify-center rounded border border-gold/25',
+        'relative flex shrink-0 select-none items-center justify-center overflow-hidden rounded border border-gold/25',
         'bg-gradient-to-br from-gold/[0.16] via-transparent to-ember/[0.10] font-display tracking-title text-gold/90 shadow-rim',
         SIZES[size],
         className,
       )}
     >
-      {initials(name)}
+      {portrait ? <img src={portrait} alt="" className="h-full w-full object-cover" draggable={false} /> : initials(name)}
     </span>
   );
 }

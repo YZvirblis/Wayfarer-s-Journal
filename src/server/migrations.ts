@@ -31,6 +31,11 @@ const migrations: Record<number, (doc: RawDocument) => RawDocument> = {
     transactions: Array.isArray(doc.transactions) ? doc.transactions : [],
     goals: Array.isArray(doc.goals) ? doc.goals : [],
   }),
+  /**
+   * 3 -> 4: entries gain an optional `portrait`. Nothing to transform — the
+   * bump exists so an older build refuses a file it would silently strip.
+   */
+  3: (doc) => ({ ...doc }),
 };
 
 export class MigrationError extends Error {}

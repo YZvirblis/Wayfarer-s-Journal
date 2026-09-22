@@ -158,7 +158,7 @@ export function Sidebar({
               type="button"
               className="flex w-full items-center gap-2.5 rounded border border-transparent px-1.5 py-1.5 text-left transition-colors duration-150 hover:border-line/15 hover:bg-ink/[0.03]"
             >
-              <Sigil name={doc.profile.name} size="sm" />
+              <Sigil name={doc.profile.name} portrait={doc.profile.portrait} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display text-sm tracking-title text-ink">{doc.profile.name}</span>
                 {subtitle ? <span className="block truncate text-2xs text-faint">{subtitle}</span> : null}

@@ -119,7 +119,7 @@ export function SidebarRail({
             aria-label={`${doc.profile.name} — switch character`}
             className="rounded transition-transform duration-150 hover:scale-105"
           >
-            <Sigil name={doc.profile.name} size="sm" className="h-9 w-9" />
+            <Sigil name={doc.profile.name} portrait={doc.profile.portrait} size="sm" className="h-9 w-9" />
           </button>
         </MenuTrigger>
         <CharacterMenu

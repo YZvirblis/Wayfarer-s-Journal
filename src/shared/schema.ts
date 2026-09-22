@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Bump SCHEMA_VERSION and add a migration in src/server/migrations.ts whenever
  * this file changes shape.
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 /** Curated accent palette. Tags and entry types store a key, not a hex value, so
  *  colours follow the active theme. */
@@ -90,6 +90,8 @@ export const entrySchema = z.object({
   body: z.string(),
   status: entryStatusSchema.optional(),
   progress: progressSchema.optional(),
+  /** Small square image as a data URL (≤ 256px). Added in schemaVersion 4. */
+  portrait: z.string().optional(),
   pinned: z.boolean().default(false),
   secret: z.boolean().default(false),
   createdAt: isoDate,
@@ -180,6 +182,7 @@ export interface CharacterSummary {
   trade: string;
   entryCount: number;
   updatedAt: string;
+  portrait?: string;
 }
 
 export const THEMES = ['dark', 'parchment'] as const;

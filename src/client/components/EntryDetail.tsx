@@ -13,6 +13,7 @@ import { BUILT_IN_TYPE_IDS } from '../../shared/defaults';
 import { Backlinks } from './Backlinks';
 import { Dealings } from './Dealings';
 import { MarkdownField } from './MarkdownField';
+import { PortraitPicker } from './PortraitPicker';
 import { ProgressBar, STATUS_META, STATUS_ORDER } from './QuestStatus';
 import { TagRow } from './TagPicker';
 import { Button, IconButton } from './ui/Button';
@@ -225,19 +226,36 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
         </div>
 
         <Veil hidden={hideSecrets && entry.secret} label="Secret entry">
-        <input
-          ref={titleInput}
-          value={title.value}
-          onChange={(event) => title.onChange(event.target.value)}
-          onBlur={title.flush}
-          placeholder="Give this a name…"
-          aria-label="Entry title"
-          className="wj-quiet-field -ml-2 px-2 py-1 font-display text-[1.75rem] leading-tight tracking-title text-ink"
-        />
-
-        <p className="mt-2 text-2xs text-faint">
-          Written {formatDate(entry.createdAt)} · last touched {relativeTime(entry.updatedAt)}
-        </p>
+        <div className="flex items-start gap-4">
+          {type.id === BUILT_IN_TYPE_IDS.people ? (
+            <PortraitPicker
+              name={entry.title}
+              portrait={entry.portrait}
+              size="lg"
+              className="mt-0.5"
+              onChange={(portrait) =>
+                updateEntry(entry.id, (draft) => {
+                  if (portrait) draft.portrait = portrait;
+                  else delete draft.portrait;
+                })
+              }
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <input
+              ref={titleInput}
+              value={title.value}
+              onChange={(event) => title.onChange(event.target.value)}
+              onBlur={title.flush}
+              placeholder="Give this a name…"
+              aria-label="Entry title"
+              className="wj-quiet-field -ml-2 px-2 py-1 font-display text-[1.75rem] leading-tight tracking-title text-ink"
+            />
+            <p className="mt-2 text-2xs text-faint">
+              Written {formatDate(entry.createdAt)} · last touched {relativeTime(entry.updatedAt)}
+            </p>
+          </div>
+        </div>
 
         {type.fields.length > 0 || type.features.status || type.features.progress ? (
           <>

@@ -410,7 +410,18 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
                         stroke={`rgb(var(${token}) / ${node.kind === 'self' ? 1 : 0.9})`}
                         strokeWidth={isHover ? 2.5 : node.kind === 'self' ? 1.75 : 1.25}
                       />
-                      {node.kind === 'self' ? (
+                      {node.portrait ? (
+                        <image
+                          href={node.portrait}
+                          x={-r + 1}
+                          y={-r + 1}
+                          width={r * 2 - 2}
+                          height={r * 2 - 2}
+                          preserveAspectRatio="xMidYMid slice"
+                          style={{ clipPath: 'circle(50%)', pointerEvents: 'none' }}
+                        />
+                      ) : null}
+                      {node.kind === 'self' && !node.portrait ? (
                         <text
                           textAnchor="middle"
                           dy="0.35em"

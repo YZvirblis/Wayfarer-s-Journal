@@ -23,6 +23,7 @@ export interface GraphNode {
   /** Distinct neighbours. */
   degree: number;
   standing?: string;
+  portrait?: string;
   // d3-force fills these in.
   x?: number;
   y?: number;
@@ -86,6 +87,7 @@ export function buildGraph(doc: CharacterDocument, { tagIds, hideSecrets }: Buil
       secret: false,
       tagIds: [],
       degree: 0,
+      ...(doc.profile.portrait ? { portrait: doc.profile.portrait } : {}),
     },
     ...shown.map(
       (entry): GraphNode => ({
@@ -98,6 +100,7 @@ export function buildGraph(doc: CharacterDocument, { tagIds, hideSecrets }: Buil
         secret: entry.secret,
         tagIds: entry.tagIds,
         degree: 0,
+        ...(entry.portrait ? { portrait: entry.portrait } : {}),
         ...(entry.typeId === BUILT_IN_TYPE_IDS.people && entry.fields.standing
           ? { standing: String(entry.fields.standing) }
           : {}),

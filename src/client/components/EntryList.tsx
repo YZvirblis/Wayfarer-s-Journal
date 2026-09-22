@@ -9,6 +9,7 @@ import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
 import type { SortKey } from '../types';
 import { ProgressBar, StatusBadge, STATUS_ORDER } from './QuestStatus';
+import { Sigil } from './Sigil';
 import { TagChip } from './TagChip';
 import { Button, IconButton } from './ui/Button';
 import { Veil } from './ui/Veil';
@@ -279,6 +280,7 @@ export function EntryList({
 
                     <Veil hidden={hideSecrets && entry.secret}>
                     <div className="flex items-center gap-2">
+                      {entry.portrait ? <Sigil name={entry.title} portrait={entry.portrait} size="sm" className="h-7 w-7" /> : null}
                       <span
                         className={cn(
                           'min-w-0 flex-1 truncate text-sm',

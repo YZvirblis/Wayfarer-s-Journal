@@ -40,7 +40,7 @@ function CharacterCard({
           'hover:-translate-y-0.5 hover:border-gold/30 hover:shadow-lifted',
         )}
       >
-        <Sigil name={character.name} size="md" />
+        <Sigil name={character.name} portrait={character.portrait} size="md" />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-display text-lg leading-snug tracking-title text-ink">
             {character.name}

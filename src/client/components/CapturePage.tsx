@@ -21,6 +21,7 @@ export function CapturePage() {
 
   // The last-opened character, for the name in the corner and for [[link]] autocomplete.
   useEffect(() => {
+    document.title = 'Quick capture';
     let cancelled = false;
     (async () => {
       try {

@@ -24,5 +24,8 @@ export function setAppInfo(patch: Partial<AppInfo>): void {
   Object.assign(appInfo, patch);
 }
 
-/** `settings` fires with the new Settings after every successful write. */
-export const serverEvents = new EventEmitter<{ settings: [Settings] }>();
+/**
+ * `settings` fires with the new Settings after every successful write;
+ * `hotkeyTest` when the client asks the desktop wrapper to listen for one press.
+ */
+export const serverEvents = new EventEmitter<{ settings: [Settings]; hotkeyTest: [] }>();

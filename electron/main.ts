@@ -5,12 +5,16 @@
  * Everything the journal does still happens in the same Express app the web
  * mode uses; this file only owns windows, the tray, and the global hotkey.
  */
-import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
+import { loadForeground, type Foreground, type WindowHandle } from './foreground';
+import { createHotkeyService, type HotkeyService } from './hotkey';
 
 const APP_NAME = "Wayfarer's Journal";
+/** How long "Test your hotkey" listens for a press. */
+const HOTKEY_TEST_MS = 6000;
 type ServerModule = typeof import('./server');
 
 /* -------------------------------------------------------------------------- */
@@ -110,6 +114,11 @@ let quitting = false;
 let baseUrl = '';
 let closeToTray = true;
 let server: ServerModule | null = null;
+let hotkeys: HotkeyService | null = null;
+let foreground: Foreground | null = null;
+/** The window that had focus when the capture box opened — the game, usually. */
+let previousForeground: WindowHandle = 0;
+let hotkeyTestUntil = 0;
 
 const iconPath = () => path.join(app.getAppPath(), 'build', 'icon.png');
 const preloadPath = () => path.join(app.getAppPath(), 'electron', 'preload.cjs');
@@ -181,12 +190,41 @@ function showMainWindow(): void {
 /* Quick capture window                                                        */
 /* -------------------------------------------------------------------------- */
 
+/** The HWND of a window, for the user32 calls. */
+function handleOf(win: BrowserWindow): WindowHandle {
+  const buffer = win.getNativeWindowHandle();
+  return buffer.length >= 8 ? Number(buffer.readBigUInt64LE(0)) : buffer.readUInt32LE(0);
+}
+
+/** When the capture box was last raised; a blur inside the grace period is a refused activation, not the player leaving. */
+let captureRaisedAt = 0;
+const RAISE_GRACE_MS = 600;
+
+/**
+ * Show and focus the capture box, taking the foreground from the game. A
+ * plain show() asks Windows to activate the window, which it refuses to a
+ * background process (the taskbar button flashes instead) — so the window is
+ * shown inactive and the foreground is taken with the input queues attached.
+ */
+function raiseCaptureWindow(win: BrowserWindow): void {
+  captureRaisedAt = Date.now();
+  if (foreground) {
+    win.showInactive();
+    const handle = handleOf(win);
+    if (!foreground.activate(handle) || !win.isFocused()) win.focus();
+  } else {
+    win.show();
+    win.focus();
+  }
+}
+
 function openCaptureWindow(): void {
   if (captureWindow && !captureWindow.isDestroyed()) {
-    captureWindow.show();
-    captureWindow.focus();
+    raiseCaptureWindow(captureWindow);
     return;
   }
+  // Remember who had the keyboard, so closing can hand it straight back.
+  previousForeground = foreground?.current() ?? 0;
   captureWindow = new BrowserWindow({
     width: 560,
     height: 220,
@@ -207,45 +245,74 @@ function openCaptureWindow(): void {
   captureWindow.setVisibleOnAllWorkspaces(true);
   attachLinkHandling(captureWindow);
   captureWindow.once('ready-to-show', () => {
-    captureWindow?.show();
-    captureWindow?.focus();
+    if (captureWindow) raiseCaptureWindow(captureWindow);
   });
-  captureWindow.on('blur', () => closeCaptureWindow());
+  // The player clicked elsewhere: close, but leave focus where they put it.
+  // A blur right after raising means Windows refused the activation; try once more.
+  captureWindow.on('blur', () => {
+    const win = captureWindow;
+    if (!win || win.isDestroyed()) return;
+    if (Date.now() - captureRaisedAt < RAISE_GRACE_MS) {
+      if (foreground) foreground.activate(handleOf(win));
+      return;
+    }
+    closeCaptureWindow(false);
+  });
   captureWindow.on('closed', () => {
     captureWindow = null;
   });
   void captureWindow.loadURL(`${baseUrl}/capture`);
 }
 
-/** Hiding the focused window hands focus back to whatever had it — the game, usually. */
-function closeCaptureWindow(): void {
-  if (captureWindow && !captureWindow.isDestroyed()) captureWindow.close();
+/**
+ * `restoreFocus` hands the keyboard back to the window that had it before
+ * the box opened (Enter, Escape, the hotkey again). Without it, Windows
+ * would activate another window of this process — the journal — instead
+ * of the game.
+ */
+function closeCaptureWindow(restoreFocus: boolean): void {
+  const win = captureWindow;
+  captureWindow = null; // the blur this triggers must not re-enter
+  if (!win || win.isDestroyed()) return;
+  if (restoreFocus && previousForeground && foreground) foreground.restore(previousForeground);
+  previousForeground = 0;
+  win.close();
+}
+
+/** The hotkey: opens the capture box, closes it when it is already up, or records a press during a test. */
+function onHotkey(): void {
+  if (Date.now() < hotkeyTestUntil) {
+    hotkeyTestUntil = 0;
+    patchHotkeyStatus({ test: { until: new Date().toISOString(), pressedAt: new Date().toISOString() } });
+    return;
+  }
+  if (captureWindow && !captureWindow.isDestroyed() && captureWindow.isFocused()) closeCaptureWindow(true);
+  else openCaptureWindow();
 }
 
 /* -------------------------------------------------------------------------- */
 /* Hotkey, tray, settings                                                      */
 /* -------------------------------------------------------------------------- */
 
-let currentAccelerator = '';
+let currentAccelerator: string | null = null;
 
-function registerHotkey(accelerator: string): void {
-  if (currentAccelerator) globalShortcut.unregister(currentAccelerator);
-  currentAccelerator = '';
-  const wanted = accelerator.trim();
-  if (!wanted) {
-    server?.setAppInfo({ hotkey: { accelerator: '', registered: false, error: 'No shortcut set.' } });
-    return;
-  }
-  let registered = false;
-  let error: string | undefined;
-  try {
-    registered = globalShortcut.register(wanted, openCaptureWindow);
-    if (!registered) error = 'Another program already uses this shortcut, or Windows reserves it. Try a different combination.';
-  } catch (caught) {
-    error = caught instanceof Error ? caught.message : 'That is not a valid shortcut.';
-  }
-  if (registered) currentAccelerator = wanted;
-  server?.setAppInfo({ hotkey: { accelerator: wanted, registered, ...(error ? { error } : {}) } });
+function patchHotkeyStatus(patch: Partial<NonNullable<ServerModule['appInfo']['hotkey']>>): void {
+  if (!server) return;
+  const current = server.appInfo.hotkey ?? { accelerator: '', registered: false, backend: 'none' as const };
+  server.setAppInfo({ hotkey: { ...current, ...patch } });
+}
+
+async function applyHotkey(accelerator: string): Promise<void> {
+  if (!server || !hotkeys) return;
+  currentAccelerator = accelerator;
+  const status = await hotkeys.apply(accelerator);
+  if (currentAccelerator !== accelerator) return; // superseded while awaiting
+  server.setAppInfo({ hotkey: status });
+}
+
+function startHotkeyTest(): void {
+  hotkeyTestUntil = Date.now() + HOTKEY_TEST_MS;
+  patchHotkeyStatus({ test: { until: new Date(hotkeyTestUntil).toISOString() } });
 }
 
 function buildTray(): void {
@@ -274,7 +341,7 @@ async function applySettings(): Promise<void> {
   if (!server) return;
   const settings = await server.readSettings();
   closeToTray = settings.desktop.closeToTray;
-  if (settings.desktop.captureHotkey !== currentAccelerator) registerHotkey(settings.desktop.captureHotkey);
+  if (settings.desktop.captureHotkey !== currentAccelerator) await applyHotkey(settings.desktop.captureHotkey);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -296,8 +363,13 @@ async function boot(): Promise<void> {
 
   Menu.setApplicationMenu(null);
   buildTray();
+  hotkeys = createHotkeyService(onHotkey);
+  const focus = await loadForeground();
+  foreground = focus.foreground;
+  if (focus.note) console.log(`[wayfarer] ${focus.note}`);
   await applySettings();
   server.serverEvents.on('settings', () => void applySettings());
+  server.serverEvents.on('hotkeyTest', startHotkeyTest);
 
   ipcMain.handle('capture:submit', async (_event, text: unknown) => {
     const body = typeof text === 'string' ? text : '';
@@ -321,7 +393,7 @@ async function boot(): Promise<void> {
       return { ok: false, reason: caught instanceof Error ? caught.message : 'Could not save the capture.' };
     }
   });
-  ipcMain.on('capture:close', () => closeCaptureWindow());
+  ipcMain.on('capture:close', () => closeCaptureWindow(true));
   ipcMain.on('capture:open', () => openCaptureWindow());
 
   mainWindow = createMainWindow();
@@ -354,7 +426,7 @@ if (!gotLock) {
 app.on('activate', showMainWindow);
 app.on('before-quit', () => {
   quitting = true;
-  globalShortcut.unregisterAll();
+  hotkeys?.dispose();
 });
 app.on('window-all-closed', () => {
   // Stay alive in the tray unless the player chose otherwise or is quitting.

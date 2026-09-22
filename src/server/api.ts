@@ -130,6 +130,13 @@ export function createApiRouter(): Router {
     res.json(appInfo);
   });
 
+  /** Desktop only: record the next hotkey press instead of opening the capture window. */
+  api.post('/app/hotkey-test', (_req, res) => {
+    if (!appInfo.desktop) throw new StorageError('The global hotkey only exists in the desktop app.', 400);
+    serverEvents.emit('hotkeyTest');
+    res.status(204).end();
+  });
+
   api.post(
     '/captures',
     wrap(async (req, res) => {

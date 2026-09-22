@@ -51,6 +51,8 @@ export const api = {
   importCharacter: (document: unknown, commit: boolean) =>
     request<ImportResult>('/characters/import', { method: 'POST', body: JSON.stringify({ document, commit }) }),
   getAppInfo: () => request<AppInfo>('/app'),
+  /** Desktop only: the next hotkey press is recorded in `getAppInfo().hotkey.test` instead of opening the capture box. */
+  startHotkeyTest: () => request<void>('/app/hotkey-test', { method: 'POST' }),
   /** Server-side capture into the last-opened character; the hotkey window's fallback. */
   addCapture: (body: string) => request<void>('/captures', { method: 'POST', body: JSON.stringify({ body }) }),
   getSettings: () => request<Settings>('/settings'),

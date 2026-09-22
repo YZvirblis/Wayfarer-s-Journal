@@ -231,6 +231,7 @@ Saves are atomic: a new file is written beside the old one and swapped in, so a 
 
 - Your journal never leaves your machine. The server binds to `127.0.0.1` only and is unreachable from your network, let alone the internet.
 - There is no account, no telemetry, no analytics, no update check, and no external script. The About dialog's links open your browser; nothing is fetched behind your back.
+- **The desktop app listens for one key combination, and nothing else.** So that the capture hotkey works while a game has the keyboard, the app installs a low-level keyboard hook (the same mechanism AutoHotkey uses). The hook compares each key press against the single combination you configured and discards it. It keeps no buffer and no log, never sees what you type as text, does not watch the mouse, and is removed when the app quits. You can read the whole of it in [`electron/hotkey.ts`](electron/hotkey.ts). If the hook cannot load, the app falls back to a plain Windows hotkey registration, and Preferences tells you which of the two is in use.
 - Portraits are stored inside the character file, not uploaded anywhere.
 - The bundled example character is fictional and written for this project. Please keep real players' characters, secrets and private conversations out of anything you share publicly.
 
@@ -248,7 +249,10 @@ Something else on your PC is listening there, or a previous journal is still run
 The desktop app tried to create `data/` next to the exe and could not, usually because the exe is in a protected folder such as *Program Files* or on a read-only drive. It has fallen back to `%APPDATA%\wayfarers-journal\data` and your journal is safe there. To keep it beside the exe instead, move the exe to a normal folder (your Documents, a games folder, a USB stick) and copy the `data` folder over.
 
 **The global hotkey does not work.**
-Open Preferences: it shows whether the hotkey registered and, if not, why. The usual reason is another program holding the same combination. Pick another one in the same box, in Electron's notation: `CommandOrControl+Shift+J`, `Alt+Shift+F9`, `Control+F12`. Some full-screen games capture the keyboard exclusively; borderless-window mode usually fixes that.
+Open Preferences and press **Test your hotkey**: the app listens for a few seconds and tells you whether the press arrived. If it did not, another program is probably holding the same combination; pick another one in the same box, in Electron's notation: `CommandOrControl+Shift+J`, `Alt+Shift+F9`, `Control+F12`. Preferences also shows *how* the app is listening. "Through a low-level keyboard hook" is the normal case and works over games that read the keyboard directly. "Registered with Windows" means the hook could not load and the app fell back to a plain hotkey, which games that use DirectInput swallow.
+
+**The hotkey works, but the capture box appears behind the game, or the game keeps the keyboard.**
+That is exclusive full-screen mode: the game owns the screen and nothing can be drawn over it. Switch the game to *borderless windowed* (most games offer it under display settings); the box then opens on top and, when you press Enter or Escape, the keyboard goes straight back to the game.
 
 **Is it tied to one game?**
 No. Sections, fields, tags and the currency name are all yours to set. The example character is the only place a particular game shows through.

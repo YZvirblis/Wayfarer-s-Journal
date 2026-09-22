@@ -192,10 +192,28 @@ export interface CharacterSummary {
 }
 
 /** Facts about the running app, from `GET /api/app`; the desktop wrapper fills the rest in. */
+/** How the desktop app listens for the capture hotkey. */
+export type HotkeyBackend =
+  /** A low-level keyboard hook (WH_KEYBOARD_LL) — sees the keys even while a game reads the keyboard directly. */
+  | 'hook'
+  /** Windows RegisterHotKey via Electron's globalShortcut; some games swallow it. */
+  | 'shortcut'
+  | 'none';
+
+/** A running "test your hotkey" window: the app records the next press instead of opening the capture box. */
+export interface HotkeyTest {
+  until: string;
+  pressedAt?: string;
+}
+
 export interface HotkeyStatus {
   accelerator: string;
   registered: boolean;
   error?: string;
+  backend: HotkeyBackend;
+  /** Why the hook is not in use, when it is not. */
+  backendNote?: string;
+  test?: HotkeyTest;
 }
 
 export interface AppInfo {

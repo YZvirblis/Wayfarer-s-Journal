@@ -59,7 +59,8 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Positioning: a journal for roleplay characters in general; currency is a per-character setting (schema v6), Skyrim wording neutralised outside the example
 - [x] About dialog (sidebar footer, rail, palette, character select): name, version from package.json, links to GitHub, Buy me a coffee and the licence
 - [x] Electron packaging → portable Windows .exe: server in-process on a free port, `data/` beside the exe with a user-data fallback, window state, external links, tray with close-to-tray setting, original icon from `assets/icon.svg`
-- [x] OS-level global quick-capture hotkey via Electron `globalShortcut` (default Ctrl+Shift+J, configurable in Preferences with registration status), opening a small always-on-top capture window over the game
+- [x] OS-level global quick-capture hotkey (default Ctrl+Shift+J, configurable in Preferences with registration status), opening a small always-on-top capture window over the game
+- [x] Session 6: hotkey through a low-level keyboard hook (`uiohook-napi`) so it fires while a DirectInput game has the keyboard; `globalShortcut` kept as the fallback with the active backend shown in Preferences; focus taken and handed back through `user32` (koffi); "Test your hotkey" in Preferences; privacy note in the README
 - [x] GitHub Actions: build and attach the .exe to Releases (`.github/workflows/release.yml`, on `v*` tags)
 - [x] README as the full manual: hero screenshot, features, download with the SmartScreen note, usage guide, shortcuts, data, privacy, FAQ (no GIF yet — still screenshots only)
 - [x] CONTRIBUTING.md, issue templates, PR template, CHANGELOG

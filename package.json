@@ -25,7 +25,9 @@
   },
   "dependencies": {
     "express": "^4.21.2",
+    "koffi": "^3.3.1",
     "nanoid": "^5.1.0",
+    "uiohook-napi": "^1.5.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -63,6 +65,7 @@
     "productName": "Wayfarer's Journal",
     "copyright": "MIT — Yuriy Zvirblis",
     "asar": false,
+    "npmRebuild": false,
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -75,7 +78,9 @@
       "package.json"
     ],
     "win": {
-      "target": ["portable"],
+      "target": [
+        "portable"
+      ],
       "icon": "build/icon.ico",
       "artifactName": "Wayfarers-Journal-${version}-portable.exe"
     },

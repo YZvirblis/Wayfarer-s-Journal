@@ -223,7 +223,7 @@ interface Goal {
    - **Left sidebar:** character switcher; Overview; one item per entry type with counts; "+ New section"; tag list with colored chips (click to filter).
    - **Main area:** a two-pane list + detail view per entry type. The list has text search, tag filter, sort (updated / title), and pinned items first. Quests show status badges and progress bars.
    - **Detail pane:** editable title, type-specific fields, tag picker (pick existing or create inline), markdown body with edit/preview toggle, pin, secret flag, timestamps.
-3. **Overview:** profile fields and sections, rendered beautifully when not editing.
+3. **Overview:** profile fields and sections, rendered beautifully when not editing. Since Phase 3 both lists reorder by dragging their grip (`lib/useReorder.ts`: pointer events with a live draft order, committed once on release; ↑/↓ on a focused grip for keyboards).
 4. **Tag manager:** rename, recolor, group, delete (removes the tag from all entries).
 
 ### Relationship web (Phase 3)

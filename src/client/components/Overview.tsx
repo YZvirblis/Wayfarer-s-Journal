@@ -9,6 +9,7 @@ import { goalProgress, totals } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
 import { useSettings } from '../lib/settingsStore';
 import { useAutoCommit } from '../lib/useAutoCommit';
+import { useReorder } from '../lib/useReorder';
 import { GoalTile } from './GoalCard';
 import { MarkdownField } from './MarkdownField';
 import { PortraitPicker } from './PortraitPicker';
@@ -22,7 +23,36 @@ function updateProfile(recipe: (profile: CharacterDocument['profile']) => void):
   mutate((draft) => recipe(draft.profile));
 }
 
-function FieldRow({ field, onDelete }: { field: ProfileField; onDelete: () => void }) {
+type HandleProps = ReturnType<ReturnType<typeof useReorder>['handleProps']>;
+
+function Grip({ handle, dragging, className }: { handle: HandleProps; dragging: boolean; className?: string }) {
+  return (
+    <Tooltip label="Drag to reorder · ↑↓ with the keyboard">
+      <span
+        {...handle}
+        className={cn(
+          'flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-faint/50 transition-colors hover:text-gold focus-visible:text-gold active:cursor-grabbing',
+          dragging && 'text-gold',
+          className,
+        )}
+      >
+        <GripVertical className="h-3.5 w-3.5" aria-hidden />
+      </span>
+    </Tooltip>
+  );
+}
+
+function FieldRow({
+  field,
+  handle,
+  dragging,
+  onDelete,
+}: {
+  field: ProfileField;
+  handle: HandleProps;
+  dragging: boolean;
+  onDelete: () => void;
+}) {
   const label = useAutoCommit(field.label, (value) =>
     updateProfile((profile) => {
       const target = profile.fields.find((candidate) => candidate.id === field.id);
@@ -37,13 +67,23 @@ function FieldRow({ field, onDelete }: { field: ProfileField; onDelete: () => vo
   );
 
   return (
-    <div className="group/field flex items-center gap-3 border-b border-line/[0.08] py-2">
+    <div
+      className={cn(
+        'group/field -ml-5 flex items-center gap-1 border-b border-line/[0.08] py-2 pl-0 transition-colors',
+        dragging && 'rounded bg-gold/[0.06]',
+      )}
+    >
+      <Grip
+        handle={handle}
+        dragging={dragging}
+        className={cn('opacity-0 group-hover/field:opacity-100 focus-visible:opacity-100', dragging && 'opacity-100')}
+      />
       <input
         value={label.value}
         onChange={(event) => label.onChange(event.target.value)}
         onBlur={label.flush}
         aria-label="Field name"
-        className="wj-quiet-field w-28 shrink-0 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-[0.14em] text-faint"
+        className="wj-quiet-field ml-2 w-28 shrink-0 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-[0.14em] text-faint"
       />
       <input
         value={value.value}
@@ -68,7 +108,17 @@ function FieldRow({ field, onDelete }: { field: ProfileField; onDelete: () => vo
   );
 }
 
-function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete: () => void }) {
+function SectionBlock({
+  section,
+  handle,
+  dragging,
+  onDelete,
+}: {
+  section: ProfileSection;
+  handle: HandleProps;
+  dragging: boolean;
+  onDelete: () => void;
+}) {
   const { hideSecrets } = useSettings();
   const title = useAutoCommit(section.title, (value) =>
     updateProfile((profile) => {
@@ -78,10 +128,13 @@ function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete
   );
 
   return (
-    <section id={`profile-section-${section.id}`} className="group/section scroll-mt-6">
+    <section
+      id={`profile-section-${section.id}`}
+      className={cn('group/section scroll-mt-6 rounded transition-colors', dragging && 'bg-gold/[0.05] ring-1 ring-gold/25')}
+    >
       <Veil hidden={hideSecrets && section.secret} label="Secret section">
       <header className="mb-3 flex items-center gap-2">
-        <GripVertical className="h-3.5 w-3.5 shrink-0 text-faint/40" aria-hidden />
+        <Grip handle={handle} dragging={dragging} className="-ml-1" />
         <input
           value={title.value}
           onChange={(event) => title.onChange(event.target.value)}
@@ -161,6 +214,25 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
     .map((field) => field.value)
     .join(' · ');
 
+  const fieldsById = new Map(doc.profile.fields.map((field) => [field.id, field] as const));
+  const sectionsById = new Map(doc.profile.sections.map((section) => [section.id, section] as const));
+  const fieldOrder = useReorder(
+    doc.profile.fields.map((field) => field.id),
+    (next) =>
+      updateProfile((profile) => {
+        const byId = new Map(profile.fields.map((field) => [field.id, field] as const));
+        profile.fields = next.flatMap((id) => byId.get(id) ?? []);
+      }),
+  );
+  const sectionOrder = useReorder(
+    doc.profile.sections.map((section) => section.id),
+    (next) =>
+      updateProfile((profile) => {
+        const byId = new Map(profile.sections.map((section) => [section.id, section] as const));
+        profile.sections = next.flatMap((id) => byId.get(id) ?? []);
+      }),
+  );
+
   return (
     <div className="wj-scroll min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-3xl px-5 pb-28 pt-6 pane:px-10 pane:pt-10">
@@ -210,17 +282,23 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
         <div className="mt-8">
           <p className="wj-eyebrow mb-2">The bearer of this journal</p>
           <div className="border-t border-line/[0.08]">
-            {doc.profile.fields.map((field) => (
-              <FieldRow
-                key={field.id}
-                field={field}
-                onDelete={() =>
-                  updateProfile((profile) => {
-                    profile.fields = profile.fields.filter((candidate) => candidate.id !== field.id);
-                  })
-                }
-              />
-            ))}
+            {fieldOrder.order.map((id) => {
+              const field = fieldsById.get(id);
+              return field ? (
+                <div key={field.id} ref={fieldOrder.register(field.id)}>
+                  <FieldRow
+                    field={field}
+                    handle={fieldOrder.handleProps(field.id)}
+                    dragging={fieldOrder.draggingId === field.id}
+                    onDelete={() =>
+                      updateProfile((profile) => {
+                        profile.fields = profile.fields.filter((candidate) => candidate.id !== field.id);
+                      })
+                    }
+                  />
+                </div>
+              ) : null;
+            })}
           </div>
           <Button
             variant="ghost"
@@ -240,9 +318,19 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
         <Divider className="my-9" />
 
         <div className="space-y-10">
-          {doc.profile.sections.map((section) => (
-            <SectionBlock key={section.id} section={section} onDelete={() => setPendingSection(section)} />
-          ))}
+          {sectionOrder.order.map((id) => {
+            const section = sectionsById.get(id);
+            return section ? (
+              <div key={section.id} ref={sectionOrder.register(section.id)}>
+                <SectionBlock
+                  section={section}
+                  handle={sectionOrder.handleProps(section.id)}
+                  dragging={sectionOrder.draggingId === section.id}
+                  onDelete={() => setPendingSection(section)}
+                />
+              </div>
+            ) : null;
+          })}
         </div>
 
         <Button

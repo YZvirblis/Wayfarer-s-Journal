@@ -3,25 +3,25 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 2 — Connections & Capture, **core items complete** (six of the eight roadmap boxes). Two smaller Phase 2 items remain: keyboard navigation of the entry list, and search across every section from the list's search box (the palette already searches everything).
+**Phase:** 3 — Depth, **complete** except one small roadmap item (reorder sections in the sidebar). Phases 1 and 2 are complete.
 
-The app runs end to end at any width from ~600px up. Everything a body of markdown can do now connects: `[[Entry Title]]` links with caret autocomplete, chips that navigate, unresolved links that offer to create the entry, rename-rewriting, and a "Mentioned in…" panel on every entry. `Ctrl+K` opens a command palette that reaches entries, sessions, sections, profile sections, tags, creation of any type, and other characters. `Ctrl+/` opens quick capture; captures wait in an Inbox to be turned into entries, appended to one, or dismissed. A dated session log lists what each night touched, and those entries list the session back.
+The journal now has a septim ledger with a running balance and one-line quick entry, goals whose progress is derived from that ledger, a force-directed relationship web of People, Factions and Places (the intended README hero image), a field editor for every section, a hide-secrets mode that blurs everything marked secret with click-to-reveal, portraits for the character and for People, and drag-to-reorder for profile fields and sections. Lists answer the keyboard, and the list search box hands off to the Ctrl+K palette for cross-section search.
 
-**Schema is v2** (`captures[]`, `sessions[]`), with a verified additive 1→2 migration. Both local characters (the example and a real imported one) were upgraded through the storage layer with v1 backups taken first. A real player's character was imported into `data/` by a script kept in the gitignored `data/_import/` folder — no details recorded here, nothing committed.
+**Schema is v4.** v3 added `transactions[]` and `goals[]`; v4 added `Entry.portrait`. Each step has an additive (v4: identity) migration in `src/server/migrations.ts`, and each was exercised through the storage layer on both local characters with a backup taken first. The example character ships at v4 with nine transactions, two goals (one secret), a capture, a session, and `[[links]]` woven through its People, Places and Factions so the web has 28 ties on first open.
 
-`docs/DESIGN.md` documents the link syntax and resolution rules, the three layout modes, the palette, quick capture, and the session log, with six new Decision Log entries.
+One new runtime dependency this phase: `d3-force`. The client bundle is now roughly 620 kB in one chunk (Vite warns); splitting it is a Phase 4 task.
 
 ## Next Up
-1. **Remaining Phase 2 polish:** ↑/↓ + Enter in the entry list; make the list search box optionally search all sections (or drop that box in favour of the palette and tick the item as superseded).
-2. **Phase 3 — Depth**, starting with the ones the data model already anticipates: the septim ledger, then goals. See DESIGN §4 "Planned additions".
-3. Before Phase 3 code, click through the example character once at 1440px and once at ~700px; the narrow layout is new and worth a second pair of eyes.
-
-Known rough edges to keep in mind (all listed under Known issues in the Session 2 log): the in-app capture hotkey only works while the journal window has focus (the OS-level hotkey is a Phase 4 Electron item), same-section namesakes cannot be told apart by `[[Title|Type]]`, and the client bundle is now ~580 kB in one chunk.
+1. **Phase 4 — Release.** Start with the visual polish pass and the bundle split (`d3-force` and the WebView are the obvious lazy chunk), then JSON/Markdown export, JSON import, restore-from-backup in the UI, and Electron packaging with the OS-level capture hotkey.
+2. The README hero: take the screenshot from the Web view of the example character at ~1440px in the dark theme. Sivrid sits pinned at the centre with 28 ties around her.
+3. The one Phase 3 leftover: reorder sections in the sidebar. `lib/useReorder.ts` already does the work; it needs a grip in the sidebar rows and `updateEntryTypes` order commit.
+4. Before Phase 4 code, click through the ledger, goals and web at ~700px; they were verified at 1440px and the layout rules are shared, but the web's overlays and the ledger's filter bar deserve a look at narrow widths.
 
 ## Open Questions
 - Final project name: "Wayfarer's Journal" is the working name (kept in one config constant).
-- The example character's ids are readable strings (`p-sigunn`, `tag-riften`). New entries use nanoid. Both are valid — worth deciding whether to normalise the example on the next touch.
-- Should the example character ship with a sample session and a capture or two, so the Sessions and Inbox views are not empty on first open? (The `examples/` file is still v1-shaped and is migrated on load.)
+- The example character's ids are readable strings (`p-sigunn`, `t-shield-bands`). New records use nanoid. Both are valid.
+- Should hide-secrets mode also blur the *balance* on the Overview and ledger header? Today it hides words, not arithmetic (a secret repayment still moves the total). Decided against for now; recorded in DESIGN.
+- Ledger counterparties are People only. Places or factions as counterparties would need a different web edge; left for a real request.
 
 ---
 
@@ -41,6 +41,35 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 3 — 2026-09-22
+**Goal:** Finish the two Phase 2 leftovers, seed the example with a capture and a session, then build Phase 3 items 1–7 in order, one commit each.
+
+**Done:**
+- **Phase 2 leftovers.** ↑/↓/Home/End/Enter in the entry and session lists with focus moving into the detail title (`lib/listKeys.ts`); the list search box counts matches elsewhere and opens the palette with the query (roadmap item marked superseded); example gains a capture and a session.
+- **Ledger + Goals (schema v3)** — `LedgerView`, `GoalsView`, `GoalCard`, `GoalDialog`, `Dealings`, `lib/ledger.ts`. Running balance over all transactions even when filtered, month subtotals, filters by person / tag / goal with totals in view, one-line quick entry with a Spent/Earned toggle and `@person` autocomplete, inline row editor, goals with remaining / percent / days left / per-week figure, quick payment line per goal, tiles on the Overview, Dealings on every person. Migration exercised on both local characters with v2 backups.
+- **Relationship web** — `lib/graph.ts` + `WebView` on d3-force. Ties from `[[links]]`, shared locations and ledger dealings; colour by section, size by ties, standing as edge opacity; hover, click, drag, pan, zoom, shake, tag filter, legend. Example bodies rewritten with `[[links]]` (19 entries) so the web is worth a screenshot.
+- **Field editor** — `FieldsDialog` from every section's menu: add, rename, reorder, kinds, choice options, data-aware removal with the affected count; People's standing locked.
+- **Hide-secrets mode** — `settings.hideSecrets`, `ui/Veil` with click-to-reveal, toggles in both sidebars and the palette, a banner while on; secrets left out of the web, backlinks, palette, entry picker and dealings.
+- **Portraits (schema v4)** — `lib/portrait.ts` (square crop, ≤256px JPEG), `PortraitPicker` (paste / drop / file), `Sigil` shows the image everywhere including web nodes. Identity 3→4 migration exercised with v3 backups.
+- **Reordering** — `lib/useReorder.ts`; grips on profile sections (real now) and fields (on hover); keyboard arrows on the grip.
+- **Docs.** DESIGN: v3 and v4 data model, ledger/goal semantics, web, field editor, hide-secrets, portraits, reordering, five new Decision Log entries. ROADMAP: all Phase 3 boxes bar one ticked.
+- **Verified in Chrome** at 1440px: every feature above end to end, including the quick entry saving to disk, goal math, the web with 28 ties and a hover neighbourhood, field removal confirmation, secrets hidden across five surfaces, a dropped image landing as a 256px JPEG, and keyboard + pointer reordering persisted. Test data was reverted through the storage layer afterwards.
+
+**Decisions:**
+- Transactions carry `secret` from v3 (hide-secrets needed it one item later). Debt-goal progress is the negative sum of its transactions. Counterparties are People only. d3-force alone with hand-drawn SVG, character pinned at the centre. Portraits inline as data URLs; v4 bump despite an empty migration. All in the DESIGN Decision Log.
+- Bash could not fork on this machine this session; all shell work ran through PowerShell. A `Remove-Item` on a `%TEMP%` path was blocked by a path-safety rule once; the commit-message temp file is now simply overwritten each time.
+
+**Build / typecheck:** pass. `npm run typecheck` clean on both projects; `npm run build` succeeds (one ~620 kB chunk, Vite warns; Phase 4).
+
+**Known issues:**
+- The bundle grew with d3-force and seven new views; code-splitting is overdue.
+- Hide-secrets mode does not hide balances, session bodies or capture text (none of those carry a secret flag).
+- The web's tag chips and header take vertical room at narrow widths; not yet checked below 960px.
+- Same-section namesakes still cannot be told apart by the link syntax (carried over from Session 2).
+- `data/_import/` still holds the original import script and source files from Session 2; gitignored, untouched.
+
+**Next:** Phase 4, starting with the polish pass and bundle split; the README hero screenshot from the Web view.
 
 ### Session 2 — 2026-09-22
 **Goal:** Recover from a crashed session (API outage mid-work), then build Phase 2 items 1–6 in priority order, committing after each.

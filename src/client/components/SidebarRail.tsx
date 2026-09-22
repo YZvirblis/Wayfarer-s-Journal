@@ -1,9 +1,10 @@
 import * as Popover from '@radix-ui/react-popover';
-import { Plus, Tags, UserRound, type LucideIcon } from 'lucide-react';
+import { Plus, Search, Tags, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import type { CharacterDocument, CharacterSummary } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
+import { MOD_LABEL } from '../lib/keys';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
@@ -24,6 +25,7 @@ interface SidebarRailProps {
   onToggleTag: (tagId: string) => void;
   onClearTags: () => void;
   onOpenTagManager: () => void;
+  onOpenPalette: () => void;
   onNewSection: () => void;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
@@ -74,6 +76,7 @@ export function SidebarRail({
   onToggleTag,
   onClearTags,
   onOpenTagManager,
+  onOpenPalette,
   onNewSection,
   onSwitchCharacter,
   onManageCharacters,
@@ -113,6 +116,10 @@ export function SidebarRail({
       </Menu>
 
       <span className="my-2.5 h-px w-6 bg-line/15" />
+
+      <RailButton label={`Jump to anything · ${MOD_LABEL} K`} icon={Search} onClick={onOpenPalette} />
+
+      <span className="my-1.5 h-px w-4 bg-line/10" />
 
       <nav className="wj-scroll flex min-h-0 flex-1 flex-col items-center gap-0.5 overflow-y-auto">
         <RailButton

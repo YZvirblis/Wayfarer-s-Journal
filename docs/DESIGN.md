@@ -199,10 +199,13 @@ Players run the journal beside the game, so it has to work from roughly 600px up
 
 Custom-section rename/delete, which the rail cannot host, moves into the list header's options menu below `wide`. Detail-pane field columns follow the pane's width (an auto-fit grid), not the viewport's.
 
+### Command palette (Phase 2)
+`Ctrl+K` (`⌘K` on a Mac) opens `components/CommandPalette.tsx` anywhere inside a journal. It is the one place that reaches everything: entries (title plus field values), sections, profile sections (scrolls the Overview to the section), tags (applies the filter), "Create “…” as <type>" for every section, other characters, and the theme. Matching is `lib/fuzzy.ts`: substring first, then an in-order character match that rejects letters scattered further apart than three times the query length. With nothing typed it shows a browsable menu without the entry list. The shortcut is printed on the sidebar's "Jump to…" button and in the rail's search tooltip so nobody has to guess it.
+
 ### UX rules
 - Empty states teach the user what to do next. No dead ends.
 - Every destructive action is confirmed. Deleting a character keeps its backups.
-- Keyboard-friendly throughout. Phase 2 adds Ctrl+K and a quick-capture hotkey.
+- Keyboard-friendly throughout. Ctrl+K opens the command palette; Phase 2 adds a quick-capture hotkey.
 - Autosave everywhere. There are no Save buttons.
 
 ## 6. Visual Design

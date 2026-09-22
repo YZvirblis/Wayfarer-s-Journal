@@ -72,7 +72,7 @@ function SectionBlock({ section, onDelete }: { section: ProfileSection; onDelete
   );
 
   return (
-    <section className="group/section">
+    <section id={`profile-section-${section.id}`} className="group/section scroll-mt-6">
       <header className="mb-3 flex items-center gap-2">
         <GripVertical className="h-3.5 w-3.5 shrink-0 text-faint/40" aria-hidden />
         <input

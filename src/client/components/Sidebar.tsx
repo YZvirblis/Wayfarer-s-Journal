@@ -1,9 +1,20 @@
-import { ChevronsUpDown, MoreHorizontal, Pencil, Plus, Tags, Trash2, UserRound, type LucideIcon } from 'lucide-react';
+import {
+  ChevronsUpDown,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Search,
+  Tags,
+  Trash2,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import { PROFILE_FIELD_IDS } from '../../shared/defaults';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
+import { MOD_LABEL } from '../lib/keys';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
@@ -24,6 +35,7 @@ interface SidebarProps {
   onNavigate: (view: View) => void;
   onToggleTag: (tagId: string) => void;
   onOpenTagManager: () => void;
+  onOpenPalette: () => void;
   onNewSection: () => void;
   onEditSection: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
@@ -95,6 +107,7 @@ export function Sidebar({
   onNavigate,
   onToggleTag,
   onOpenTagManager,
+  onOpenPalette,
   onNewSection,
   onEditSection,
   onDeleteSection,
@@ -148,6 +161,20 @@ export function Sidebar({
             onManageCharacters={onManageCharacters}
           />
         </Menu>
+      </div>
+
+      <div className="px-2.5 pt-2">
+        <button
+          type="button"
+          onClick={onOpenPalette}
+          className="flex w-full items-center gap-2.5 rounded border border-line/[0.12] bg-base/30 py-1.5 pl-2.5 pr-2 text-left text-sm text-faint transition-colors duration-150 hover:border-line/25 hover:text-muted"
+        >
+          <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+          <span className="min-w-0 flex-1 truncate">Jump to…</span>
+          <kbd className="shrink-0 rounded border border-line/15 px-1.5 py-px font-sans text-2xs tracking-wide text-faint">
+            {MOD_LABEL} K
+          </kbd>
+        </button>
       </div>
 
       <Divider className="mx-4 my-2.5" />

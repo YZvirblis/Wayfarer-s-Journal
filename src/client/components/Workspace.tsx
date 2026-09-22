@@ -11,9 +11,12 @@ import {
   useDocumentState,
 } from '../lib/documentStore';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
+import { hasModifier } from '../lib/keys';
 import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
 import { normalizeTitle, type LinkSource } from '../lib/links';
+import { toggleTheme } from '../lib/settingsStore';
 import type { View } from '../types';
+import { CommandPalette, type PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
 import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
@@ -50,6 +53,19 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  // Ctrl+K / ⌘K anywhere in the workspace. Neither browser uses it for anything a player would miss.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'k' && hasModifier(event) && !event.altKey && !event.shiftKey) {
+        event.preventDefault();
+        setPaletteOpen((current) => !current);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +120,29 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       // Captures and sessions gain their own views later in Phase 2.
     },
     [showEntry],
+  );
+
+  const openOverview = useCallback((sectionId?: string) => {
+    setView({ kind: 'overview' });
+    if (!sectionId) return;
+    // The Overview may not be mounted yet; give it a frame before scrolling.
+    window.setTimeout(() => {
+      document.getElementById(`profile-section-${sectionId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 60);
+  }, []);
+
+  const paletteActions = useMemo<PaletteActions>(
+    () => ({
+      openEntry: showEntry,
+      openType: (typeId) => setView({ kind: 'type', typeId }),
+      openOverview,
+      toggleTag,
+      createEntry: (type, title) => showEntry(type.id, createEntry(type, title)),
+      switchCharacter: onSwitchCharacter,
+      manageCharacters: onManageCharacters,
+      toggleTheme,
+    }),
+    [showEntry, openOverview, toggleTag, onSwitchCharacter, onManageCharacters],
   );
 
   const linkContext = useMemo<LinkContextValue>(
@@ -172,6 +211,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onNavigate={setView}
           onToggleTag={toggleTag}
           onOpenTagManager={() => setTagManagerOpen(true)}
+          onOpenPalette={() => setPaletteOpen(true)}
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onEditSection={(type) => setSectionDialog({ open: true, type })}
           onDeleteSection={(type) => setPendingSectionDelete(type)}
@@ -188,6 +228,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onToggleTag={toggleTag}
           onClearTags={() => setActiveTagIds([])}
           onOpenTagManager={() => setTagManagerOpen(true)}
+          onOpenPalette={() => setPaletteOpen(true)}
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
@@ -218,6 +259,14 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       </main>
 
       <TagManager open={tagManagerOpen} onOpenChange={setTagManagerOpen} doc={doc} />
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        doc={doc}
+        characters={characters}
+        actions={paletteActions}
+      />
 
       <NewEntryDialog
         open={linkDraft !== null}

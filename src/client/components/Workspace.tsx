@@ -437,6 +437,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             open
             onOpenChange={(open) => setGoalDialog((current) => ({ ...current, open }))}
             goal={goalDialog.goal}
+            currency={doc.profile.currency}
             onSubmit={(values) => {
               const existing = goalDialog.goal;
               if (existing) {

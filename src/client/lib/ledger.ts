@@ -39,22 +39,23 @@ export function totals(transactions: Transaction[]): Totals {
   return { income, expense, net: income - expense };
 }
 
-export const formatSeptims = (amount: number): string => Math.round(Math.abs(amount)).toLocaleString();
+/** An unsigned amount with digit grouping; the currency name is the character's own (`profile.currency`). */
+export const formatAmount = (amount: number): string => Math.round(Math.abs(amount)).toLocaleString();
 
 /** "+120" / "−40": the sign the player thinks in, with a real minus sign. */
 export function formatSigned(amount: number): string {
-  return `${amount < 0 ? '−' : '+'}${formatSeptims(amount)}`;
+  return `${amount < 0 ? '−' : '+'}${formatAmount(amount)}`;
 }
 
 export interface GoalProgress {
-  /** Septims saved (for a save goal) or repaid (for a debt) so far. */
+  /** Coin saved (for a save goal) or repaid (for a debt) so far. */
   done: number;
   remaining: number;
   ratio: number;
   complete: boolean;
   /** Whole days until the deadline; negative when overdue; null without a deadline. */
   daysLeft: number | null;
-  /** Septims per week still needed to make the deadline; null when there is none or it has passed. */
+  /** Coin per week still needed to make the deadline; null when there is none or it has passed. */
   perWeek: number | null;
   /** The transactions carrying this goal, newest first. */
   transactions: Transaction[];

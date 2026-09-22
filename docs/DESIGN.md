@@ -1,7 +1,7 @@
 # Wayfarer's Journal — Design Document
 
 ## 1. Vision
-A beautiful, local-first journal for Keizaal Online roleplayers. It replaces the cluttered text files players keep open while playing: character sheets, lists of people met, tasks, deals, and notes.
+A beautiful, local-first journal for roleplay characters — born on Keizaal Online, useful on any server or table. It replaces the cluttered text files players keep open while playing: character sheets, lists of people met, tasks, deals, and notes.
 
 It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene, pleasant to browse, and good at answering "who was that Khajit in Whiterun and what did I promise him?"
 
@@ -91,7 +91,7 @@ interface CharacterDocument {
   tags: Tag[];
   entryTypes: EntryType[];
   entries: Entry[];
-  // schemaVersion 2 adds captures and sessions; 3 adds transactions and goals; 4 adds Entry.portrait; 5 adds Session.secret
+  // schemaVersion 2 adds captures and sessions; 3 adds transactions and goals; 4 adds Entry.portrait; 5 adds Session.secret; 6 adds Profile.currency
 }
 
 interface Profile {
@@ -172,6 +172,9 @@ interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; bo
 
 ### schemaVersion 5 (Phase 4a)
 `Session` gains `secret: boolean` (default `false`). The 4 → 5 migration writes `secret: false` onto every existing session. This settles the hide-secrets open question: **sessions can be secret** (blurred in the list and the detail pane, left out of backlinks and the palette while the mode is on); **captures stay unblurred**, because a capture is a raw jot that has not been sorted yet and would gain nothing from a second flag; and **balances stay visible**, because the mode hides words, not arithmetic — a player who needs the total hidden can crop the screenshot, while blurring numbers would make the ledger unusable during play. Verified on both local characters on 2026-09-22 with v4 backups taken first.
+
+### schemaVersion 6 (Phase 4b)
+`Profile` gains `currency: string` (default `"septims"`). The app is a journal for roleplay characters in general; the ledger and goals name whatever the character's world counts in, editable in place on the Overview (click the currency name under the balance). The 5 → 6 migration writes `septims` onto existing journals. Nothing else in code or copy is setting-specific: the built-in Places field is "Region", placeholders are generic, and only the bundled example character keeps its Skyrim flavour.
 
 ### Links (Phase 2, no schema change)
 `[[Entry Title]]` anywhere in a markdown body (entry bodies, profile sections, captures, sessions) links to an entry. Links are plain text in the file; nothing is stored beside them, and backlinks are computed at runtime.
@@ -308,6 +311,7 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | The currency name is a per-character profile setting (schema v6), not an app setting | A player with characters on different servers or systems wants each ledger in its own coin; and it keeps the code free of any one game's vocabulary |
 | 2026-09-22 | Portraits are stored inline as ≤256px JPEG data URLs, and adding the field bumped the schema to v4 even though the migration is empty | One JSON file per character stays the whole truth (backups, duplicates and exports carry the images for free); the bump keeps the "format changed → version changed" rule honest, so an older build cannot strip portraits by accident |
 | 2026-09-22 | The relationship web uses `d3-force` alone, rendering to SVG by hand, with the character pinned at the centre | A full graph library would add hundreds of kB for features the web does not need; SVG keeps nodes clickable and the picture crisp for screenshots. Pinning the character gives every graph the same readable shape |
 | 2026-09-22 | Transactions carry `secret` from the start (v3), although the ledger spec did not list it | Hide-secrets mode (Phase 3 item 5) has to blur transactions too; adding the flag now avoids a fourth schema bump one item later |

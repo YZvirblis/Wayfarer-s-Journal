@@ -29,7 +29,7 @@ export function GoalsView({ doc, onNewGoal, onEditGoal, onOpenLedger }: GoalsVie
             <p className="wj-eyebrow">Ambitions and obligations</p>
             <h2 className="mt-1 font-display text-[1.75rem] leading-tight tracking-title text-ink">Goals</h2>
             <p className="mt-1.5 text-sm text-muted">
-              What you are saving for and what you owe. Every septim logged against a goal moves its bar.
+              What you are saving for and what you owe. Every coin logged against a goal moves its bar.
             </p>
           </div>
           <Button variant="primary" onClick={onNewGoal}>
@@ -57,6 +57,7 @@ export function GoalsView({ doc, onNewGoal, onEditGoal, onOpenLedger }: GoalsVie
                 <GoalCard
                   goal={goal}
                   progress={goalProgress(goal, doc.transactions)}
+                  currency={doc.profile.currency}
                   onEdit={() => onEditGoal(goal)}
                   onDelete={() => setPendingDelete(goal)}
                   onOpenLedger={onOpenLedger}

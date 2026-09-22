@@ -36,6 +36,11 @@ const migrations: Record<number, (doc: RawDocument) => RawDocument> = {
    * bump exists so an older build refuses a file it would silently strip.
    */
   3: (doc) => ({ ...doc }),
+  /** 5 -> 6: the profile names its currency; every existing journal counted in septims. */
+  5: (doc) => {
+    const profile = typeof doc.profile === 'object' && doc.profile !== null ? (doc.profile as Record<string, unknown>) : {};
+    return { ...doc, profile: { currency: 'septims', ...profile } };
+  },
   /** 4 -> 5: sessions gain `secret`, defaulting to false. */
   4: (doc) => ({
     ...doc,

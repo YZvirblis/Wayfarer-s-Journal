@@ -1,10 +1,11 @@
 {
   "id": "example-sivrid",
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "createdAt": "2026-06-02T19:14:00.000Z",
   "updatedAt": "2026-09-19T21:40:00.000Z",
   "profile": {
     "name": "Sivrid Coal-Hand",
+    "currency": "septims",
     "fields": [
       { "id": "race", "label": "Race", "value": "Nord" },
       { "id": "age", "label": "Age", "value": "31" },

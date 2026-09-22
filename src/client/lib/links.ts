@@ -123,7 +123,7 @@ export function linkSources(doc: CharacterDocument): LinkSource[] {
     ...doc.transactions.map((transaction): LinkSource => ({
       kind: 'transaction',
       id: transaction.id,
-      label: `${transaction.amount < 0 ? '−' : '+'}${Math.abs(transaction.amount).toLocaleString()} septims`,
+      label: `${transaction.amount < 0 ? '−' : '+'}${Math.abs(transaction.amount).toLocaleString()} ${doc.profile.currency}`,
       body: transaction.description,
       secret: transaction.secret,
     })),

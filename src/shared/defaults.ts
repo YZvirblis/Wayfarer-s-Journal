@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import {
+  DEFAULT_CURRENCY,
   SCHEMA_VERSION,
   type CharacterDocument,
   type CharacterSummary,
@@ -50,7 +51,7 @@ export function builtInEntryTypes(): EntryType[] {
       icon: 'MapPin',
       color: 'sage',
       builtIn: true,
-      fields: [{ key: 'hold', label: 'Hold / Region', kind: 'text' }],
+      fields: [{ key: 'hold', label: 'Region', kind: 'text' }],
       features: {},
     },
     {
@@ -106,6 +107,7 @@ export const SECTION_ICON_CHOICES = [
 function defaultProfile(name: string): Profile {
   return {
     name,
+    currency: DEFAULT_CURRENCY,
     fields: [
       { id: PROFILE_FIELD_IDS.race, label: 'Race', value: '' },
       { id: PROFILE_FIELD_IDS.age, label: 'Age', value: '' },

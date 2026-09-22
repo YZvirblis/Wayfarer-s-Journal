@@ -16,10 +16,11 @@ interface GoalDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Present when editing. */
   goal?: Goal | null;
+  currency: string;
   onSubmit: (values: GoalInput) => void;
 }
 
-export function GoalDialog({ open, onOpenChange, goal, onSubmit }: GoalDialogProps) {
+export function GoalDialog({ open, onOpenChange, goal, currency, onSubmit }: GoalDialogProps) {
   const [title, setTitle] = useState('');
   const [kind, setKind] = useState<GoalKind>('save');
   const [target, setTarget] = useState('');
@@ -90,7 +91,7 @@ export function GoalDialog({ open, onOpenChange, goal, onSubmit }: GoalDialogPro
                 submit();
               }
             }}
-            placeholder={kind === 'save' ? 'A horse of my own' : 'What is owed to Ma’ziri'}
+            placeholder={kind === 'save' ? 'A horse of my own' : 'What I owe the moneylender'}
             className="wj-field h-9"
           />
         </div>
@@ -102,7 +103,7 @@ export function GoalDialog({ open, onOpenChange, goal, onSubmit }: GoalDialogPro
           </div>
           <div>
             <label htmlFor="goal-target" className="wj-label mb-1.5 block">
-              Target, in septims
+              Target, in {currency}
             </label>
             <input
               id="goal-target"

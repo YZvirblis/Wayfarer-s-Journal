@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type { CharacterDocument } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { bodyPreview, formatCalendarShort } from '../lib/format';
-import { chronological, formatSeptims, formatSigned, totals } from '../lib/ledger';
+import { chronological, formatAmount, formatSigned, totals } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
 import { useSettings } from '../lib/settingsStore';
 import { Button } from './ui/Button';
@@ -56,7 +56,7 @@ export function Dealings({ doc, entryId, className }: { doc: CharacterDocument; 
           </ul>
           <div className="mt-2 flex items-center justify-between text-2xs text-faint">
             <span className="tabular-nums">
-              +{formatSeptims(sums.income)} in · −{formatSeptims(sums.expense)} out
+              +{formatAmount(sums.income)} in · −{formatAmount(sums.expense)} out
             </span>
             <Button variant="ghost" size="sm" className="h-6 px-1.5 text-2xs text-faint hover:text-gold" onClick={() => openLedger(entryId)}>
               <Coins className="h-3 w-3" />

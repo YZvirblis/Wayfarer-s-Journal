@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Bump SCHEMA_VERSION and add a migration in src/server/migrations.ts whenever
  * this file changes shape.
  */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 /** Curated accent palette. Tags and entry types store a key, not a hex value, so
  *  colours follow the active theme. */
@@ -45,9 +45,13 @@ export const profileSectionSchema = z.object({
 });
 export type ProfileSection = z.infer<typeof profileSectionSchema>;
 
+export const DEFAULT_CURRENCY = 'septims';
+
 export const profileSchema = z.object({
   name: z.string(),
   portrait: z.string().optional(),
+  /** What the ledger counts in — "septims", "gold", "credits"… Added in schemaVersion 6. */
+  currency: z.string().default(DEFAULT_CURRENCY),
   fields: z.array(profileFieldSchema),
   sections: z.array(profileSectionSchema),
 });
@@ -125,7 +129,7 @@ export const sessionSchema = z.object({
 export type Session = z.infer<typeof sessionSchema>;
 
 /**
- * One movement of septims. Added in schemaVersion 3. Positive amounts are
+ * One movement of coin. Added in schemaVersion 3. Positive amounts are
  * income, negative are expenses. `counterpartyId` points at a People entry;
  * `goalId` ties the transaction to a goal, whose progress is derived from it.
  */

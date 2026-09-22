@@ -2,7 +2,7 @@
   "name": "wayfarers-journal",
   "version": "0.1.0",
   "private": true,
-  "description": "A local, open-source journal and character tracker for Keizaal Online roleplayers.",
+  "description": "A local, open-source journal and character tracker for roleplayers.",
   "license": "MIT",
   "type": "module",
   "engines": {

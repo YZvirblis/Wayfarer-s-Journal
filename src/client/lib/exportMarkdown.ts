@@ -1,6 +1,6 @@
 import type { CharacterDocument, Entry, EntryType } from '../../shared/schema';
 import { formatCalendarLong, formatMonth } from './format';
-import { chronological, formatSeptims, formatSigned, goalProgress, totals } from './ledger';
+import { chronological, formatAmount, formatSigned, goalProgress, totals } from './ledger';
 import { STATUS_META } from '../components/QuestStatus';
 
 /**
@@ -77,8 +77,8 @@ export function renderMarkdown(doc: CharacterDocument, { includeSecrets }: Markd
   if (transactions.length) {
     const sums = totals(transactions);
     out += '## Ledger\n\n';
-    out += `- **On hand:** ${sums.net < 0 ? '−' : ''}${formatSeptims(sums.net)} septims\n`;
-    out += `- **Earned:** ${formatSeptims(sums.income)} · **Spent:** ${formatSeptims(sums.expense)} · ${transactions.length} lines\n\n`;
+    out += `- **On hand:** ${sums.net < 0 ? '−' : ''}${formatAmount(sums.net)} ${doc.profile.currency}\n`;
+    out += `- **Earned:** ${formatAmount(sums.income)} · **Spent:** ${formatAmount(sums.expense)} · ${transactions.length} lines\n\n`;
     const byMonth = new Map<string, number>();
     for (const transaction of transactions) {
       const key = transaction.date.slice(0, 7);
@@ -104,7 +104,7 @@ export function renderMarkdown(doc: CharacterDocument, { includeSecrets }: Markd
     for (const goal of goals) {
       const progress = goalProgress(goal, doc.transactions);
       out += `### ${goal.title} — ${goal.kind === 'save' ? 'saving up' : 'paying off'}${goal.secret ? ' *(secret)*' : ''}\n\n`;
-      out += `- **Target:** ${formatSeptims(goal.target)} · **So far:** ${formatSeptims(progress.done)} · **To go:** ${formatSeptims(progress.remaining)} (${Math.round(progress.ratio * 100)}%)\n`;
+      out += `- **Target:** ${formatAmount(goal.target)} ${doc.profile.currency} · **So far:** ${formatAmount(progress.done)} · **To go:** ${formatAmount(progress.remaining)} (${Math.round(progress.ratio * 100)}%)\n`;
       if (goal.deadline) out += line('By', formatCalendarLong(goal.deadline));
       if (goal.notes.trim()) out += `\n${goal.notes.trim()}\n`;
       out += '\n';

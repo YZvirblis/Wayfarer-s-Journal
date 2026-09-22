@@ -145,7 +145,7 @@ export function TagManager({
           <EmptyState
             icon={Tags}
             title="No tags yet"
-            hint="Tags are how you slice your journal — a hold, a role, a promise you owe. Add one above, or create them as you write entries."
+            hint="Tags are how you slice your journal — a place, a role, a promise you owe. Add one above, or create them as you write entries."
             className="py-8"
           />
         ) : (

@@ -1,7 +1,7 @@
 import { EyeOff, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { newId } from '../../shared/defaults';
-import type { CharacterDocument, ProfileField, ProfileSection } from '../../shared/schema';
+import { DEFAULT_CURRENCY, type CharacterDocument, type ProfileField, type ProfileSection } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { mutate } from '../lib/documentStore';
 import { compactRelative } from '../lib/format';
@@ -183,6 +183,30 @@ function SectionBlock({
   );
 }
 
+/** The balance, with the currency's name editable in place: click "septims" and call it what your world calls it. */
+function CurrencyStat({ balance, currency }: { balance: number; currency: string }) {
+  const name = useAutoCommit(currency, (value) =>
+    updateProfile((profile) => void (profile.currency = value.trim() || DEFAULT_CURRENCY)),
+  );
+  return (
+    <div className="min-w-0">
+      <p className="font-display text-xl tabular-nums tracking-title text-gold/90">
+        {balance < 0 ? '−' : ''}
+        {Math.abs(balance).toLocaleString()}
+      </p>
+      <Tooltip label="The name of your currency — rename it here">
+        <input
+          value={name.value}
+          onChange={(event) => name.onChange(event.target.value)}
+          onBlur={name.flush}
+          aria-label="Currency name"
+          className="wj-quiet-field -ml-1.5 mt-0.5 w-full px-1.5 py-0 font-sans text-2xs font-medium uppercase tracking-[0.14em] text-faint"
+        />
+      </Tooltip>
+    </div>
+  );
+}
+
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
@@ -262,7 +286,7 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
         <div className="mt-8 grid grid-cols-2 gap-6 border-y border-line/[0.1] py-4 sm:grid-cols-4">
           <Stat label="Entries" value={String(stats.entries)} />
           <Stat label={stats.questType ? 'Quests afoot' : 'Tags'} value={String(stats.questType ? stats.open : stats.tags)} />
-          <Stat label="Septims" value={`${stats.balance < 0 ? '−' : ''}${Math.abs(stats.balance).toLocaleString()}`} />
+          <CurrencyStat balance={stats.balance} currency={doc.profile.currency} />
           <Stat label="Last written" value={compactRelative(doc.updatedAt)} />
         </div>
 

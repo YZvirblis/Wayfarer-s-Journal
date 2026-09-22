@@ -4,7 +4,7 @@ import type { Goal } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { addTransaction } from '../lib/documentStore';
 import { bodyPreview, formatCalendarShort, localDate } from '../lib/format';
-import { formatSeptims, formatSigned, parseQuickEntry, type GoalProgress } from '../lib/ledger';
+import { formatAmount, formatSigned, parseQuickEntry, type GoalProgress } from '../lib/ledger';
 import { Markdown } from './Markdown';
 import { Button, IconButton } from './ui/Button';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
@@ -51,7 +51,7 @@ export function GoalTile({ goal, progress, onOpen }: { goal: Goal; progress: Goa
       </div>
       <div className="mt-2 flex items-baseline justify-between text-2xs text-faint">
         <span className="tabular-nums">
-          <span className="text-ink/85">{formatSeptims(progress.done)}</span> of {formatSeptims(goal.target)}
+          <span className="text-ink/85">{formatAmount(progress.done)}</span> of {formatAmount(goal.target)}
         </span>
         <span>{due ?? `${Math.round(progress.ratio * 100)}%`}</span>
       </div>
@@ -62,13 +62,15 @@ export function GoalTile({ goal, progress, onOpen }: { goal: Goal; progress: Goa
 interface GoalCardProps {
   goal: Goal;
   progress: GoalProgress;
+  /** The character's currency name, e.g. "septims". */
+  currency: string;
   onEdit: () => void;
   onDelete: () => void;
   onOpenLedger: () => void;
 }
 
 /** The full card on the Goals page: numbers, a quick payment line, and the recent movements. */
-export function GoalCard({ goal, progress, onEdit, onDelete, onOpenLedger }: GoalCardProps) {
+export function GoalCard({ goal, progress, currency, onEdit, onDelete, onOpenLedger }: GoalCardProps) {
   const [line, setLine] = useState('');
   const parsed = parseQuickEntry(line);
   const canAdd = parsed.amount !== null && parsed.amount !== 0;
@@ -127,13 +129,13 @@ export function GoalCard({ goal, progress, onEdit, onDelete, onOpenLedger }: Goa
       <div className="mt-4 flex items-end justify-between gap-4">
         <div>
           <p className="font-display text-[1.9rem] leading-none tabular-nums tracking-title text-gold/90">
-            {formatSeptims(progress.remaining)}
+            {formatAmount(progress.remaining)}
           </p>
-          <p className="wj-label mt-1">{progress.complete ? 'Nothing left — done' : 'septims to go'}</p>
+          <p className="wj-label mt-1">{progress.complete ? 'Nothing left — done' : `${currency} to go`}</p>
         </div>
         <div className="text-right text-2xs text-faint">
           <p className="tabular-nums">
-            <span className="text-ink/85">{formatSeptims(progress.done)}</span> of {formatSeptims(goal.target)} ·{' '}
+            <span className="text-ink/85">{formatAmount(progress.done)}</span> of {formatAmount(goal.target)} ·{' '}
             {Math.round(progress.ratio * 100)}%
           </p>
           {due ? (
@@ -144,7 +146,7 @@ export function GoalCard({ goal, progress, onEdit, onDelete, onOpenLedger }: Goa
             </p>
           ) : null}
           {progress.perWeek !== null ? (
-            <p className="mt-0.5 tabular-nums text-ink/80">≈ {formatSeptims(progress.perWeek)} a week to make it</p>
+            <p className="mt-0.5 tabular-nums text-ink/80">≈ {formatAmount(progress.perWeek)} a week to make it</p>
           ) : null}
         </div>
       </div>
@@ -164,13 +166,13 @@ export function GoalCard({ goal, progress, onEdit, onDelete, onOpenLedger }: Goa
               add();
             }
           }}
-          placeholder={goal.kind === 'debt' ? '50 paid at the forge door' : '120 from the shield-bands'}
+          placeholder={goal.kind === 'debt' ? '50 paid back in person' : '120 set aside from the last job'}
           aria-label={`Log toward ${goal.title}`}
           className="wj-field h-8 min-w-0 flex-1 py-0 text-sm"
         />
         <Button variant="primary" size="sm" className="h-8" onClick={add} disabled={!canAdd}>
           <Plus className="h-3 w-3" />
-          {canAdd ? `Log ${formatSeptims(parsed.amount ?? 0)}` : 'Log'}
+          {canAdd ? `Log ${formatAmount(parsed.amount ?? 0)}` : 'Log'}
         </Button>
       </div>
 

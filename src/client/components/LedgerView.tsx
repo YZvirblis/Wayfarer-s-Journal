@@ -6,7 +6,7 @@ import { cn } from '../lib/cn';
 import { addTransaction, deleteTransaction, updateTransaction } from '../lib/documentStore';
 import { formatCalendarShort, formatMonth, localDate } from '../lib/format';
 import { fuzzyScore } from '../lib/fuzzy';
-import { formatSeptims, formatSigned, parseQuickEntry, totals, withRunningBalance, type LedgerRow } from '../lib/ledger';
+import { formatAmount, formatSigned, parseQuickEntry, totals, withRunningBalance, type LedgerRow } from '../lib/ledger';
 import { useLinks } from '../lib/linkContext';
 import { normalizeTitle } from '../lib/links';
 import { useSettings } from '../lib/settingsStore';
@@ -132,7 +132,7 @@ function QuickEntry({ people, defaultCounterpartyId }: { people: Entry[]; defaul
             onSelect={(event) => refresh(event.currentTarget)}
             onKeyDown={onKeyDown}
             onBlur={() => setMention(null)}
-            placeholder="40 for the back room at the Kettle — type @ to name who it was with"
+            placeholder="40 for a room at the inn — type @ to name who it was with"
             aria-label="Amount and description"
             className="wj-field h-9 py-0 text-sm"
           />
@@ -394,7 +394,7 @@ function Row({
             </IconButton>
           </Tooltip>
         </div>
-        <span className="hidden pt-0.5 text-right text-xs tabular-nums text-faint sm:block">{formatSeptims(row.balance)}{row.balance < 0 ? ' dr' : ''}</span>
+        <span className="hidden pt-0.5 text-right text-xs tabular-nums text-faint sm:block">{formatAmount(row.balance)}{row.balance < 0 ? ' dr' : ''}</span>
       </div>
       {editing ? <Editor doc={doc} transaction={transaction} people={people} onDone={() => onEdit(null)} /> : null}
       </Veil>
@@ -472,9 +472,9 @@ export function LedgerView({ doc, counterpartyId, onFilterCounterparty }: Ledger
           </div>
           <div className="text-right">
             <p className={cn('font-display text-[1.9rem] leading-none tabular-nums tracking-title', balance < 0 ? 'text-rose' : 'text-gold/90')}>
-              {balance < 0 ? '−' : ''}{formatSeptims(balance)}
+              {balance < 0 ? '−' : ''}{formatAmount(balance)}
             </p>
-            <p className="wj-label mt-1">septims on hand</p>
+            <p className="wj-label mt-1">{doc.profile.currency} on hand</p>
           </div>
         </header>
 
@@ -526,8 +526,8 @@ export function LedgerView({ doc, counterpartyId, onFilterCounterparty }: Ledger
             </button>
           ) : null}
           <p className="ml-auto text-2xs tabular-nums text-faint">
-            <span className="text-sage">+{formatSeptims(shown.income)}</span> earned ·{' '}
-            <span className="text-rose/90">−{formatSeptims(shown.expense)}</span> spent · net{' '}
+            <span className="text-sage">+{formatAmount(shown.income)}</span> earned ·{' '}
+            <span className="text-rose/90">−{formatAmount(shown.expense)}</span> spent · net{' '}
             <span className={cn(shown.net < 0 ? 'text-rose/90' : 'text-ink/85')}>{formatSigned(shown.net)}</span>
             {filtered ? ' in view' : ''}
           </p>

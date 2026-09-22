@@ -315,4 +315,24 @@
   .wj-prose p:first-child {
     @apply mt-0;
   }
+
+  /* A [[link]] rendered inline: a small chip in the target's section colour. */
+  .wj-link {
+    @apply inline-flex max-w-full items-center gap-1 rounded border px-1.5 align-baseline text-[0.9em] leading-[1.45] transition-[filter,color,border-color] duration-150;
+    vertical-align: baseline;
+    transform: translateY(-0.04em);
+  }
+  .wj-link:hover {
+    filter: brightness(1.15);
+  }
+  .wj-link > svg {
+    @apply h-[0.8em] w-[0.8em] shrink-0 opacity-80;
+  }
+  .wj-link-missing {
+    @apply border-dashed border-line/35 text-muted;
+    background: transparent;
+  }
+  .wj-link-missing:hover {
+    @apply border-gold/50 text-gold;
+  }
 }

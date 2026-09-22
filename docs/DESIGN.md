@@ -127,7 +127,7 @@ interface Entry {
   title: string;
   tagIds: string[];
   fields: Record<string, string | number>;
-  body: string;                    // markdown; Phase 2 adds [[Entry Title]] links
+  body: string;                    // markdown; may contain [[Entry Title]] links (see "Links" below)
   status?: "active" | "on_hold" | "done" | "failed";
   progress?: { current: number; target: number };
   pinned: boolean;
@@ -162,8 +162,17 @@ interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; bo
 - **Sessions carry no `entryIds`.** What a session references is whatever its body links to with `[[Entry Title]]`, the same rule entries follow. There is one kind of link in the app, and a session shows up under an entry's backlinks like any other source.
 - **Migration 1 → 2** (`src/server/migrations.ts`): adds `captures: []` and `sessions: []` when absent, leaves every other key untouched, and is safe to run twice. It runs in memory on every read; the upgraded document reaches disk on the next save, and `saveCharacter` copies the v1 file into `data/backups/<id>/` before overwriting it. Verified against the example character and a real imported character on 2026-09-22.
 
+### Links (Phase 2, no schema change)
+`[[Entry Title]]` anywhere in a markdown body (entry bodies, profile sections, captures, sessions) links to an entry. Links are plain text in the file; nothing is stored beside them, and backlinks are computed at runtime.
+
+- **Syntax:** `[[Title]]`, or `[[Title|Type]]` where *Type* is a section name (`People`, `Rumours`). A title cannot contain `[`, `]`, `|` or a line break, so such titles cannot be linked.
+- **Resolution** is by title, case-insensitively, ignoring surrounding and repeated whitespace. A `|Type` qualifier restricts the match to that section; a qualifier naming no real section is ignored rather than breaking the link. Among namesakes the **oldest entry wins**, so an existing link keeps its meaning when a newer entry borrows the same title. Two namesakes in the *same* section cannot be told apart by this syntax; the qualifier only separates sections.
+- **Autocomplete** opens on `[[` in the editor, filters by title, shows the section icon, and inserts `[[Title|Type]]` automatically when another entry shares the title. Typing `|` after a title narrows the list to that title's namesakes.
+- **Renaming** an entry rewrites every link that resolved to it, across every body, inside the same document mutation (`renameEntry` in `lib/documentStore.ts`). If the new title collides with another entry, the rewritten links gain a `|Type` qualifier.
+- **Rendering:** a resolved link is a chip in its section's colour that opens the entry. An unresolved link is a dashed, dimmed chip; clicking it offers to create the entry, defaulting to People (or to the section named in the qualifier).
+- **Implementation:** `lib/links.ts` (parse, resolve, rewrite), `lib/remarkWikiLinks.ts` (a remark plugin that turns `[[…]]` text into link nodes with a private `#wj-link:` href, which the Markdown component renders as `WikiLink`), `lib/linkContext.tsx` (what Workspace provides to the renderer and the editor), `lib/caret.ts` (mirror-div caret measurement for the autocomplete popup).
+
 ### Planned additions (future schema versions)
-- **Links (Phase 2):** `[[Entry Title]]` in any markdown body links to an entry. Backlinks are computed at runtime, not stored.
 - **Ledger (Phase 3):** `{ id, date, amount, description, entryIds, tagIds }` in septims.
 - **Goals (Phase 3):** `{ id, title, target, deadline?, kind: "save" | "debt" }`, with progress derived from the ledger.
 
@@ -210,6 +219,8 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Links stay as `[[Title]]` text in bodies; nothing is stored beside them, and namesakes are resolved oldest-first | Text survives any edit, export, or hand-editing of the file. A stored id would break the moment the user edits the link in write mode. Oldest-first keeps existing links stable when a new entry borrows a title |
+| 2026-09-22 | `[[…]]` is handled as a remark plugin on the syntax tree, not by string replacement before rendering | Code blocks and inline code are left alone for free, and no second markdown grammar has to be maintained |
 | 2026-09-22 | Sessions have no `entryIds`; a session references entries only through `[[links]]` in its body | One linking mechanism instead of two. Backlinks already have to be computed from bodies, so a session becomes a backlink source for free, and there is no second list to keep in sync when an entry is renamed or deleted |
 | 2026-09-22 | schemaVersion 2 adds `captures` and `sessions` in one purely additive migration | Both Phase 2 features need a new top-level collection; shipping them in one step means one backup, one migration, one thing to verify |
 | 2026-09-22 | Run the server with `tsx` in production instead of compiling to `dist/server`; `npm run build` builds the client only | Removes ESM-extension friction on Windows and keeps one source of truth. Startup cost is negligible for a local single-user app, and the Phase 4 Electron build will bundle anyway. `tsx` is therefore a runtime dependency, not a dev one. |

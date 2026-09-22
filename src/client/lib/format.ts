@@ -50,6 +50,7 @@ export function bodyPreview(body: string, limit = 130): string {
   const text = body
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\[\[([^[\]|\n]+?)(?:\|[^[\]|\n]+?)?\]\]/g, '$1')
     .replace(/[*_`>#]/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/\s+/g, ' ')

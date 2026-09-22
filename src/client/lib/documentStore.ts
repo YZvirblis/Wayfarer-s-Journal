@@ -3,6 +3,7 @@ import type { CharacterDocument, Entry, EntryType, PaletteColor, Tag } from '../
 import { SCHEMA_VERSION } from '../../shared/schema';
 import { newId } from '../../shared/defaults';
 import { api, errorMessage } from './api';
+import { rewriteLinksTo } from './links';
 
 export const SAVE_DEBOUNCE_MS = 800;
 
@@ -155,6 +156,17 @@ export function updateEntry(id: string, recipe: (entry: Entry) => void): void {
     const entry = draft.entries.find((candidate) => candidate.id === id);
     if (!entry) return;
     recipe(entry);
+    entry.updatedAt = stamp();
+  });
+}
+
+/** Retitling an entry also rewrites every `[[link]]` that pointed at it, in the same save. */
+export function renameEntry(id: string, title: string): void {
+  mutate((draft) => {
+    const entry = draft.entries.find((candidate) => candidate.id === id);
+    if (!entry || entry.title === title) return;
+    rewriteLinksTo(draft, entry.id, title); // resolves against the old title, so it runs first
+    entry.title = title;
     entry.updatedAt = stamp();
   });
 }

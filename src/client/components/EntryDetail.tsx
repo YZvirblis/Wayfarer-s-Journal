@@ -2,7 +2,7 @@ import { ChevronDown, Copy, Eye, EyeOff, MoreHorizontal, Pin, PinOff, Target, Tr
 import { useState } from 'react';
 import type { CharacterDocument, Entry, EntryStatus, EntryType, FieldDef } from '../../shared/schema';
 import { cn } from '../lib/cn';
-import { deleteEntry, duplicateEntry, updateEntry } from '../lib/documentStore';
+import { deleteEntry, duplicateEntry, renameEntry, updateEntry } from '../lib/documentStore';
 import { formatDate, relativeTime } from '../lib/format';
 import { colorClasses } from '../lib/palette';
 import { useAutoCommit } from '../lib/useAutoCommit';
@@ -132,7 +132,7 @@ interface EntryDetailProps {
 
 export function EntryDetail({ doc, type, entry, onDeleted, onSelect }: EntryDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const title = useAutoCommit(entry.title, (value) => updateEntry(entry.id, (draft) => void (draft.title = value)));
+  const title = useAutoCommit(entry.title, (value) => renameEntry(entry.id, value));
   const TypeIcon = iconByName(type.icon);
   const colors = colorClasses(type.color);
 

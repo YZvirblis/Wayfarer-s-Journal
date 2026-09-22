@@ -23,7 +23,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] .gitignore, MIT LICENSE, basic README
 
 ## Phase 2 — Connections & Capture
-- [ ] `[[Entry Title]]` links with autocomplete in the editor
+- [x] `[[Entry Title]]` links with autocomplete in the editor (incl. `[[Title|Type]]` disambiguation, rename-rewrite, create-from-unresolved-link)
 - [ ] Backlinks panel ("Mentioned in…") on every entry
 - [ ] Ctrl+K command palette: search everything, jump anywhere, create entries
 - [ ] Quick-capture popup (global in-app hotkey) → inbox of unsorted captures
@@ -50,6 +50,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [ ] Import: JSON; optional plain-text journal import
 - [ ] Restore from backup in the UI
 - [ ] Electron packaging → portable Windows .exe
+- [ ] True global (OS-level) quick-capture hotkey via Electron — the browser cannot see keys while the game window is focused, so the Phase 2 in-app shortcut only works when the journal has focus
 - [ ] GitHub Actions: build and attach .exe to Releases
 - [ ] README: hero screenshot, GIF demo, features, download, FAQ
 - [ ] CONTRIBUTING.md, issue templates

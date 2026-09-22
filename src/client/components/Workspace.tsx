@@ -1,10 +1,20 @@
 import { AlertTriangle } from 'lucide-react';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { CharacterSummary, EntryType, PaletteColor } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
-import { createEntryType, deleteEntryType, openDocument, updateEntryType, useDocumentState } from '../lib/documentStore';
+import {
+  createEntry,
+  createEntryType,
+  deleteEntryType,
+  openDocument,
+  updateEntryType,
+  useDocumentState,
+} from '../lib/documentStore';
+import { LinkContext, type LinkContextValue } from '../lib/linkContext';
+import { normalizeTitle } from '../lib/links';
 import type { View } from '../types';
 import { EntryTypeView } from './EntryTypeView';
+import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
 import { SectionDialog } from './SectionDialog';
 import { Sidebar } from './Sidebar';
@@ -35,6 +45,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     type: null,
   });
   const [pendingSectionDelete, setPendingSectionDelete] = useState<EntryType | null>(null);
+  /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
+  const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +78,30 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       }
     },
     [doc, view.kind],
+  );
+
+  const showEntry = useCallback((typeId: string, id: string) => {
+    setSelection((current) => ({ ...current, [typeId]: id }));
+    setView({ kind: 'type', typeId });
+  }, []);
+
+  const entries = doc?.entries;
+  const openEntry = useCallback(
+    (id: string) => {
+      const target = entries?.find((entry) => entry.id === id);
+      if (target) showEntry(target.typeId, id);
+    },
+    [entries, showEntry],
+  );
+
+  const linkContext = useMemo<LinkContextValue>(
+    () => ({
+      entries: doc?.entries ?? [],
+      entryTypes: doc?.entryTypes ?? [],
+      openEntry,
+      createFromLink: (title, typeName) => setLinkDraft({ title, ...(typeName ? { typeName } : {}) }),
+    }),
+    [doc?.entries, doc?.entryTypes, openEntry],
   );
 
   if (loadError) {
@@ -107,7 +143,12 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     }
   }
 
+  const linkDraftTypeId = linkDraft?.typeName
+    ? doc.entryTypes.find((type) => normalizeTitle(type.name) === normalizeTitle(linkDraft.typeName ?? ''))?.id
+    : undefined;
+
   return (
+    <LinkContext.Provider value={linkContext}>
     <div className="flex h-full">
       <Sidebar
         doc={doc}
@@ -147,6 +188,20 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
 
       <TagManager open={tagManagerOpen} onOpenChange={setTagManagerOpen} doc={doc} />
 
+      <NewEntryDialog
+        open={linkDraft !== null}
+        onOpenChange={(open) => !open && setLinkDraft(null)}
+        entryTypes={doc.entryTypes}
+        initialTitle={linkDraft?.title}
+        initialTypeId={linkDraftTypeId}
+        onSubmit={({ title, typeId }) => {
+          const type = doc.entryTypes.find((candidate) => candidate.id === typeId);
+          // The store publishes the new entry synchronously, but this closure's
+          // `entries` predates it, so navigate with the type we already know.
+          if (type) showEntry(type.id, createEntry(type, title));
+        }}
+      />
+
       <SectionDialog
         open={sectionDialog.open}
         onOpenChange={(open) => setSectionDialog((current) => ({ ...current, open }))}
@@ -172,5 +227,6 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         </p>
       </ConfirmDialog>
     </div>
+    </LinkContext.Provider>
   );
 }

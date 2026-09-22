@@ -12,7 +12,16 @@ type RawDocument = Record<string, unknown>;
  *  - always be safe to run twice (defensive defaults, not blind overwrites).
  */
 const migrations: Record<number, (doc: RawDocument) => RawDocument> = {
-  // 1 -> 2 will live here when the format next changes.
+  /**
+   * 1 -> 2: Phase 2 adds quick captures and the session log. Both are new
+   * top-level collections; nothing existing is touched, read or reshaped, so
+   * this is purely additive and safe to run twice.
+   */
+  1: (doc) => ({
+    ...doc,
+    captures: Array.isArray(doc.captures) ? doc.captures : [],
+    sessions: Array.isArray(doc.sessions) ? doc.sessions : [],
+  }),
 };
 
 export class MigrationError extends Error {}

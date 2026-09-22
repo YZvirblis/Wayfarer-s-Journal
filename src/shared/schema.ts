@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Bump SCHEMA_VERSION and add a migration in src/server/migrations.ts whenever
  * this file changes shape.
  */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Curated accent palette. Tags and entry types store a key, not a hex value, so
  *  colours follow the active theme. */
@@ -97,6 +97,29 @@ export const entrySchema = z.object({
 });
 export type Entry = z.infer<typeof entrySchema>;
 
+/** A line jotted mid-scene, waiting to be filed. Added in schemaVersion 2. */
+export const captureSchema = z.object({
+  id: z.string().min(1),
+  body: z.string(),
+  createdAt: isoDate,
+});
+export type Capture = z.infer<typeof captureSchema>;
+
+/**
+ * One sitting at the table. Added in schemaVersion 2. Sessions carry no
+ * `entryIds`: what a session references is whatever its body links to, the same
+ * rule entries follow, so there is only one kind of link in the app.
+ */
+export const sessionSchema = z.object({
+  id: z.string().min(1),
+  date: z.string(), // YYYY-MM-DD
+  title: z.string(),
+  body: z.string(),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+});
+export type Session = z.infer<typeof sessionSchema>;
+
 export const characterDocumentSchema = z.object({
   id: z.string().min(1),
   schemaVersion: z.number().int().positive(),
@@ -106,6 +129,8 @@ export const characterDocumentSchema = z.object({
   tags: z.array(tagSchema),
   entryTypes: z.array(entryTypeSchema),
   entries: z.array(entrySchema),
+  captures: z.array(captureSchema).default([]),
+  sessions: z.array(sessionSchema).default([]),
 });
 export type CharacterDocument = z.infer<typeof characterDocumentSchema>;
 

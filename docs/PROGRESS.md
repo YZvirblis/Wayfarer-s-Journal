@@ -3,7 +3,7 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 1 — Foundation ✅ **complete.** Phase 2 not started.
+**Phase:** 2 — Connections & Capture, in progress. Schema v2 (captures + sessions) is in place with a verified 1→2 migration; a real player's character was imported locally into `data/` via a script that lives in the gitignored `data/_import/` folder (never committed, no details recorded here).
 
 The app runs end to end. `start.bat` (or `npm run dev`) launches an Express API on `127.0.0.1:4777` that serves the built React client. A character's whole document lives in one JSON file under `data/characters/`, is validated by the shared zod schema on every read and write, is written atomically, and keeps the last 20 versions in `data/backups/<id>/`.
 

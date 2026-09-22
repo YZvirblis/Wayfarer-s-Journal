@@ -130,6 +130,8 @@ export function createCharacterDocument(name: string, now = new Date().toISOStri
     tags: [],
     entryTypes: builtInEntryTypes(),
     entries: [],
+    captures: [],
+    sessions: [],
   };
 }
 

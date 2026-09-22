@@ -60,10 +60,10 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] About dialog (sidebar footer, rail, palette, character select): name, version from package.json, links to GitHub, Buy me a coffee and the licence
 - [x] Electron packaging → portable Windows .exe: server in-process on a free port, `data/` beside the exe with a user-data fallback, window state, external links, tray with close-to-tray setting, original icon from `assets/icon.svg`
 - [x] OS-level global quick-capture hotkey via Electron `globalShortcut` (default Ctrl+Shift+J, configurable in Preferences with registration status), opening a small always-on-top capture window over the game
-- [ ] GitHub Actions: build and attach the .exe to Releases
-- [ ] README: hero screenshot, GIF demo, features, download, FAQ
-- [ ] CONTRIBUTING.md, issue templates
-- [ ] v1.0.0 release
+- [x] GitHub Actions: build and attach the .exe to Releases (`.github/workflows/release.yml`, on `v*` tags)
+- [x] README as the full manual: hero screenshot, features, download with the SmartScreen note, usage guide, shortcuts, data, privacy, FAQ (no GIF yet — still screenshots only)
+- [x] CONTRIBUTING.md, issue templates, PR template, CHANGELOG
+- [ ] v1.0.0 release — package.json is at 1.0.0; the user creates and pushes the tag
 - [ ] Optional plain-text journal import
 
 ## Phase 5 — Launch

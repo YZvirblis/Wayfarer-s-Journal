@@ -3,18 +3,21 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 4a — Harden and polish, **complete**. Phases 1–3 are complete. Next is Phase 4b — Release (Electron, CI, README, v1.0.0).
+**Phase:** 4b — Release, **built and ready to tag**. Phases 1–4a are complete. `package.json` is at **1.0.0**; the tag `v1.0.0` has not been created (the user tags and pushes).
 
-The app is on GitHub (`origin/main`, pushed at the start of Session 4 on the user's instruction). Everything since is committed locally and **not pushed**; the user pushes.
+The app is on GitHub (`origin/main`, pushed at the start of Session 4). Everything since is committed locally and **not pushed**; the user pushes.
 
-What Phase 4a added: a narrow-width pass so ledger, goals, web, field editor, sessions and inbox all work at 700px and 960px; a `secret` flag on sessions (schema v5) that settles the hide-secrets question; sidebar section reordering; a code-split bundle (193 kB entry chunk, 51 kB gzipped, vendors and every off-screen view in their own chunks, fonts trimmed to latin subsets); JSON and Markdown export plus JSON import with a preview; restore-from-backup with restore-as-new and a two-step replace; a polish pass on dialog focus and the Parchment web; and six dark-theme screenshots in `docs/screenshots/`.
+What Phase 4b added: the positioning change (a journal for roleplay characters in general; currency is a per-character profile setting, schema v6; Skyrim wording neutralised outside the example); an About dialog; a **portable Windows desktop app** (`electron/`, electron-builder, `npm run electron:build` → `release/Wayfarers-Journal-1.0.0-portable.exe`, 96 MB, verified to create `data/` beside itself and register the hotkey); an **OS-level quick-capture hotkey** (default Ctrl+Shift+J, configurable in the new Preferences dialog, frameless always-on-top capture window); a GitHub Actions workflow that builds the exe on `v*` tags and attaches it to a Release; the README rewritten as the full manual; CONTRIBUTING, issue and PR templates, CHANGELOG.
 
-**Schema is v5.** v3 added `transactions[]` and `goals[]`, v4 `Entry.portrait`, v5 `Session.secret`. Every step has a migration in `src/server/migrations.ts` and was exercised on both local characters with a backup taken first. The example character ships at v5.
+**Schema is v6.** v3 added `transactions[]` and `goals[]`, v4 `Entry.portrait`, v5 `Session.secret`, v6 `Profile.currency`. Every step has a migration in `src/server/migrations.ts` and was exercised on both local characters with a backup taken first. The example character ships at v6.
+
+**Web mode is unchanged:** `start.bat`, `start.sh`, `npm run dev`, `npm start` all work as before. The desktop app is a wrapper that runs the same server in-process (`src/server/app.ts` → `startServer()`).
 
 ## Next Up
-1. **Phase 4b — Release**, in the ROADMAP order: Electron portable `.exe` with `data/` beside the exe, then the OS-level capture hotkey (`globalShortcut` → a small always-on-top capture window that posts to the same API), then the GitHub Actions release workflow, README with the screenshots, CONTRIBUTING and issue templates, v1.0.0.
-2. Before Electron: decide how the packaged app finds `data/` (`src/server/paths.ts` reads `WJ_DATA_DIR`; the Electron main process should set it to `path.join(path.dirname(process.execPath), 'data')` for the portable build).
-3. The README hero is `docs/screenshots/web.png`. The other five are ready to drop into a features section.
+1. **Release v1.0.0:** the user pushes `main`, tags `v1.0.0` and pushes the tag; the workflow in `.github/workflows/release.yml` builds and attaches the exe. Watch the first run: `npm run icon` runs Electron on the runner (offscreen render), and electron-builder is passed `--publish never`. If the run fails, fix and re-tag (`v1.0.1`).
+2. After the first release: download the exe from the Release page on a clean PC and walk the README's *Download* section once (SmartScreen wording, `data/` beside the exe, hotkey over a game window, tray behaviour). Tray "Quick capture" and the real key press could not be exercised from tooling this session.
+3. Phase 5 — Launch: announcement post using the example character; a GIF demo for the README if wanted (the ROADMAP item lists it; only still screenshots exist).
+4. Optional: plain-text journal import (ROADMAP, Phase 4b tail); a macOS/Linux packaged build (electron-builder targets exist; untested).
 
 ## Open Questions
 - Final project name: "Wayfarer's Journal" is the working name (kept in one config constant).
@@ -40,6 +43,32 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 5 — 2026-09-22
+**Goal:** Phase 4b — Release: positioning change, About dialog, Electron portable exe, OS-level capture hotkey, release workflow, README manual, repo files; version 1.0.0, no tag.
+
+**Done:**
+- **Positioning (schema v6).** `Profile.currency` (default `septims`) editable on the Overview; `formatAmount` and every ledger/goal label use it; migration 5→6 exercised on both local characters. Neutral wording elsewhere (Places field "Region", placeholders, palette keywords); Keizaal appears only in the example and once in the README (plus the mandated disclaimer).
+- **About dialog.** `AboutDialog` from the sidebar footer, rail, palette and character select: name, version (`__APP_VERSION__` from package.json via Vite `define`), tagline, GitHub / Buy me a coffee / licence links, credit.
+- **Electron portable app.** `electron/main.ts` bundled by `vite.electron.config.ts` (CJS, `main` + `server` entries; express external, zod/nanoid bundled). Data dir beside the exe (`PORTABLE_EXECUTABLE_DIR`) with a one-time-notice fallback to `%APPDATA%\wayfarers-journal\data`; `WJ_DATA_DIR`/`WJ_PORT` set before the server loads; `startServer()` on a free loopback port; window state persisted; title follows the character; links to the system browser; tray Open / Quick capture / Quit with `settings.desktop.closeToTray` (default on); single-instance lock; original icon `assets/icon.svg` rendered by `scripts/make-icon.cjs` into `build/icon.{png,ico}`. `GET /api/app` reports version, desktop flag, data dir and hotkey status. electron-builder portable target (`asar: false`, `release/`) built and run from a scratch folder: `data/` created beside the exe, hotkey registered.
+- **OS-level capture.** `globalShortcut` with `settings.desktop.captureHotkey` (default `CommandOrControl+Shift+J`), re-registered on settings change via `serverEvents`; status and failure reason shown in the new **Preferences** dialog (`SettingsDialog`, from the sidebar gear, rail and palette). Frameless always-on-top `/capture` window (`CapturePage`) → Enter saves through the main window's store (IPC via `electron/preload.cjs`), falling back to `POST /api/captures` → `captureToLastCharacter`; Esc or blur closes. Inbox shows the global hotkey when running in the desktop app. Verified: hotkey change and invalid-hotkey error through the API, the capture page end-to-end in Chrome.
+- **Release workflow.** `.github/workflows/release.yml`: tags `v*`, windows-latest, Node 20, `npm ci`, typecheck, `electron:build -- --publish never`, `softprops/action-gh-release@v2` with generated notes and `release/*.exe`.
+- **README** rewritten as the manual (features with screenshots, download + SmartScreen, run from source, usage guide, shortcuts, data, privacy, FAQ, contributing, support badge, disclaimer). Every claim checked against the code.
+- **Repo files.** `CONTRIBUTING.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request}.md`, `.github/pull_request_template.md`, `CHANGELOG.md` with 1.0.0.
+- `package.json` → 1.0.0; client libraries moved to devDependencies so the exe ships only express/nanoid/zod; `build/` and `release/` gitignored.
+
+**Decisions:** Desktop runs the same Express server in-process rather than touching storage directly; global captures go through the main window's store when a journal is open (autosave would overwrite a server-side write); currency is a profile field, not an app setting. All in the DESIGN Decision Log.
+
+**Build / typecheck:** pass. `npm run typecheck` clean on client, server and Electron; `npm run build` (entry chunk 204 kB, 54 kB gzipped); `npm run build:electron` (main 10 kB, server 134 kB); `electron-builder --win portable` produced a working 96 MB exe.
+
+**Known issues:**
+- Tray "Quick capture" and the actual global key press were not exercised (tooling cannot press OS hotkeys); the registration and the capture window were verified separately.
+- The first CI run of the release workflow is unverified until the tag is pushed.
+- `npm run icon` once printed a transient Electron "UnknownVizError" inside a chained command; a rerun worked.
+- Entry chunk grew to 204 kB with the About/Preferences dialogs (still one chunk, no Vite warning).
+- Earlier cosmetic items stand: ledger date labels wrap at 700px; auto-fit can zoom out far on sparse webs.
+
+**Next:** The user tags `v1.0.0`; watch the workflow; then Phase 5.
 
 ### Session 4 — 2026-09-22
 **Goal:** Push to GitHub, then Phase 4a items 1–8 in order, one commit each.

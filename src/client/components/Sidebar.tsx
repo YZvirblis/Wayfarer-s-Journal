@@ -89,11 +89,11 @@ function NavRow({
         <span
           {...handle}
           className={cn(
-            'absolute left-0 top-1/2 z-10 flex h-6 w-3 -translate-y-1/2 cursor-grab touch-none items-center justify-center rounded text-faint/60 opacity-0 transition-opacity hover:text-gold focus-visible:opacity-100 group-hover/row:opacity-100 active:cursor-grabbing',
+            'absolute left-0 top-1/2 z-10 flex h-8 w-4 -translate-y-1/2 cursor-grab touch-none items-center justify-center rounded text-muted/80 opacity-0 transition-opacity hover:text-gold focus-visible:opacity-100 group-hover/row:opacity-100 active:cursor-grabbing',
             dragging && 'opacity-100 text-gold',
           )}
         >
-          <GripVertical className="h-3 w-3" aria-hidden />
+          <GripVertical className="h-4 w-4" aria-hidden />
         </span>
       ) : null}
       <button
@@ -219,7 +219,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={onOpenPalette}
-          className="flex w-full items-center gap-2.5 rounded border border-line/[0.12] bg-base/30 py-1.5 pl-2.5 pr-2 text-left text-sm text-faint transition-colors duration-150 hover:border-line/25 hover:text-muted"
+          className="flex w-full items-center gap-2.5 rounded border border-line/[0.12] bg-ground/30 py-1.5 pl-2.5 pr-2 text-left text-sm text-faint transition-colors duration-150 hover:border-line/25 hover:text-muted"
         >
           <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
           <span className="min-w-0 flex-1 truncate">Jump to…</span>
@@ -248,8 +248,8 @@ export function Sidebar({
           onClick={() => onNavigate({ kind: 'inbox' })}
           trailing={
             <Tooltip label={`Quick capture · ${CAPTURE_SHORTCUT}`}>
-              <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label="Quick capture" onClick={onCapture}>
-                <Feather className="h-3.5 w-3.5" />
+              <IconButton variant="ghost" size="xs" aria-label="Quick capture" onClick={onCapture}>
+                <Feather />
               </IconButton>
             </Tooltip>
           }
@@ -332,12 +332,11 @@ export function Sidebar({
           <Tooltip label="Manage tags">
             <IconButton
               variant="ghost"
-              size="sm"
-              className="h-5 w-5"
+              size="xs"
               onClick={onOpenTagManager}
               aria-label="Manage tags"
             >
-              <Tags className="h-3 w-3" />
+              <Tags />
             </IconButton>
           </Tooltip>
         </div>
@@ -360,19 +359,19 @@ export function Sidebar({
         )}
       </nav>
 
-      <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
+      <div className="flex items-center justify-between gap-2 border-t px-3 py-1.5">
         <SaveStatus />
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1">
           <SecretsToggle />
           <ThemeToggle />
           <Tooltip label="Preferences" side="top">
             <IconButton variant="ghost" size="sm" aria-label="Preferences" onClick={onSettings}>
-              <Settings className="h-3.5 w-3.5" />
+              <Settings />
             </IconButton>
           </Tooltip>
           <Tooltip label="About Wayfarer's Journal" side="top">
             <IconButton variant="ghost" size="sm" aria-label="About" onClick={onAbout}>
-              <Info className="h-3.5 w-3.5" />
+              <Info />
             </IconButton>
           </Tooltip>
         </div>

@@ -69,7 +69,7 @@ function TagRowEditor({ tag, usage, onDelete }: { tag: Tag; usage: number; onDel
         </span>
         <Tooltip label="Delete tag">
           <IconButton variant="ghost" size="sm" onClick={onDelete} aria-label={`Delete tag ${tag.name}`}>
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 />
           </IconButton>
         </Tooltip>
       </div>

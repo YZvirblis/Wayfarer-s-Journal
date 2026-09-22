@@ -49,8 +49,8 @@ function SessionList({
           <span className="text-2xs tabular-nums text-faint">{sessions.length}</span>
         </div>
         <Tooltip label="New session">
-          <IconButton variant="primary" size="sm" className="h-8 w-8" onClick={onCreate} aria-label="New session">
-            <Plus className="h-3.5 w-3.5" />
+          <IconButton variant="primary" size="sm" onClick={onCreate} aria-label="New session">
+            <Plus />
           </IconButton>
         </Tooltip>
       </header>
@@ -180,15 +180,17 @@ function SessionDetail({
                 className={cn(session.secret && 'text-plum')}
                 onClick={() => updateSession(session.id, (draft) => void (draft.secret = !draft.secret))}
               >
-                {session.secret ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {session.secret ? <EyeOff /> : <Eye />}
               </IconButton>
             </Tooltip>
             <Menu>
-              <MenuTrigger asChild>
-                <IconButton variant="ghost" size="sm" aria-label="Session options">
-                  <MoreHorizontal className="h-3.5 w-3.5" />
-                </IconButton>
-              </MenuTrigger>
+              <Tooltip label="More">
+                <MenuTrigger asChild>
+                  <IconButton variant="ghost" size="sm" aria-label="Session options">
+                    <MoreHorizontal />
+                  </IconButton>
+                </MenuTrigger>
+              </Tooltip>
               <MenuContent>
                 <MenuItem danger onSelect={() => setConfirmDelete(true)}>
                   <Trash2 className="h-3.5 w-3.5" />

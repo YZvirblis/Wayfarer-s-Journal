@@ -17,7 +17,7 @@ export function SecretsToggle({ side = 'top' }: { side?: 'top' | 'right' }) {
         aria-pressed={hideSecrets}
         className={cn(hideSecrets && 'bg-plum/15 text-plum hover:bg-plum/25 hover:text-plum')}
       >
-        {hideSecrets ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+        {hideSecrets ? <EyeOff /> : <Eye />}
       </IconButton>
     </Tooltip>
   );

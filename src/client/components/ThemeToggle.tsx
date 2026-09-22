@@ -24,7 +24,7 @@ export function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
   return (
     <Tooltip label={`Switch to ${next}`} side="top">
       <IconButton variant="ghost" size="sm" onClick={toggleTheme} aria-label={`Switch to ${next} theme`}>
-        <Icon className="h-3.5 w-3.5" />
+        <Icon />
       </IconButton>
     </Tooltip>
   );

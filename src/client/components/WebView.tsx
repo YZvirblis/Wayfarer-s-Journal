@@ -334,12 +334,12 @@ export function WebView({ doc, activeTagIds, onToggleTag, onClearTags }: WebView
         <div className="flex items-center gap-1">
           <Tooltip label="Shake the web loose">
             <IconButton variant="secondary" size="sm" aria-label="Shake" onClick={shake}>
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw />
             </IconButton>
           </Tooltip>
           <Tooltip label="Fit to view">
             <IconButton variant="secondary" size="sm" aria-label="Fit to view" onClick={fitToView}>
-              <Maximize2 className="h-3.5 w-3.5" />
+              <Maximize2 />
             </IconButton>
           </Tooltip>
         </div>

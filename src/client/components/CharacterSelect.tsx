@@ -12,6 +12,7 @@ import { Button, IconButton } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { Divider } from './ui/Divider';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
+import { Tooltip } from './ui/Tooltip';
 import { Modal } from './ui/Modal';
 
 interface CharacterSelectProps {
@@ -58,11 +59,13 @@ function CharacterCard({
 
       <div className="absolute right-3 top-3 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <Menu>
-          <MenuTrigger asChild>
-            <IconButton variant="ghost" size="sm" aria-label={`Options for ${character.name}`}>
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </IconButton>
-          </MenuTrigger>
+          <Tooltip label="More">
+            <MenuTrigger asChild>
+              <IconButton variant="ghost" size="sm" aria-label={`Options for ${character.name}`}>
+                <MoreHorizontal />
+              </IconButton>
+            </MenuTrigger>
+          </Tooltip>
           <MenuContent>
             <MenuItem onSelect={onDuplicate}>
               <Copy className="h-3.5 w-3.5 opacity-70" />

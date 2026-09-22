@@ -8,6 +8,7 @@ import { formatAmount, formatSigned, parseQuickEntry, type GoalProgress } from '
 import { Markdown } from './Markdown';
 import { Button, IconButton } from './ui/Button';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
+import { Tooltip } from './ui/Tooltip';
 
 const KIND_LABEL = { save: 'Saving up', debt: 'Paying off' } as const;
 
@@ -103,11 +104,13 @@ export function GoalCard({ goal, progress, currency, onEdit, onDelete, onOpenLed
           <h3 className="mt-1 truncate font-display text-xl tracking-title text-ink">{goal.title}</h3>
         </div>
         <Menu>
-          <MenuTrigger asChild>
-            <IconButton variant="ghost" size="sm" aria-label={`${goal.title} options`}>
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </IconButton>
-          </MenuTrigger>
+          <Tooltip label="More">
+            <MenuTrigger asChild>
+              <IconButton variant="ghost" size="sm" aria-label={`${goal.title} options`}>
+                <MoreHorizontal />
+              </IconButton>
+            </MenuTrigger>
+          </Tooltip>
           <MenuContent>
             <MenuItem onSelect={onEdit}>
               <Pencil className="h-3.5 w-3.5 opacity-70" />

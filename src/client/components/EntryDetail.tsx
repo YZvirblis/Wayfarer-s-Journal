@@ -121,7 +121,7 @@ function ProgressControl({ entry, type }: { entry: Entry; type: EntryType }) {
           aria-label="Stop counting"
           onClick={() => updateEntry(entry.id, (draft) => void delete draft.progress)}
         >
-          <X className="h-3.5 w-3.5" />
+          <X />
         </IconButton>
       </Tooltip>
     </div>
@@ -185,7 +185,7 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
                 className={cn(entry.secret && 'text-plum')}
                 onClick={() => updateEntry(entry.id, (draft) => void (draft.secret = !draft.secret))}
               >
-                {entry.secret ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {entry.secret ? <EyeOff /> : <Eye />}
               </IconButton>
             </Tooltip>
             <Tooltip label={entry.pinned ? 'Unpin' : 'Pin to top'}>
@@ -196,15 +196,17 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
                 className={cn(entry.pinned && 'text-gold')}
                 onClick={() => updateEntry(entry.id, (draft) => void (draft.pinned = !draft.pinned))}
               >
-                {entry.pinned ? <Pin className="h-3.5 w-3.5 fill-current" /> : <PinOff className="h-3.5 w-3.5" />}
+                {entry.pinned ? <Pin className="fill-current" /> : <PinOff />}
               </IconButton>
             </Tooltip>
             <Menu>
-              <MenuTrigger asChild>
-                <IconButton variant="ghost" size="sm" aria-label="Entry options">
-                  <MoreHorizontal className="h-3.5 w-3.5" />
-                </IconButton>
-              </MenuTrigger>
+              <Tooltip label="More">
+                <MenuTrigger asChild>
+                  <IconButton variant="ghost" size="sm" aria-label="Entry options">
+                    <MoreHorizontal />
+                  </IconButton>
+                </MenuTrigger>
+              </Tooltip>
               <MenuContent>
                 <MenuItem
                   onSelect={() => {

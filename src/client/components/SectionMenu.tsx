@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, ListChecks, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import type { EntryType } from '../../shared/schema';
-import { cn } from '../lib/cn';
 import { moveEntryType } from '../lib/documentStore';
 import { IconButton } from './ui/Button';
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from './ui/Menu';
+import { Tooltip } from './ui/Tooltip';
 
 interface SectionMenuProps {
   type: EntryType;
@@ -20,11 +20,13 @@ interface SectionMenuProps {
 export function SectionMenu({ type, index, total, onEditSection, onEditFields, onDeleteSection, className }: SectionMenuProps) {
   return (
     <Menu>
-      <MenuTrigger asChild>
-        <IconButton variant="ghost" size="sm" className={cn('h-6 w-6', className)} aria-label={`${type.name} options`}>
-          <MoreHorizontal className="h-3.5 w-3.5" />
-        </IconButton>
-      </MenuTrigger>
+      <Tooltip label={`${type.name} options`}>
+        <MenuTrigger asChild>
+          <IconButton variant="ghost" size="xs" className={className} aria-label={`${type.name} options`}>
+            <MoreHorizontal />
+          </IconButton>
+        </MenuTrigger>
+      </Tooltip>
       <MenuContent>
         {type.builtIn ? null : (
           <MenuItem onSelect={() => onEditSection(type)}>

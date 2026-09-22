@@ -31,12 +31,12 @@ function Grip({ handle, dragging, className }: { handle: HandleProps; dragging: 
       <span
         {...handle}
         className={cn(
-          'flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-faint/50 transition-colors hover:text-gold focus-visible:text-gold active:cursor-grabbing',
+          'flex h-8 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted/70 transition-colors hover:text-gold focus-visible:text-gold active:cursor-grabbing',
           dragging && 'text-gold',
           className,
         )}
       >
-        <GripVertical className="h-3.5 w-3.5" aria-hidden />
+        <GripVertical className="h-4 w-4" aria-hidden />
       </span>
     </Tooltip>
   );
@@ -96,12 +96,12 @@ function FieldRow({
       <Tooltip label="Remove field">
         <IconButton
           variant="ghost"
-          size="sm"
+          size="xs"
           aria-label={`Remove ${field.label}`}
-          className="h-6 w-6 opacity-0 transition-opacity focus-visible:opacity-100 group-hover/field:opacity-100"
+          className=" opacity-0 transition-opacity focus-visible:opacity-100 group-hover/field:opacity-100"
           onClick={onDelete}
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 />
         </IconButton>
       </Tooltip>
     </div>
@@ -147,9 +147,9 @@ function SectionBlock({
           <Tooltip label={section.secret ? 'Unmark secret' : 'Mark as secret'}>
             <IconButton
               variant="ghost"
-              size="sm"
+              size="xs"
               aria-label={section.secret ? 'Unmark secret' : 'Mark as secret'}
-              className={cn('h-6 w-6', section.secret && 'text-plum opacity-100')}
+              className={cn(section.secret && 'text-plum opacity-100')}
               onClick={() =>
                 updateProfile((profile) => {
                   const target = profile.sections.find((candidate) => candidate.id === section.id);
@@ -157,12 +157,12 @@ function SectionBlock({
                 })
               }
             >
-              <EyeOff className="h-3 w-3" />
+              <EyeOff />
             </IconButton>
           </Tooltip>
           <Tooltip label="Delete section">
-            <IconButton variant="ghost" size="sm" aria-label="Delete section" className="h-6 w-6" onClick={onDelete}>
-              <Trash2 className="h-3 w-3" />
+            <IconButton variant="ghost" size="xs" aria-label="Delete section" onClick={onDelete}>
+              <Trash2 />
             </IconButton>
           </Tooltip>
         </div>

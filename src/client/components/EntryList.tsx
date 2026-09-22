@@ -151,26 +151,29 @@ export function EntryList({
               }}
               placeholder={`Search ${type.name.toLowerCase()}…`}
               aria-label={`Search ${type.name}`}
-              className="wj-field h-8 py-0 pl-8 pr-7 text-sm"
+              className="wj-field h-9 py-0 pl-8 pr-9 text-sm"
             />
             {query ? (
-              <button
-                type="button"
+              <IconButton
+                variant="ghost"
+                size="xs"
                 onClick={() => setQuery('')}
                 aria-label="Clear search"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-faint hover:text-ink"
+                className="absolute right-0.5 top-1/2 -translate-y-1/2"
               >
-                <X className="h-3 w-3" />
-              </button>
+                <X />
+              </IconButton>
             ) : null}
           </div>
 
           <Menu>
-            <MenuTrigger asChild>
-              <IconButton variant="secondary" size="sm" className="h-8 w-8" aria-label="Sort entries">
-                <ArrowDownWideNarrow className="h-3.5 w-3.5" />
-              </IconButton>
-            </MenuTrigger>
+            <Tooltip label="Sort">
+              <MenuTrigger asChild>
+                <IconButton variant="secondary" size="sm" aria-label="Sort entries">
+                  <ArrowDownWideNarrow />
+                </IconButton>
+              </MenuTrigger>
+            </Tooltip>
             <MenuContent>
               <MenuLabel>Sort by</MenuLabel>
               <MenuRadioGroup value={sort} onValueChange={(value) => setSort(value as SortKey)}>
@@ -184,8 +187,8 @@ export function EntryList({
           </Menu>
 
           <Tooltip label={`New ${singularize(type.name).toLowerCase()}`}>
-            <IconButton variant="primary" size="sm" className="h-8 w-8" onClick={onCreate} aria-label="New entry">
-              <Plus className="h-3.5 w-3.5" />
+            <IconButton variant="primary" size="sm" onClick={onCreate} aria-label="New entry">
+              <Plus />
             </IconButton>
           </Tooltip>
         </div>

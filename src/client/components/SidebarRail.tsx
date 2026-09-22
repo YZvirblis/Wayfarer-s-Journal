@@ -76,12 +76,12 @@ function RailButton({
         aria-label={label}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'relative flex h-9 w-9 items-center justify-center rounded transition-colors duration-150',
-          active ? 'bg-gold/[0.09] text-ink' : 'text-muted hover:bg-ink/[0.045] hover:text-ink',
+          'relative flex h-10 w-10 shrink-0 items-center justify-center rounded transition-colors duration-150',
+          active ? 'bg-gold/[0.09] text-ink' : 'text-muted hover:bg-ink/[0.06] hover:text-ink active:bg-ink/[0.09]',
         )}
       >
-        {active ? <span className="absolute inset-y-1.5 -left-2 w-[2px] rounded-full bg-gold/80" /> : null}
-        <Icon className={cn('h-[1.05rem] w-[1.05rem]', active && color)} strokeWidth={1.75} />
+        {active ? <span className="absolute inset-y-2 -left-2 w-[2px] rounded-full bg-gold/80" /> : null}
+        <Icon className={cn('h-5 w-5', active && color)} strokeWidth={1.75} />
         {badge}
       </button>
     </Tooltip>
@@ -171,7 +171,7 @@ export function SidebarRail({
           onClick={() => onNavigate({ kind: 'inbox' })}
           badge={
             doc.captures.length > 0 ? (
-              <span className="absolute -right-0.5 -top-0.5 min-w-[1rem] rounded-full border border-panel bg-gold px-1 text-center text-[0.55rem] font-semibold leading-4 text-base">
+              <span className="absolute -right-0.5 -top-0.5 min-w-[1rem] rounded-full border border-panel bg-gold px-1 text-center text-[0.55rem] font-semibold leading-4 text-ground">
                 {doc.captures.length}
               </span>
             ) : undefined
@@ -225,11 +225,11 @@ export function SidebarRail({
             type="button"
             aria-label={activeTagIds.length ? `Tags (${activeTagIds.length} filtering)` : 'Tags'}
             className={cn(
-              'relative mt-1 flex h-9 w-9 items-center justify-center rounded transition-colors duration-150',
-              activeTagIds.length ? 'text-gold' : 'text-muted hover:bg-ink/[0.045] hover:text-ink',
+              'relative mt-1 flex h-10 w-10 items-center justify-center rounded transition-colors duration-150',
+              activeTagIds.length ? 'text-gold' : 'text-muted hover:bg-ink/[0.06] hover:text-ink active:bg-ink/[0.09]',
             )}
           >
-            <Tags className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.75} />
+            <Tags className="h-5 w-5" strokeWidth={1.75} />
             {activeTagIds.length ? (
               <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-gold" />
             ) : null}
@@ -279,12 +279,12 @@ export function SidebarRail({
       <ThemeToggle />
       <Tooltip label="Preferences" side="right">
         <IconButton variant="ghost" size="sm" aria-label="Preferences" onClick={onSettings}>
-          <Settings className="h-3.5 w-3.5" />
+          <Settings />
         </IconButton>
       </Tooltip>
       <Tooltip label="About Wayfarer's Journal" side="right">
         <IconButton variant="ghost" size="sm" aria-label="About" onClick={onAbout}>
-          <Info className="h-3.5 w-3.5" />
+          <Info />
         </IconButton>
       </Tooltip>
       <SaveStatus compact className="mt-1" />

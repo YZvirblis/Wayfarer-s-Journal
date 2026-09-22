@@ -15,16 +15,16 @@ export function SaveStatus({ className, compact = false }: { className?: string;
           onClick={() => void retrySave()}
           aria-label="Not saved — retry"
           className={cn(
-            'inline-flex items-center gap-1.5 rounded border border-rose/40 bg-rose/10 text-2xs font-medium text-rose transition-colors hover:bg-rose/20',
-            compact ? 'h-7 w-7 justify-center' : 'px-2 py-0.5',
+            'inline-flex items-center gap-1.5 rounded border border-rose/40 bg-rose/10 text-xs font-medium text-rose transition-colors hover:bg-rose/20',
+            compact ? 'h-9 w-9 justify-center' : 'h-8 px-2.5',
             className,
           )}
         >
-          <AlertTriangle className="h-3 w-3" />
+          <AlertTriangle className="h-4 w-4" />
           {compact ? null : (
             <>
               Not saved
-              <RefreshCw className="h-2.5 w-2.5 opacity-70" />
+              <RefreshCw className="h-3.5 w-3.5 opacity-70" />
             </>
           )}
         </button>
@@ -41,14 +41,14 @@ export function SaveStatus({ className, compact = false }: { className?: string;
         <span
           aria-label={label}
           role="status"
-          className={cn('flex h-7 w-7 items-center justify-center', className)}
+          className={cn('flex h-9 w-9 items-center justify-center', className)}
         >
           {saving ? (
-            <span className="h-1.5 w-1.5 animate-ember rounded-full bg-gold" />
+            <span className="h-2 w-2 animate-ember rounded-full bg-gold" />
           ) : saveState === 'saved' ? (
-            <Check className="h-3 w-3 text-sage" />
+            <Check className="h-4 w-4 text-sage" />
           ) : (
-            <span className="h-1.5 w-1.5 rounded-full bg-line/25" />
+            <span className="h-2 w-2 rounded-full bg-line/30" />
           )}
         </span>
       </Tooltip>
@@ -57,22 +57,22 @@ export function SaveStatus({ className, compact = false }: { className?: string;
 
   return (
     <span
-      className={cn('inline-flex select-none items-center gap-1.5 text-2xs tracking-[0.08em] text-faint', className)}
+      className={cn('inline-flex select-none items-center gap-1.5 text-xs tracking-[0.06em] text-muted', className)}
       aria-live="polite"
     >
       {saving ? (
         <>
-          <span className="h-1.5 w-1.5 animate-ember rounded-full bg-gold" />
+          <span className="h-2 w-2 animate-ember rounded-full bg-gold" />
           Saving…
         </>
       ) : saveState === 'saved' ? (
         <>
-          <Check className="h-3 w-3 text-sage" />
+          <Check className="h-4 w-4 text-sage" />
           Saved
         </>
       ) : (
         <>
-          <span className="h-1.5 w-1.5 rounded-full bg-line/25" />
+          <span className="h-2 w-2 rounded-full bg-line/30" />
           Up to date
         </>
       )}

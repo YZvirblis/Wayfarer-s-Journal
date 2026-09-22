@@ -295,6 +295,14 @@ Custom-section rename/delete, which the rail cannot host, moves into the list he
 
 `LinkTextarea` is the shared editor primitive: an auto-growing textarea with `[[` autocomplete at the caret, used by `MarkdownField` and by quick capture.
 
+### Floating panels (Session 6)
+Every dialog, the palette, quick capture and the entry picker sit inside a fixed, full-viewport flex frame (`DIALOG_FRAME` in `ui/Modal.tsx`: centred, or top-anchored at 12vh for the palette-style ones) with a 1rem gutter on every side, and the panel is `w-full` up to its cap (`DIALOG_PANEL`). Nothing is positioned with `left-1/2 -translate-x-1/2` any more: the entrance animations use `fill-mode: both`, so a keyframe's `transform` replaced the centring translate and pushed the palette off centre (and off screen on narrow windows). The frame ignores pointer events so the overlay behind it still takes the outside click; the panel is a flex column capped at the frame's height with a scrolling body, so a tall dialog never overflows the viewport.
+
+### Form controls and icon controls (Session 6)
+- **Controls are themed in one place.** `styles/index.css` sets text, caret, placeholder, `<option>` background, checkbox accent, the disabled state and the native date/number widgets for every `input`, `textarea` and `select` in the base layer; `.wj-field` and `.wj-quiet-field` add the box. Nothing per field.
+- **The colour token for the page background is `ground`, not `base`.** Tailwind's `text-base` is a font size; a colour named `base` made `text-base` also emit `color`, and the New Character input came out in the background colour. Any future token must not shadow a Tailwind utility name.
+- **`IconButton` owns both the hit target and the glyph size** (`ui/Button.tsx`): `sm` is 36 px with an 18 px glyph and is the default; `md` 40/20; `lg` 44/22; `xs` 32/16 only inside dense rows (a profile field, a ledger line, a sidebar row, the field editor). The glyph size is applied by the button (`[&>svg]:…`), so an icon cannot be shrunk at the call site. Ghost buttons rest in `muted`, go `ink` on hover, stay lit while their menu is open (`data-[state=open]`), and every icon-only control carries a tooltip with its label as well as an `aria-label`. The rail's buttons are 40 px with 20 px glyphs.
+
 ### UX rules
 - Empty states teach the user what to do next. No dead ends.
 - Every destructive action is confirmed. Deleting a character keeps its backups. Dismissing a capture uses a two-step inline button instead of a modal.
@@ -327,6 +335,8 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Floating panels are centred by a flex frame, never by a transform | The entrance keyframes carry a `transform` with `fill-mode: both`, which silently replaced `-translate-x-1/2`; a frame cannot be knocked off centre by any animation and also gives every panel the same gutters and height cap |
+| 2026-09-22 | The background colour token is `ground`; `IconButton` sets glyph sizes itself | `base` shadowed Tailwind's `text-base` font size and painted an input's text in the background colour; per-site `h-3.5 w-3.5` glyphs had drifted below what a pointer can hit, so the primitive now fixes 36 px / 18 px as the floor |
 | 2026-09-22 | The capture hotkey is a low-level keyboard hook (`uiohook-napi`), with `globalShortcut` only as a fallback | `RegisterHotKey` never fires while a game reads the keyboard through DirectInput (tested in-game: borderless and elevated made no difference); a `WH_KEYBOARD_LL` hook does, which is how AutoHotkey works inside Skyrim. The hook matches one combination and stores nothing, and the README says so |
 | 2026-09-22 | Foreground handling goes through koffi (`user32` calls), not a compiled addon or a helper process | koffi ships prebuilt N-API binaries, so neither the developer nor CI needs a compiler; a PowerShell helper would cost a process and a second of startup. Both native modules are external to the Vite bundle and `npmRebuild` is off, because prebuilt N-API needs no rebuild for Electron |
 | 2026-09-22 | The desktop wrapper runs the existing Express server in-process on a random loopback port rather than talking to storage directly | One code path for web and desktop; the renderer stays a plain web page, and the storage module's atomic writes, backups and migrations are exercised identically in both |

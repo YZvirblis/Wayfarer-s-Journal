@@ -199,7 +199,7 @@ function QuickEntry({ people, defaultCounterpartyId }: { people: Entry[]; defaul
 function Editor({ doc, transaction, people, onDone }: { doc: CharacterDocument; transaction: Transaction; people: Entry[]; onDone: () => void }) {
   const set = (recipe: (draft: Transaction) => void) => updateTransaction(transaction.id, recipe);
   return (
-    <div className="mt-2 space-y-3 rounded border border-line/15 bg-base/30 p-3">
+    <div className="mt-2 space-y-3 rounded border border-line/15 bg-ground/30 p-3">
       <div className="grid gap-3 sm:grid-cols-[auto_auto_1fr]">
         <label className="block">
           <span className="wj-label mb-1 block">Date</span>
@@ -385,12 +385,12 @@ function Row({
           <Tooltip label="Edit">
             <IconButton
               variant="ghost"
-              size="sm"
-              className={cn('h-6 w-6 opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100', editing && 'opacity-100 text-gold')}
+              size="xs"
+              className={cn(' opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100', editing && 'opacity-100 text-gold')}
               aria-label="Edit transaction"
               onClick={() => onEdit(editing ? null : transaction.id)}
             >
-              <Pencil className="h-3 w-3" />
+              <Pencil />
             </IconButton>
           </Tooltip>
         </div>

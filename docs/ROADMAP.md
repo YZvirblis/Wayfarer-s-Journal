@@ -64,6 +64,9 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] GitHub Actions: build and attach the .exe to Releases (`.github/workflows/release.yml`, on `v*` tags)
 - [x] README as the full manual: hero screenshot, features, download with the SmartScreen note, usage guide, shortcuts, data, privacy, FAQ (no GIF yet — still screenshots only)
 - [x] CONTRIBUTING.md, issue templates, PR template, CHANGELOG
+- [x] Session 6: floating panels centred by a flex frame (palette, quick capture, entry picker, every modal) — checked at 700, 960 and 1440 px, no overflow
+- [x] Session 6: form-control contrast fixed at the token level (`ground` colour token replaces the colliding `base`; text, caret, placeholder, option, checkbox, disabled and native date/number widgets themed once in `index.css`); both themes audited
+- [x] Session 6: icon controls sized by the `IconButton` primitive (36 px / 18 px floor, 32 px only in dense rows, rail 40 px / 20 px), consistent rest/hover/open states, tooltips on every icon-only control
 - [ ] v1.0.0 release — package.json is at 1.0.0; the user creates and pushes the tag
 - [ ] Optional plain-text journal import
 

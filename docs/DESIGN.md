@@ -202,10 +202,15 @@ Custom-section rename/delete, which the rail cannot host, moves into the list he
 ### Command palette (Phase 2)
 `Ctrl+K` (`⌘K` on a Mac) opens `components/CommandPalette.tsx` anywhere inside a journal. It is the one place that reaches everything: entries (title plus field values), sections, profile sections (scrolls the Overview to the section), tags (applies the filter), "Create “…” as <type>" for every section, other characters, and the theme. Matching is `lib/fuzzy.ts`: substring first, then an in-order character match that rejects letters scattered further apart than three times the query length. With nothing typed it shows a browsable menu without the entry list. The shortcut is printed on the sidebar's "Jump to…" button and in the rail's search tooltip so nobody has to guess it.
 
+### Quick capture and the Inbox (Phase 2)
+`Ctrl+/` (`⌘/`) opens `components/QuickCapture.tsx`: one box, Enter keeps it and closes, Ctrl+Enter keeps it and stays open for the next line, Shift+Enter adds a line, Escape abandons it. The shortcut was chosen because Chrome, Edge and Firefox bind nothing to it (Ctrl+J, Ctrl+Shift+K/J/C and Ctrl+Space all collide with something); it is matched on the physical `/` key as well, for layouts where `/` needs Shift. Captures are `Capture` records (`captures[]`, schema v2) shown newest-first in the Inbox view, with a count in the sidebar and on the rail badge. Each capture can be edited in place (the same markdown editor, so `[[links]]` autocomplete), turned into an entry (first line becomes the title, the rest the body, via `NewEntryDialog`), appended to an existing entry (`EntryPicker`, joined with a blank line), or dismissed (a two-step inline button rather than a modal, since a capture is a single line). Convert and append remove the capture in the same document mutation. The in-app hotkey only works while the journal window has focus; the OS-level hotkey is a Phase 4 Electron item.
+
+`LinkTextarea` is the shared editor primitive: an auto-growing textarea with `[[` autocomplete at the caret, used by `MarkdownField` and by quick capture.
+
 ### UX rules
 - Empty states teach the user what to do next. No dead ends.
-- Every destructive action is confirmed. Deleting a character keeps its backups.
-- Keyboard-friendly throughout. Ctrl+K opens the command palette; Phase 2 adds a quick-capture hotkey.
+- Every destructive action is confirmed. Deleting a character keeps its backups. Dismissing a capture uses a two-step inline button instead of a modal.
+- Keyboard-friendly throughout. Ctrl+K opens the command palette, Ctrl+/ opens quick capture; both shortcuts are printed in the UI.
 - Autosave everywhere. There are no Save buttons.
 
 ## 6. Visual Design
@@ -234,6 +239,7 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Quick capture is bound to `Ctrl+/` | The obvious candidates collide: Ctrl+J is Downloads in Chrome, Ctrl+Shift+J/C/K open devtools or the console, Ctrl+Space is claimed by IMEs. Nothing in Chrome, Edge or Firefox uses Ctrl+/ |
 | 2026-09-22 | Narrow layouts use an icon rail rather than a slide-in drawer | Navigation stays one click away while the game is running; a drawer would cost a click to open and one to close on every switch |
 | 2026-09-22 | Links stay as `[[Title]]` text in bodies; nothing is stored beside them, and namesakes are resolved oldest-first | Text survives any edit, export, or hand-editing of the file. A stored id would break the moment the user edits the link in write mode. Oldest-first keeps existing links stable when a new entry borrows a title |
 | 2026-09-22 | `[[…]]` is handled as a remark plugin on the syntax tree, not by string replacement before rendering | Code blocks and inline code are left alone for free, and no second markdown grammar has to be maintained |

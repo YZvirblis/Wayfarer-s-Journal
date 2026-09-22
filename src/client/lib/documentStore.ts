@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { CharacterDocument, Entry, EntryType, PaletteColor, Tag } from '../../shared/schema';
+import type { Capture, CharacterDocument, Entry, EntryType, PaletteColor, Tag } from '../../shared/schema';
 import { SCHEMA_VERSION } from '../../shared/schema';
 import { newId } from '../../shared/defaults';
 import { api, errorMessage } from './api';
@@ -33,6 +33,9 @@ const snapshot = (): DocumentState => state;
 export function useDocumentState(): DocumentState {
   return useSyncExternalStore(subscribe, snapshot, snapshot);
 }
+
+/** The live document, for callbacks that must not trust a closure taken before the last mutation. */
+export const getDocument = (): CharacterDocument | null => state.doc;
 
 /* -------------------------------------------------------------------------- */
 /* Autosave                                                                    */
@@ -192,6 +195,81 @@ export function duplicateEntry(id: string): string | null {
     draft.entries.splice(index + 1, 0, copy);
   });
   return copy.id;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Captures (the Inbox)                                                        */
+/* -------------------------------------------------------------------------- */
+
+export function addCapture(body: string): string | null {
+  const text = body.trim();
+  if (!text) return null;
+  const capture: Capture = { id: newId(), body: text, createdAt: stamp() };
+  mutate((draft) => {
+    draft.captures.unshift(capture);
+  });
+  return capture.id;
+}
+
+export function updateCapture(id: string, body: string): void {
+  mutate((draft) => {
+    const capture = draft.captures.find((candidate) => candidate.id === id);
+    if (capture) capture.body = body;
+  });
+}
+
+export function deleteCapture(id: string): void {
+  mutate((draft) => {
+    draft.captures = draft.captures.filter((capture) => capture.id !== id);
+  });
+}
+
+/** A capture's first line makes a natural title; whatever follows becomes the body. */
+export function splitCapture(body: string): { title: string; rest: string } {
+  const [first = '', ...lines] = body.trim().split('\n');
+  const title = first.replace(/^#+\s*/, '').replace(/^[-*]\s+/, '').trim();
+  return { title: title.length > 90 ? `${title.slice(0, 87).trimEnd()}…` : title, rest: lines.join('\n').trim() };
+}
+
+/** Turn a capture into a new entry and file it away, in one save. */
+export function convertCapture(id: string, type: EntryType, title: string): string | null {
+  const capture = state.doc?.captures.find((candidate) => candidate.id === id);
+  if (!capture) return null;
+  const { rest } = splitCapture(capture.body);
+  const entryId = newId();
+  mutate((draft) => {
+    const entry: Entry = {
+      id: entryId,
+      typeId: type.id,
+      title,
+      tagIds: [],
+      fields: {},
+      body: rest,
+      pinned: false,
+      secret: false,
+      createdAt: stamp(),
+      updatedAt: stamp(),
+      ...(type.features.status ? { status: 'active' as const } : {}),
+    };
+    draft.entries.unshift(entry);
+    draft.captures = draft.captures.filter((candidate) => candidate.id !== id);
+  });
+  return entryId;
+}
+
+/** Append a capture's text to an existing entry's body, then file the capture away. */
+export function appendCaptureToEntry(id: string, entryId: string): boolean {
+  const capture = state.doc?.captures.find((candidate) => candidate.id === id);
+  const entry = state.doc?.entries.find((candidate) => candidate.id === entryId);
+  if (!capture || !entry) return false;
+  mutate((draft) => {
+    const target = draft.entries.find((candidate) => candidate.id === entryId);
+    if (!target) return;
+    target.body = target.body.trim() ? `${target.body.replace(/\s+$/, '')}\n\n${capture.body}` : capture.body;
+    target.updatedAt = stamp();
+    draft.captures = draft.captures.filter((candidate) => candidate.id !== id);
+  });
+  return true;
 }
 
 /* -------------------------------------------------------------------------- */

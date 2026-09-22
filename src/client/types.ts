@@ -1,4 +1,4 @@
-/** Which pane the workspace is showing. Phase 2 will add command-palette targets. */
-export type View = { kind: 'overview' } | { kind: 'type'; typeId: string };
+/** Which pane the workspace is showing. */
+export type View = { kind: 'overview' } | { kind: 'type'; typeId: string } | { kind: 'inbox' };
 
 export type SortKey = 'updated' | 'title' | 'created';

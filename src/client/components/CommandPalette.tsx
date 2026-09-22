@@ -1,10 +1,22 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { CirclePlus, Moon, Search, Sun, Tag as TagIcon, UserRound, Users, type LucideIcon } from 'lucide-react';
+import {
+  CirclePlus,
+  Feather,
+  Inbox,
+  Moon,
+  Search,
+  Sun,
+  Tag as TagIcon,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { fuzzyScore } from '../lib/fuzzy';
 import { iconByName } from '../lib/icons';
+import { CAPTURE_SHORTCUT } from '../lib/keys';
 import { colorClasses } from '../lib/palette';
 import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
@@ -14,6 +26,8 @@ export interface PaletteActions {
   openEntry: (typeId: string, id: string) => void;
   openType: (typeId: string) => void;
   openOverview: (sectionId?: string) => void;
+  openInbox: () => void;
+  quickCapture: () => void;
   toggleTag: (tagId: string) => void;
   createEntry: (type: EntryType, title: string) => void;
   switchCharacter: (id: string) => void;
@@ -72,6 +86,16 @@ function buildCommands(
     iconClass: 'text-gold',
     run: () => actions.openOverview(),
   });
+  commands.push({
+    id: 'go:inbox',
+    group: 'Go to',
+    label: 'Inbox',
+    keywords: 'captures unsorted',
+    hint: doc.captures.length ? `${doc.captures.length} waiting` : undefined,
+    icon: Inbox,
+    iconClass: 'text-gold',
+    run: actions.openInbox,
+  });
   for (const type of doc.entryTypes) {
     commands.push({
       id: `go:${type.id}`,
@@ -109,6 +133,16 @@ function buildCommands(
   }
 
   const title = query.trim();
+  commands.push({
+    id: 'create:capture',
+    group: 'Create',
+    label: 'Quick capture',
+    keywords: 'jot note inbox',
+    hint: CAPTURE_SHORTCUT,
+    icon: Feather,
+    iconClass: 'text-gold',
+    run: actions.quickCapture,
+  });
   for (const type of doc.entryTypes) {
     const singular = singularize(type.name).toLowerCase();
     commands.push({
@@ -163,7 +197,9 @@ function rank(commands: Command[], query: string): Command[] {
     return commands.filter((command) => command.group !== 'Entries' && command.group !== 'Overview');
   }
   const scored = commands.flatMap((command) => {
-    if (command.group === 'Create') return [{ command, score: -1 }]; // always offered, always last
+    if (command.id.startsWith('create:') && command.id !== 'create:capture') {
+      return [{ command, score: -1 }]; // "Create as…" is always offered, always last
+    }
     const score = fuzzyScore(needle, command.keywords ? `${command.label} ${command.keywords}` : command.label);
     return score === null ? [] : [{ command, score }];
   });

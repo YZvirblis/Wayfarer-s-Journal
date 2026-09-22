@@ -6,20 +6,23 @@ import {
   createEntry,
   createEntryType,
   deleteEntryType,
+  getDocument,
   openDocument,
   updateEntryType,
   useDocumentState,
 } from '../lib/documentStore';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
-import { hasModifier } from '../lib/keys';
+import { isCaptureShortcut, isPaletteShortcut } from '../lib/keys';
 import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
 import { normalizeTitle, type LinkSource } from '../lib/links';
 import { toggleTheme } from '../lib/settingsStore';
 import type { View } from '../types';
 import { CommandPalette, type PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
+import { InboxView } from './InboxView';
 import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
+import { QuickCapture } from './QuickCapture';
 import { SectionDialog } from './SectionDialog';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
@@ -54,13 +57,19 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [captureOpen, setCaptureOpen] = useState(false);
 
-  // Ctrl+K / ⌘K anywhere in the workspace. Neither browser uses it for anything a player would miss.
+  // Global shortcuts (see lib/keys.ts). Each one closes the other's dialog so they never stack.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'k' && hasModifier(event) && !event.altKey && !event.shiftKey) {
+      if (isPaletteShortcut(event)) {
         event.preventDefault();
+        setCaptureOpen(false);
         setPaletteOpen((current) => !current);
+      } else if (isCaptureShortcut(event)) {
+        event.preventDefault();
+        setPaletteOpen(false);
+        setCaptureOpen((current) => !current);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -104,20 +113,21 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     setView({ kind: 'type', typeId });
   }, []);
 
-  const entries = doc?.entries;
+  // Reads the live store rather than `doc`, so an entry created a moment ago can be opened too.
   const openEntry = useCallback(
     (id: string) => {
-      const target = entries?.find((entry) => entry.id === id);
+      const target = getDocument()?.entries.find((entry) => entry.id === id);
       if (target) showEntry(target.typeId, id);
     },
-    [entries, showEntry],
+    [showEntry],
   );
 
   const openSource = useCallback(
     (source: LinkSource) => {
       if (source.kind === 'entry') showEntry(source.typeId, source.id);
       else if (source.kind === 'section') setView({ kind: 'overview' });
-      // Captures and sessions gain their own views later in Phase 2.
+      else if (source.kind === 'capture') setView({ kind: 'inbox' });
+      // Sessions gain their own view later in Phase 2.
     },
     [showEntry],
   );
@@ -136,6 +146,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       openEntry: showEntry,
       openType: (typeId) => setView({ kind: 'type', typeId }),
       openOverview,
+      openInbox: () => setView({ kind: 'inbox' }),
+      quickCapture: () => setCaptureOpen(true),
       toggleTag,
       createEntry: (type, title) => showEntry(type.id, createEntry(type, title)),
       switchCharacter: onSwitchCharacter,
@@ -155,6 +167,11 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
     }),
     [doc?.entries, doc?.entryTypes, openEntry, openSource],
   );
+
+  const openCapture = useCallback(() => {
+    setPaletteOpen(false);
+    setCaptureOpen(true);
+  }, []);
 
   if (loadError) {
     return (
@@ -212,6 +229,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onToggleTag={toggleTag}
           onOpenTagManager={() => setTagManagerOpen(true)}
           onOpenPalette={() => setPaletteOpen(true)}
+          onCapture={openCapture}
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onEditSection={(type) => setSectionDialog({ open: true, type })}
           onDeleteSection={(type) => setPendingSectionDelete(type)}
@@ -229,6 +247,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onClearTags={() => setActiveTagIds([])}
           onOpenTagManager={() => setTagManagerOpen(true)}
           onOpenPalette={() => setPaletteOpen(true)}
+          onCapture={openCapture}
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
@@ -238,6 +257,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       <main className="flex min-w-0 flex-1">
         {view.kind === 'overview' ? (
           <Overview doc={doc} />
+        ) : view.kind === 'inbox' ? (
+          <InboxView doc={doc} onCapture={openCapture} />
         ) : activeType ? (
           <EntryTypeView
             key={activeType.id}
@@ -268,6 +289,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         actions={paletteActions}
       />
 
+      <QuickCapture open={captureOpen} onOpenChange={setCaptureOpen} onOpenInbox={() => setView({ kind: 'inbox' })} />
+
       <NewEntryDialog
         open={linkDraft !== null}
         onOpenChange={(open) => !open && setLinkDraft(null)}
@@ -276,8 +299,6 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         initialTypeId={linkDraftTypeId}
         onSubmit={({ title, typeId }) => {
           const type = doc.entryTypes.find((candidate) => candidate.id === typeId);
-          // The store publishes the new entry synchronously, but this closure's
-          // `entries` predates it, so navigate with the type we already know.
           if (type) showEntry(type.id, createEntry(type, title));
         }}
       />

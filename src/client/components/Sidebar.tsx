@@ -1,5 +1,7 @@
 import {
   ChevronsUpDown,
+  Feather,
+  Inbox,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -14,7 +16,7 @@ import { PROFILE_FIELD_IDS } from '../../shared/defaults';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
-import { MOD_LABEL } from '../lib/keys';
+import { CAPTURE_SHORTCUT, PALETTE_SHORTCUT } from '../lib/keys';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
@@ -36,6 +38,7 @@ interface SidebarProps {
   onToggleTag: (tagId: string) => void;
   onOpenTagManager: () => void;
   onOpenPalette: () => void;
+  onCapture: () => void;
   onNewSection: () => void;
   onEditSection: (type: EntryType) => void;
   onDeleteSection: (type: EntryType) => void;
@@ -108,6 +111,7 @@ export function Sidebar({
   onToggleTag,
   onOpenTagManager,
   onOpenPalette,
+  onCapture,
   onNewSection,
   onEditSection,
   onDeleteSection,
@@ -172,7 +176,7 @@ export function Sidebar({
           <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
           <span className="min-w-0 flex-1 truncate">Jump to…</span>
           <kbd className="shrink-0 rounded border border-line/15 px-1.5 py-px font-sans text-2xs tracking-wide text-faint">
-            {MOD_LABEL} K
+            {PALETTE_SHORTCUT}
           </kbd>
         </button>
       </div>
@@ -186,6 +190,21 @@ export function Sidebar({
           color="text-gold"
           active={view.kind === 'overview'}
           onClick={() => onNavigate({ kind: 'overview' })}
+        />
+        <NavRow
+          label="Inbox"
+          icon={Inbox}
+          color="text-gold"
+          count={doc.captures.length}
+          active={view.kind === 'inbox'}
+          onClick={() => onNavigate({ kind: 'inbox' })}
+          trailing={
+            <Tooltip label={`Quick capture · ${CAPTURE_SHORTCUT}`}>
+              <IconButton variant="ghost" size="sm" className="h-6 w-6" aria-label="Quick capture" onClick={onCapture}>
+                <Feather className="h-3.5 w-3.5" />
+              </IconButton>
+            </Tooltip>
+          }
         />
 
         <p className="wj-label px-3 pb-1 pt-4">Journal</p>

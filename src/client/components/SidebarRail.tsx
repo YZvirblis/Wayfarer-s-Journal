@@ -1,10 +1,10 @@
 import * as Popover from '@radix-ui/react-popover';
-import { Plus, Search, Tags, UserRound, type LucideIcon } from 'lucide-react';
+import { Feather, Inbox, Plus, Search, Tags, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import type { CharacterDocument, CharacterSummary } from '../../shared/schema';
 import { cn } from '../lib/cn';
 import { iconByName } from '../lib/icons';
-import { MOD_LABEL } from '../lib/keys';
+import { CAPTURE_SHORTCUT, PALETTE_SHORTCUT } from '../lib/keys';
 import { colorClasses } from '../lib/palette';
 import type { View } from '../types';
 import { CharacterMenu } from './CharacterMenu';
@@ -26,6 +26,7 @@ interface SidebarRailProps {
   onClearTags: () => void;
   onOpenTagManager: () => void;
   onOpenPalette: () => void;
+  onCapture: () => void;
   onNewSection: () => void;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
@@ -77,6 +78,7 @@ export function SidebarRail({
   onClearTags,
   onOpenTagManager,
   onOpenPalette,
+  onCapture,
   onNewSection,
   onSwitchCharacter,
   onManageCharacters,
@@ -117,7 +119,8 @@ export function SidebarRail({
 
       <span className="my-2.5 h-px w-6 bg-line/15" />
 
-      <RailButton label={`Jump to anything · ${MOD_LABEL} K`} icon={Search} onClick={onOpenPalette} />
+      <RailButton label={`Jump to anything · ${PALETTE_SHORTCUT}`} icon={Search} onClick={onOpenPalette} />
+      <RailButton label={`Quick capture · ${CAPTURE_SHORTCUT}`} icon={Feather} onClick={onCapture} />
 
       <span className="my-1.5 h-px w-4 bg-line/10" />
 
@@ -128,6 +131,20 @@ export function SidebarRail({
           color="text-gold"
           active={view.kind === 'overview'}
           onClick={() => onNavigate({ kind: 'overview' })}
+        />
+        <RailButton
+          label={`Inbox · ${doc.captures.length}`}
+          icon={Inbox}
+          color="text-gold"
+          active={view.kind === 'inbox'}
+          onClick={() => onNavigate({ kind: 'inbox' })}
+          badge={
+            doc.captures.length > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 min-w-[1rem] rounded-full border border-panel bg-gold px-1 text-center text-[0.55rem] font-semibold leading-4 text-base">
+                {doc.captures.length}
+              </span>
+            ) : undefined
+          }
         />
         <span className="my-1.5 h-px w-4 bg-line/10" />
         {doc.entryTypes.map((type) => (

@@ -8,6 +8,7 @@ import { iconByName } from '../lib/icons';
 import { colorClasses } from '../lib/palette';
 import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
+import { DIALOG_FRAME, DIALOG_PANEL } from './ui/Modal';
 
 interface EntryPickerProps {
   open: boolean;
@@ -58,10 +59,11 @@ export function EntryPicker({ open, onOpenChange, doc, title, onPick }: EntryPic
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/55 backdrop-blur-[2px]" />
+        <div className={DIALOG_FRAME.top}>
         <Dialog.Content
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => event.preventDefault()}
-          className="fixed left-1/2 top-[12vh] z-50 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 animate-scale-in overflow-hidden rounded-card border bg-panel shadow-lifted"
+          className={cn(DIALOG_PANEL, 'max-w-[34rem] animate-scale-in overflow-hidden')}
         >
           <Dialog.Title className="wj-eyebrow px-4 pt-3">{title}</Dialog.Title>
           <div className="flex items-center gap-3 border-b px-4">
@@ -119,6 +121,7 @@ export function EntryPicker({ open, onOpenChange, doc, title, onPick }: EntryPic
             )}
           </div>
         </Dialog.Content>
+        </div>
       </Dialog.Portal>
     </Dialog.Root>
   );

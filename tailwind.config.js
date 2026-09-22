@@ -74,11 +74,11 @@ export default {
           from: { opacity: '0', transform: 'translateY(-4px) scale(0.98)' },
           to: { opacity: '1', transform: 'translateY(0) scale(1)' },
         },
-        // Carries the centring translate itself: an animation with fill-mode
-        // `both` wins over Tailwind's -translate-x-1/2 utilities.
+        // Dialogs are centred by a flex wrapper, never by a transform, so an
+        // animation with fill-mode `both` cannot knock them off centre.
         'modal-in': {
-          from: { opacity: '0', transform: 'translate(-50%, calc(-50% + 8px)) scale(0.985)' },
-          to: { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' },
+          from: { opacity: '0', transform: 'translateY(8px) scale(0.985)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
         },
         ember: {
           '0%, 100%': { opacity: '0.55' },

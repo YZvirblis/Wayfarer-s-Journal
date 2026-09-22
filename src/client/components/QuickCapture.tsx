@@ -1,10 +1,12 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Feather, Inbox } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '../lib/cn';
 import { addCapture } from '../lib/documentStore';
 import { CAPTURE_SHORTCUT } from '../lib/keys';
 import { LinkTextarea } from './LinkTextarea';
 import { Button } from './ui/Button';
+import { DIALOG_FRAME, DIALOG_PANEL } from './ui/Modal';
 
 interface QuickCaptureProps {
   open: boolean;
@@ -39,9 +41,10 @@ export function QuickCapture({ open, onOpenChange, onOpenInbox }: QuickCapturePr
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/40" />
+        <div className={DIALOG_FRAME.top}>
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed left-1/2 top-[14vh] z-50 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 animate-scale-in rounded-card border border-gold/25 bg-panel shadow-glow"
+          className={cn(DIALOG_PANEL, 'max-w-[34rem] animate-scale-in border-gold/25 shadow-glow')}
         >
           <div className="flex items-center gap-2 px-4 pt-3">
             <Feather className="h-3.5 w-3.5 text-gold/80" strokeWidth={1.75} />
@@ -83,6 +86,7 @@ export function QuickCapture({ open, onOpenChange, onOpenInbox }: QuickCapturePr
             </Button>
           </div>
         </Dialog.Content>
+        </div>
       </Dialog.Portal>
     </Dialog.Root>
   );

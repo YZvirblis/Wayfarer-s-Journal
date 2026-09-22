@@ -34,6 +34,7 @@ import { colorClasses } from '../lib/palette';
 import { useSettings } from '../lib/settingsStore';
 import { singularize } from '../lib/words';
 import { Sigil } from './Sigil';
+import { DIALOG_FRAME, DIALOG_PANEL } from './ui/Modal';
 
 export interface PaletteActions {
   openEntry: (typeId: string, id: string) => void;
@@ -417,10 +418,11 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions, i
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/55 backdrop-blur-[2px]" />
+        <div className={DIALOG_FRAME.top}>
         <Dialog.Content
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => event.preventDefault()}
-          className="fixed left-1/2 top-[12vh] z-50 w-[min(38rem,calc(100vw-2rem))] -translate-x-1/2 animate-scale-in overflow-hidden rounded-card border bg-panel shadow-lifted"
+          className={cn(DIALOG_PANEL, 'max-w-[38rem] animate-scale-in overflow-hidden')}
         >
           <Dialog.Title className="sr-only">Jump to anything</Dialog.Title>
           <div className="flex items-center gap-3 border-b px-4">
@@ -495,6 +497,7 @@ export function CommandPalette({ open, onOpenChange, doc, characters, actions, i
             <span className="ml-auto">{doc.entries.length} entries searchable</span>
           </div>
         </Dialog.Content>
+        </div>
       </Dialog.Portal>
     </Dialog.Root>
   );

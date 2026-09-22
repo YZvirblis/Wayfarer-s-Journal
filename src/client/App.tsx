@@ -1,8 +1,12 @@
 import { AlertTriangle } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { CharacterSummary } from '../shared/schema';
-import { CharacterSelect } from './components/CharacterSelect';
 import { Workspace } from './components/Workspace';
+
+// Only one of the two top-level screens is needed per launch.
+const CharacterSelect = lazy(() =>
+  import('./components/CharacterSelect').then((module) => ({ default: module.CharacterSelect })),
+);
 import { Button } from './components/ui/Button';
 import { TooltipProvider } from './components/ui/Tooltip';
 import { api, errorMessage } from './lib/api';
@@ -112,7 +116,9 @@ export function App() {
           onManageCharacters={() => void leave()}
         />
       ) : (
-        <CharacterSelect characters={characters} onOpen={open} onChanged={refresh} />
+        <Suspense fallback={null}>
+          <CharacterSelect characters={characters} onOpen={open} onChanged={refresh} />
+        </Suspense>
       )}
     </TooltipProvider>
   );

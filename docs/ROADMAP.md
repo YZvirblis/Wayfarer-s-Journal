@@ -48,7 +48,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Narrow-width pass at 700px and 960px across ledger, goals, web, field editor, sessions and inbox — usable beside a game window
 - [x] Sessions gain a `secret` flag (schema v5); captures stay unblurred, balances stay visible
 - [x] Reorder sections in the sidebar (drag the grip in the full sidebar; Move up / down in every section menu, which also serves the icon rail)
-- [ ] Code-split the web view (d3) and other heavy routes; drop unused font subsets; initial chunk well under 300 kB
+- [x] Code-split the web view (d3) and other heavy routes; drop unused font subsets; entry chunk 193 kB (51 kB gzipped), vendors in separate cacheable chunks, fonts 507 → 332 kB
 - [ ] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette
 - [ ] Import JSON as a new character: validate, migrate, preview what was found, never overwrite
 - [ ] Restore from backup in the UI: list with timestamps and counts, restore as new or replace current (two-step, current backed up first)

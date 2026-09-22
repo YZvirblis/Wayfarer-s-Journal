@@ -1,5 +1,5 @@
 import { AlertTriangle, EyeOff } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { CharacterSummary, EntryType, Goal, PaletteColor } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
 import {
@@ -20,24 +20,37 @@ import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
 import { normalizeTitle, type LinkSource } from '../lib/links';
 import { setHideSecrets, toggleHideSecrets, toggleTheme, useSettings } from '../lib/settingsStore';
 import type { View } from '../types';
-import { CommandPalette, type PaletteActions } from './CommandPalette';
+import type { PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
-import { FieldsDialog } from './FieldsDialog';
-import { GoalDialog } from './GoalDialog';
-import { GoalsView } from './GoalsView';
-import { InboxView } from './InboxView';
-import { LedgerView } from './LedgerView';
 import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
 import { QuickCapture } from './QuickCapture';
 import { SectionDialog } from './SectionDialog';
-import { SessionsView } from './SessionsView';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
-import { TagManager } from './TagManager';
-import { WebView } from './WebView';
 import { Button } from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+
+// Everything that is not on screen at first paint loads on demand. The web
+// brings d3-force with it; the rest are whole views or dialogs the player may
+// never open in a sitting.
+const WebView = lazy(() => import('./WebView').then((module) => ({ default: module.WebView })));
+const LedgerView = lazy(() => import('./LedgerView').then((module) => ({ default: module.LedgerView })));
+const GoalsView = lazy(() => import('./GoalsView').then((module) => ({ default: module.GoalsView })));
+const SessionsView = lazy(() => import('./SessionsView').then((module) => ({ default: module.SessionsView })));
+const InboxView = lazy(() => import('./InboxView').then((module) => ({ default: module.InboxView })));
+const CommandPalette = lazy(() => import('./CommandPalette').then((module) => ({ default: module.CommandPalette })));
+const TagManager = lazy(() => import('./TagManager').then((module) => ({ default: module.TagManager })));
+const FieldsDialog = lazy(() => import('./FieldsDialog').then((module) => ({ default: module.FieldsDialog })));
+const GoalDialog = lazy(() => import('./GoalDialog').then((module) => ({ default: module.GoalDialog })));
+
+function Loading() {
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <p className="animate-ember font-display text-xs uppercase tracking-wordmark text-gold/60">Turning the page…</p>
+    </div>
+  );
+}
 
 interface WorkspaceProps {
   characterId: string;
@@ -304,6 +317,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           </div>
         ) : null}
         <div className="flex min-h-0 min-w-0 flex-1">
+        <Suspense fallback={<Loading />}>
         {view.kind === 'overview' ? (
           <Overview doc={doc} />
         ) : view.kind === 'inbox' ? (
@@ -349,19 +363,52 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             <p className="text-sm text-faint">That section is gone. Pick another from the sidebar.</p>
           </Centered>
         )}
+        </Suspense>
         </div>
       </main>
 
-      <TagManager open={tagManagerOpen} onOpenChange={setTagManagerOpen} doc={doc} />
+      <Suspense fallback={null}>
+        {tagManagerOpen ? <TagManager open onOpenChange={setTagManagerOpen} doc={doc} /> : null}
 
-      <CommandPalette
-        open={palette.open}
-        onOpenChange={setPaletteOpen}
-        doc={doc}
-        characters={characters}
-        actions={paletteActions}
-        initialQuery={palette.query}
-      />
+        {palette.open ? (
+          <CommandPalette
+            open
+            onOpenChange={setPaletteOpen}
+            doc={doc}
+            characters={characters}
+            actions={paletteActions}
+            initialQuery={palette.query}
+          />
+        ) : null}
+
+        {fieldsTypeId !== null ? (
+          <FieldsDialog open onOpenChange={(open) => !open && setFieldsTypeId(null)} doc={doc} typeId={fieldsTypeId} />
+        ) : null}
+
+        {goalDialog.open ? (
+          <GoalDialog
+            open
+            onOpenChange={(open) => setGoalDialog((current) => ({ ...current, open }))}
+            goal={goalDialog.goal}
+            onSubmit={(values) => {
+              const existing = goalDialog.goal;
+              if (existing) {
+                updateGoal(existing.id, (goal) => {
+                  goal.title = values.title;
+                  goal.kind = values.kind;
+                  goal.target = values.target;
+                  goal.notes = values.notes;
+                  goal.secret = values.secret;
+                  if (values.deadline) goal.deadline = values.deadline;
+                  else delete goal.deadline;
+                });
+              } else {
+                addGoal(values);
+              }
+            }}
+          />
+        ) : null}
+      </Suspense>
 
       <QuickCapture open={captureOpen} onOpenChange={setCaptureOpen} onOpenInbox={() => setView({ kind: 'inbox' })} />
 
@@ -375,35 +422,6 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           const type = doc.entryTypes.find((candidate) => candidate.id === typeId);
           if (type) showEntry(type.id, createEntry(type, title));
         }}
-      />
-
-      <GoalDialog
-        open={goalDialog.open}
-        onOpenChange={(open) => setGoalDialog((current) => ({ ...current, open }))}
-        goal={goalDialog.goal}
-        onSubmit={(values) => {
-          const existing = goalDialog.goal;
-          if (existing) {
-            updateGoal(existing.id, (goal) => {
-              goal.title = values.title;
-              goal.kind = values.kind;
-              goal.target = values.target;
-              goal.notes = values.notes;
-              goal.secret = values.secret;
-              if (values.deadline) goal.deadline = values.deadline;
-              else delete goal.deadline;
-            });
-          } else {
-            addGoal(values);
-          }
-        }}
-      />
-
-      <FieldsDialog
-        open={fieldsTypeId !== null}
-        onOpenChange={(open) => !open && setFieldsTypeId(null)}
-        doc={doc}
-        typeId={fieldsTypeId}
       />
 
       <SectionDialog

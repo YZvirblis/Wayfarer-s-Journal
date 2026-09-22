@@ -1,6 +1,4 @@
-import '@fontsource-variable/cinzel';
-import '@fontsource-variable/inter';
-import '@fontsource-variable/eb-garamond';
+import './styles/fonts.css';
 import './styles/index.css';
 
 import { StrictMode } from 'react';

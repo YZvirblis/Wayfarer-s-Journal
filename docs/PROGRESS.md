@@ -3,29 +3,25 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 2 — Connections & Capture, in progress. Schema v2 (captures + sessions) is in place with a verified 1→2 migration; a real player's character was imported locally into `data/` via a script that lives in the gitignored `data/_import/` folder (never committed, no details recorded here).
+**Phase:** 2 — Connections & Capture, **core items complete** (six of the eight roadmap boxes). Two smaller Phase 2 items remain: keyboard navigation of the entry list, and search across every section from the list's search box (the palette already searches everything).
 
-The app runs end to end. `start.bat` (or `npm run dev`) launches an Express API on `127.0.0.1:4777` that serves the built React client. A character's whole document lives in one JSON file under `data/characters/`, is validated by the shared zod schema on every read and write, is written atomically, and keeps the last 20 versions in `data/backups/<id>/`.
+The app runs end to end at any width from ~600px up. Everything a body of markdown can do now connects: `[[Entry Title]]` links with caret autocomplete, chips that navigate, unresolved links that offer to create the entry, rename-rewriting, and a "Mentioned in…" panel on every entry. `Ctrl+K` opens a command palette that reaches entries, sessions, sections, profile sections, tags, creation of any type, and other characters. `Ctrl+/` opens quick capture; captures wait in an Inbox to be turned into entries, appended to one, or dismissed. A dated session log lists what each night touched, and those entries list the session back.
 
-Everything on the Phase 1 checklist in `docs/ROADMAP.md` is ticked: character select, the sidebar shell with a character switcher and per-type counts, the two-pane list + detail view with search / tag filter / sort / pin / secret, the five built-in types (Quests with status and an optional progress counter), user-created sections, tags with inline creation and a tag manager, the Overview/profile page, markdown with a Read/Write toggle, Dark + Parchment themes, and empty states everywhere.
+**Schema is v2** (`captures[]`, `sessions[]`), with a verified additive 1→2 migration. Both local characters (the example and a real imported one) were upgraded through the storage layer with v1 backups taken first. A real player's character was imported into `data/` by a script kept in the gitignored `data/_import/` folder — no details recorded here, nothing committed.
 
-The bundled example character is **Sivrid Coal-Hand** (`examples/example-character.json`) — a fictional Nord smith with 34 entries across six sections (including a custom "Rumours" section), 20 grouped tags, quests in four different statuses with two progress counters, secret entries, and a full profile with backstory. It is loaded via `POST /api/characters/example`, which copies it into `data/` under a fresh id.
-
-`docs/DESIGN.md` §2 now has an "As built" section describing the real folder layout, the client store, and the theming approach. Nine new entries were added to its Decision Log.
+`docs/DESIGN.md` documents the link syntax and resolution rules, the three layout modes, the palette, quick capture, and the session log, with six new Decision Log entries.
 
 ## Next Up
-Start **Phase 2 — Connections & Capture**, in this order:
+1. **Remaining Phase 2 polish:** ↑/↓ + Enter in the entry list; make the list search box optionally search all sections (or drop that box in favour of the palette and tick the item as superseded).
+2. **Phase 3 — Depth**, starting with the ones the data model already anticipates: the septim ledger, then goals. See DESIGN §4 "Planned additions".
+3. Before Phase 3 code, click through the example character once at 1440px and once at ~700px; the narrow layout is new and worth a second pair of eyes.
 
-1. `[[Entry Title]]` links — a remark plugin in `components/Markdown.tsx` plus an autocomplete in the `MarkdownField` textarea. Links resolve by title against `doc.entries`; per DESIGN §4 backlinks are computed at runtime, not stored.
-2. Backlinks panel on the entry detail pane.
-3. Ctrl+K command palette (search everything, jump anywhere, create entries).
-4. Quick capture → inbox. This is the first change that needs a **schema bump to version 2** plus a migration in `src/server/migrations.ts` — see the `migrations` map there, which is wired up and currently empty by design.
-
-Before writing Phase 2 code, run `npm run dev` and click through the example character once; it is the fastest way to reload the shape of the app.
+Known rough edges to keep in mind (all listed under Known issues in the Session 2 log): the in-app capture hotkey only works while the journal window has focus (the OS-level hotkey is a Phase 4 Electron item), same-section namesakes cannot be told apart by `[[Title|Type]]`, and the client bundle is now ~580 kB in one chunk.
 
 ## Open Questions
 - Final project name: "Wayfarer's Journal" is the working name (kept in one config constant).
 - The example character's ids are readable strings (`p-sigunn`, `tag-riften`). New entries use nanoid. Both are valid — worth deciding whether to normalise the example on the next touch.
+- Should the example character ship with a sample session and a capture or two, so the Sessions and Inbox views are not empty on first open? (The `examples/` file is still v1-shaped and is migrated on load.)
 
 ---
 
@@ -45,6 +41,35 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 2 — 2026-09-22
+**Goal:** Recover from a crashed session (API outage mid-work), then build Phase 2 items 1–6 in priority order, committing after each.
+
+**Done:**
+- **Recovery.** Reconstructed state from the repo rather than the stale PROGRESS.md: the crashed session had imported the real character and written the v2 schema + migration but no client code. Verified the import structurally (counts only), accepted the "sessions carry no entryIds" decision, exercised the migration for real (both characters now v2 on disk, v1 backups in `data/backups/<id>/`), and committed the schema work.
+- **Links** (`lib/links.ts`, `lib/remarkWikiLinks.ts`, `lib/caret.ts`, `LinkTextarea`, `LinkAutocomplete`, `WikiLink`, `NewEntryDialog`). `[[Title]]` / `[[Title|Type]]`; caret-anchored autocomplete with section icons; case-insensitive resolution, oldest namesake wins; `renameEntry` rewrites every link in one mutation; dashed unresolved chips create the entry.
+- **Backlinks** (`Backlinks.tsx`): one row per source (entry, profile section, capture, session) with the sentence around the first mention, computed at render time.
+- **Narrow layout** (`lib/layout.ts`, `SidebarRail`, `CharacterMenu`): `wide` (1200px) and `pane` (960px) breakpoints shared by Tailwind and JS; icon rail with tags popover; single-pane list/detail with a back action; auto-fit field columns.
+- **Command palette** (`CommandPalette.tsx`, `lib/fuzzy.ts`, `lib/keys.ts`): Ctrl+K, grouped results, create-as-any-type, character switch, theme toggle, shortcut printed in both sidebars.
+- **Quick capture + Inbox** (`QuickCapture`, `InboxView`, `EntryPicker`): Ctrl+/, Enter / Ctrl+Enter / Shift+Enter semantics, convert / append / two-step dismiss, count in sidebar and rail badge.
+- **Session log** (`SessionsView.tsx`): month-grouped timeline, date picker, "This session touched" chips, sessions as backlink sources, palette integration.
+- **Docs.** DESIGN: link syntax and resolution, layout modes, palette, capture, sessions, six Decision Log entries. ROADMAP: six Phase 2 boxes ticked, Phase 4 gains the Electron OS-level hotkey item, the old "responsive below 1000px" Phase 4 item removed as done.
+- **Verified in Chrome** at 1440px, 1100px and 720px: autocomplete, chips, create-from-link, rename rewrite persisted to disk, backlinks, rail + single-pane flow with back, palette navigation, capture → Inbox → append to entry, session → backlinks → session. Console clean at the end of each item.
+
+**Decisions:**
+- Links stay as text; namesakes resolve oldest-first; `[[…]]` handled as a remark plugin (not string replacement); icon rail instead of a drawer; `Ctrl+/` for capture (nothing in Chrome/Edge/Firefox uses it); schema v2 ships captures and sessions in one migration; sessions have no `entryIds`. All in the DESIGN Decision Log.
+- Navigation callbacks read the live store (`getDocument()`) rather than a `doc` closure, after a stale-closure bug stopped "create from link" from opening the new entry.
+
+**Build / typecheck:** pass. `npm run typecheck` clean on both projects; `npm run build` succeeds (one ~580 kB chunk, Vite warns; Phase 4).
+
+**Known issues:**
+- The capture hotkey is in-app only; the game window keeps the keys. Phase 4 Electron item.
+- Two entries with the same title in the *same* section cannot be told apart by the link syntax; the oldest wins.
+- The fuzzy matcher still admits a few loose in-order matches on long field text (e.g. a three-letter query hitting a role description).
+- Bundle grew to ~580 kB; code-splitting remains a Phase 4 task.
+- The local copy of the example character in `data/` now contains one demo session ("The Whiterun run") left from verification; the other test edits were reverted through the storage layer. `examples/example-character.json` is untouched.
+
+**Next:** Keyboard navigation of the entry list and the "search across sections" decision, then Phase 3 starting with the ledger.
 
 ### Session 1 — 2026-09-22
 **Goal:** Build all of Phase 1 — Foundation.

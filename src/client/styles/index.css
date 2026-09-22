@@ -19,7 +19,7 @@
     --wj-line: 214 188 138;
     --wj-ink: 237 226 203;
     --wj-muted: 178 164 137;
-    --wj-faint: 130 118 95;
+    --wj-faint: 138 126 102;
 
     --wj-gold: 213 175 92;
     --wj-gold-deep: 166 132 60;
@@ -37,6 +37,7 @@
     --wj-grain-opacity: 0.05;
     --wj-rule: rgb(var(--wj-line) / 0.16);
     --wj-rule-soft: rgb(var(--wj-line) / 0.09);
+    --wj-native-control-filter: invert(0.85) sepia(0.3);
   }
 
   [data-theme='parchment'] {
@@ -49,7 +50,7 @@
     --wj-line: 92 68 36;
     --wj-ink: 34 27 17;
     --wj-muted: 84 69 48;
-    --wj-faint: 124 106 80;
+    --wj-faint: 110 93 68;
 
     --wj-gold: 143 106 30;
     --wj-gold-deep: 108 78 20;
@@ -66,6 +67,7 @@
     --wj-grain-opacity: 0.07;
     --wj-rule: rgb(var(--wj-line) / 0.26);
     --wj-rule-soft: rgb(var(--wj-line) / 0.14);
+    --wj-native-control-filter: none;
   }
 
   * {
@@ -79,7 +81,7 @@
   }
 
   body {
-    @apply bg-base font-sans text-ink antialiased;
+    @apply bg-ground font-sans text-ink antialiased;
     font-feature-settings: 'cv05' 1, 'ss03' 1;
     overflow: hidden;
   }
@@ -127,6 +129,8 @@
     border-radius: 3px;
   }
 
+  /* Form controls take the surrounding ink, never the browser's defaults;
+     every themed part is set here so no single field can drift. */
   input,
   textarea,
   button,
@@ -135,9 +139,43 @@
     color: inherit;
   }
 
+  input,
+  textarea,
+  select {
+    color: rgb(var(--wj-ink));
+    caret-color: rgb(var(--wj-gold));
+  }
+
   input::placeholder,
   textarea::placeholder {
-    @apply text-faint;
+    color: rgb(var(--wj-faint));
+    opacity: 1;
+  }
+
+  /* The native dropdown list follows the theme rather than the OS. */
+  select option,
+  select optgroup {
+    background-color: rgb(var(--wj-panel));
+    color: rgb(var(--wj-ink));
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: rgb(var(--wj-gold));
+  }
+
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* Chromium paints these black regardless of colour; follow the theme instead. */
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='number']::-webkit-inner-spin-button {
+    opacity: 0.7;
+    filter: var(--wj-native-control-filter);
   }
 
   textarea {
@@ -194,7 +232,7 @@
   }
 
   .wj-field {
-    @apply w-full rounded border bg-base/40 px-3 py-2 text-sm text-ink transition-colors duration-150;
+    @apply w-full rounded border bg-ground/40 px-3 py-2 text-sm text-ink transition-colors duration-150;
     border-color: var(--wj-rule-soft);
   }
   .wj-field:hover {
@@ -289,10 +327,10 @@
     border-color: rgb(var(--wj-gold) / 0.45);
   }
   .wj-prose code {
-    @apply rounded bg-base/70 px-1.5 py-0.5 font-sans text-[0.85em] text-copper;
+    @apply rounded bg-ground/70 px-1.5 py-0.5 font-sans text-[0.85em] text-copper;
   }
   .wj-prose pre {
-    @apply overflow-x-auto rounded border bg-base/70 p-3;
+    @apply overflow-x-auto rounded border bg-ground/70 p-3;
   }
   .wj-prose pre code {
     @apply bg-transparent p-0;

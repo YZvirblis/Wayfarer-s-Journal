@@ -9,7 +9,7 @@ interface SegmentedControlProps<T extends string> {
 
 export function SegmentedControl<T extends string>({ value, options, onChange, className }: SegmentedControlProps<T>) {
   return (
-    <div className={cn('inline-flex rounded border border-line/15 bg-base/50 p-0.5', className)} role="tablist">
+    <div className={cn('inline-flex rounded border border-line/15 bg-ground/50 p-0.5', className)} role="tablist">
       {options.map((option) => {
         const active = option.value === value;
         return (

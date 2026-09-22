@@ -18,7 +18,9 @@ export default {
         wide: '1200px',
       },
       colors: {
-        base: token('--wj-bg'),
+        // The page background. Not named `base`: that would collide with the
+        // `text-base` font-size utility and paint text in the background colour.
+        ground: token('--wj-bg'),
         panel: token('--wj-panel'),
         surface: token('--wj-surface'),
         raised: token('--wj-raised'),

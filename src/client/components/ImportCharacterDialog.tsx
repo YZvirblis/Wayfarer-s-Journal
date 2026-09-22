@@ -116,7 +116,7 @@ export function ImportCharacterDialog({ open, onOpenChange, onImported }: Import
               </p>
             </div>
           </div>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-1 rounded border border-line/15 bg-base/30 px-3 py-2 text-xs sm:grid-cols-3">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-1 rounded border border-line/15 bg-ground/30 px-3 py-2 text-xs sm:grid-cols-3">
             {(
               [
                 ['Entries', summary.counts.entries],

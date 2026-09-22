@@ -107,7 +107,7 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           <p className="wj-label mb-2 flex items-center gap-1.5">
             <FolderOpen className="h-3.5 w-3.5" /> Your data
           </p>
-          <p className="break-all rounded border border-line/15 bg-base/30 px-3 py-2 font-sans text-xs text-ink/85">{info?.dataDir ?? '…'}</p>
+          <p className="break-all rounded border border-line/15 bg-ground/30 px-3 py-2 font-sans text-xs text-ink/85">{info?.dataDir ?? '…'}</p>
           <p className="mt-1.5 text-2xs leading-relaxed text-faint">
             One JSON file per character, with the last twenty saves in <span className="text-muted">backups/</span>. Copy this folder to
             back up or move your journals.

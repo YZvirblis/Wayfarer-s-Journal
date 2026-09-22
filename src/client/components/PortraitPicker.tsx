@@ -73,7 +73,7 @@ export function PortraitPicker({ name, portrait, onChange, size = 'lg', classNam
           className={cn('group/portrait relative rounded transition-transform duration-150 hover:scale-[1.03]', className)}
         >
           <Sigil name={name} portrait={portrait} size={size} />
-          <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded bg-base/60 opacity-0 transition-opacity group-hover/portrait:opacity-100">
+          <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded bg-ground/60 opacity-0 transition-opacity group-hover/portrait:opacity-100">
             <ImagePlus className="h-4 w-4 text-gold" />
           </span>
         </button>

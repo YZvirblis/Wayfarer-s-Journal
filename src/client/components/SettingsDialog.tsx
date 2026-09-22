@@ -1,0 +1,138 @@
+import { AlertTriangle, Check, FolderOpen, Keyboard, Monitor } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { DEFAULT_CAPTURE_HOTKEY, type AppInfo } from '../../shared/schema';
+import { api } from '../lib/api';
+import { formatAccelerator } from '../lib/keys';
+import { setDesktopSettings, useSettings } from '../lib/settingsStore';
+import { Button } from './ui/Button';
+import { Modal } from './ui/Modal';
+
+/**
+ * Preferences that live outside any one character: where the data is, and —
+ * in the desktop app — the tray behaviour and the global capture hotkey.
+ */
+export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { desktop } = useSettings();
+  const [info, setInfo] = useState<AppInfo | null>(null);
+  const [hotkey, setHotkey] = useState(desktop.captureHotkey);
+
+  useEffect(() => {
+    if (!open) return;
+    setHotkey(desktop.captureHotkey);
+    let cancelled = false;
+    const load = () =>
+      api
+        .getAppInfo()
+        .then((loaded) => {
+          if (!cancelled) setInfo(loaded);
+        })
+        .catch(() => undefined);
+    void load();
+    // The main process re-registers a moment after the setting is saved; poll briefly for the verdict.
+    const timer = window.setInterval(() => void load(), 1500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [open, desktop.captureHotkey]);
+
+  function applyHotkey() {
+    const next = hotkey.trim() || DEFAULT_CAPTURE_HOTKEY;
+    setHotkey(next);
+    if (next !== desktop.captureHotkey) setDesktopSettings({ captureHotkey: next });
+  }
+
+  const status = info?.hotkey;
+  const isDesktop = info?.desktop ?? false;
+
+  return (
+    <Modal open={open} onOpenChange={onOpenChange} title="Preferences" description="Settings that belong to the app rather than to a character." size="md">
+      <div className="space-y-6">
+        <section>
+          <p className="wj-label mb-2 flex items-center gap-1.5">
+            <FolderOpen className="h-3 w-3" /> Your data
+          </p>
+          <p className="break-all rounded border border-line/15 bg-base/30 px-3 py-2 font-sans text-xs text-ink/85">{info?.dataDir ?? '…'}</p>
+          <p className="mt-1.5 text-2xs leading-relaxed text-faint">
+            One JSON file per character, with the last twenty saves in <span className="text-muted">backups/</span>. Copy this folder to
+            back up or move your journals.
+            {info?.dataDirFallback
+              ? ' The folder next to the app was not writable, so the journal lives in your user folder instead.'
+              : ''}
+          </p>
+        </section>
+
+        <section>
+          <p className="wj-label mb-2 flex items-center gap-1.5">
+            <Keyboard className="h-3 w-3" /> Quick capture from anywhere
+          </p>
+          {isDesktop ? (
+            <>
+              <div className="flex items-center gap-2">
+                <input
+                  value={hotkey}
+                  onChange={(event) => setHotkey(event.target.value)}
+                  onBlur={applyHotkey}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      applyHotkey();
+                    }
+                  }}
+                  spellCheck={false}
+                  aria-label="Global capture shortcut"
+                  className="wj-field h-9 font-sans text-sm"
+                />
+                <Button variant="secondary" size="md" onClick={applyHotkey}>
+                  Apply
+                </Button>
+              </div>
+              <p className="mt-1.5 text-2xs leading-relaxed text-faint">
+                Written the Electron way: <span className="text-muted">Ctrl+Shift+J</span>, <span className="text-muted">Alt+Space</span>,{' '}
+                <span className="text-muted">CommandOrControl+Shift+K</span>. It works while the game has focus and opens a small box over
+                it; Enter keeps the line in the open journal's Inbox.
+              </p>
+              {status ? (
+                <p className={status.registered ? 'mt-2 flex items-center gap-1.5 text-xs text-sage' : 'mt-2 flex items-start gap-1.5 text-xs text-rose'}>
+                  {status.registered ? <Check className="h-3.5 w-3.5 shrink-0" /> : <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
+                  {status.registered
+                    ? `${formatAccelerator(status.accelerator)} is registered.`
+                    : `${formatAccelerator(status.accelerator) || 'The shortcut'} could not be registered. ${status.error ?? ''}`}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p className="text-xs leading-relaxed text-faint">
+              The system-wide shortcut needs the desktop app; in a browser the game keeps the keys. Inside the journal,{' '}
+              <span className="text-muted">Ctrl+/</span> still captures.
+            </p>
+          )}
+        </section>
+
+        <section>
+          <p className="wj-label mb-2 flex items-center gap-1.5">
+            <Monitor className="h-3 w-3" /> Window
+          </p>
+          {isDesktop ? (
+            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-ink/90">
+              <input
+                type="checkbox"
+                checked={desktop.closeToTray}
+                onChange={(event) => setDesktopSettings({ closeToTray: event.target.checked })}
+                className="mt-1 h-3.5 w-3.5 accent-[rgb(var(--wj-gold))]"
+              />
+              <span>
+                Keep running in the tray when the window is closed
+                <span className="block text-2xs leading-relaxed text-faint">
+                  So the capture shortcut keeps working behind the game. Quit from the tray icon's menu.
+                </span>
+              </span>
+            </label>
+          ) : (
+            <p className="text-xs leading-relaxed text-faint">Tray settings appear in the desktop app.</p>
+          )}
+        </section>
+      </div>
+    </Modal>
+  );
+}

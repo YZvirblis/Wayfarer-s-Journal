@@ -305,6 +305,21 @@ export async function restoreBackup(id: string, file: string, mode: RestoreMode)
   return saveCharacter({ ...reborn(doc, `${doc.profile.name} (restored)`), createdAt: doc.createdAt });
 }
 
+/**
+ * Append a quick capture to the last-opened character without a browser in
+ * the loop — the desktop hotkey's fallback when no journal window is open.
+ */
+export async function captureToLastCharacter(body: string): Promise<void> {
+  const text = body.trim();
+  if (!text) return;
+  const settings = await readSettings();
+  if (!settings.lastCharacterId) throw new StorageError('Open a character first so the capture has a journal to land in.', 400);
+  const doc = await readCharacter(settings.lastCharacterId);
+  doc.captures.unshift({ id: newId(), body: text, createdAt: new Date().toISOString() });
+  doc.updatedAt = new Date().toISOString();
+  await saveCharacter(doc);
+}
+
 export async function readSettings(): Promise<Settings> {
   await ensureDataDirs();
   try {

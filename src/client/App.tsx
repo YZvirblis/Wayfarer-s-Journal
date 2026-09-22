@@ -10,7 +10,7 @@ const CharacterSelect = lazy(() =>
 import { Button } from './components/ui/Button';
 import { TooltipProvider } from './components/ui/Tooltip';
 import { api, errorMessage } from './lib/api';
-import { closeDocument, flushSave } from './lib/documentStore';
+import { addCapture, closeDocument, flushSave, getDocument } from './lib/documentStore';
 import { loadSettings, setLastCharacterId } from './lib/settingsStore';
 
 type Boot = 'loading' | 'ready' | 'error';
@@ -46,6 +46,24 @@ export function App() {
       cancelled = true;
     };
   }, []);
+
+  // The tab (and the desktop window) is named after the open character.
+  useEffect(() => {
+    const name = activeId ? characters.find((character) => character.id === activeId)?.name : undefined;
+    document.title = name ? `${name} — Wayfarer's Journal` : "Wayfarer's Journal";
+  }, [activeId, characters]);
+
+  // Captures from the desktop hotkey window land in the open journal through the store,
+  // so the autosave that follows carries them; with no journal open, the main process
+  // writes to the last-opened character itself.
+  useEffect(
+    () =>
+      window.wayfarerDesktop?.onCapture((text) => {
+        if (!getDocument()) return false;
+        return addCapture(text) !== null;
+      }),
+    [],
+  );
 
   // Never let the browser close on top of an unsaved keystroke.
   useEffect(() => {

@@ -74,6 +74,11 @@ export function toggleHideSecrets(): void {
   setHideSecrets(!settings.hideSecrets);
 }
 
+export function setDesktopSettings(patch: Partial<Settings['desktop']>): void {
+  publish({ ...settings, desktop: { ...settings.desktop, ...patch } });
+  persist();
+}
+
 export function setLastCharacterId(id: string | null): void {
   if (settings.lastCharacterId === id) return;
   publish({ ...settings, lastCharacterId: id });

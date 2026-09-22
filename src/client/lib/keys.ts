@@ -13,6 +13,21 @@ export const CAPTURE_SHORTCUT = `${MOD_LABEL} /`;
 export const isPaletteShortcut = (event: KeyboardEvent): boolean =>
   event.key.toLowerCase() === 'k' && hasModifier(event) && !event.altKey && !event.shiftKey;
 
+/** An Electron accelerator as people write it: "CommandOrControl+Shift+J" → "Ctrl+Shift+J" (⌘ on a Mac). */
+export function formatAccelerator(accelerator: string): string {
+  return accelerator
+    .split('+')
+    .map((part) => {
+      const key = part.trim();
+      if (/^(CommandOrControl|CmdOrCtrl)$/i.test(key)) return IS_MAC ? '⌘' : 'Ctrl';
+      if (/^(Command|Cmd)$/i.test(key)) return '⌘';
+      if (/^Control$/i.test(key)) return 'Ctrl';
+      if (/^Option$/i.test(key)) return 'Alt';
+      return key;
+    })
+    .join('+');
+}
+
 /** Matched on the physical key too, so layouts where "/" needs Shift still work. */
 export const isCaptureShortcut = (event: KeyboardEvent): boolean =>
   (event.key === '/' || event.code === 'Slash') && hasModifier(event) && !event.altKey;

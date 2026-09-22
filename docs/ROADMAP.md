@@ -58,8 +58,8 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 ## Phase 4b — Release
 - [x] Positioning: a journal for roleplay characters in general; currency is a per-character setting (schema v6), Skyrim wording neutralised outside the example
 - [x] About dialog (sidebar footer, rail, palette, character select): name, version from package.json, links to GitHub, Buy me a coffee and the licence
-- [ ] Electron packaging → portable Windows .exe with `data/` next to the exe
-- [ ] OS-level global quick-capture hotkey via Electron `globalShortcut`, opening a small always-on-top capture window — the browser cannot see keys while the game window is focused
+- [x] Electron packaging → portable Windows .exe: server in-process on a free port, `data/` beside the exe with a user-data fallback, window state, external links, tray with close-to-tray setting, original icon from `assets/icon.svg`
+- [x] OS-level global quick-capture hotkey via Electron `globalShortcut` (default Ctrl+Shift+J, configurable in Preferences with registration status), opening a small always-on-top capture window over the game
 - [ ] GitHub Actions: build and attach the .exe to Releases
 - [ ] README: hero screenshot, GIF demo, features, download, FAQ
 - [ ] CONTRIBUTING.md, issue templates

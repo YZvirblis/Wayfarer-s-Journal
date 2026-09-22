@@ -4,6 +4,9 @@ data/
 # Dependencies & build output
 node_modules/
 dist/
+# Generated icon files (from assets/icon.svg) and electron-builder output
+build/
+release/
 
 # Logs
 *.log

@@ -52,6 +52,7 @@ const ImportCharacterDialog = lazy(() =>
 );
 const BackupsDialog = lazy(() => import('./BackupsDialog').then((module) => ({ default: module.BackupsDialog })));
 const AboutDialog = lazy(() => import('./AboutDialog').then((module) => ({ default: module.AboutDialog })));
+const SettingsDialog = lazy(() => import('./SettingsDialog').then((module) => ({ default: module.SettingsDialog })));
 
 function Loading() {
   return (
@@ -94,6 +95,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [importOpen, setImportOpen] = useState(false);
   const [backupsOpen, setBackupsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { hideSecrets } = useSettings();
 
   const exportJson = useCallback(() => {
@@ -226,6 +228,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       importCharacter: () => setImportOpen(true),
       backups: () => setBackupsOpen(true),
       about: () => setAboutOpen(true),
+      settings: () => setSettingsOpen(true),
     }),
     [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters, exportJson],
   );
@@ -317,6 +320,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onImport={() => setImportOpen(true)}
           onBackups={() => setBackupsOpen(true)}
           onAbout={() => setAboutOpen(true)}
+          onSettings={() => setSettingsOpen(true)}
         />
       ) : (
         <SidebarRail
@@ -338,6 +342,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onImport={() => setImportOpen(true)}
           onBackups={() => setBackupsOpen(true)}
           onAbout={() => setAboutOpen(true)}
+          onSettings={() => setSettingsOpen(true)}
         />
       )}
 
@@ -423,6 +428,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         {exportMdOpen ? <ExportMarkdownDialog open onOpenChange={setExportMdOpen} doc={doc} /> : null}
         {importOpen ? <ImportCharacterDialog open onOpenChange={setImportOpen} onImported={onImported} /> : null}
         {aboutOpen ? <AboutDialog open onOpenChange={setAboutOpen} /> : null}
+        {settingsOpen ? <SettingsDialog open onOpenChange={setSettingsOpen} /> : null}
         {backupsOpen ? (
           <BackupsDialog
             open

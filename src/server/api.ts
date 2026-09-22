@@ -1,5 +1,6 @@
 import { Router, type Request, type Response, type NextFunction, type RequestHandler } from 'express';
 import {
+  captureToLastCharacter,
   createCharacter,
   deleteCharacter,
   duplicateCharacter,
@@ -14,6 +15,7 @@ import {
   StorageError,
   writeSettings,
 } from './storage';
+import { appInfo, serverEvents } from './state';
 
 const wrap =
   (handler: (req: Request, res: Response) => Promise<void>): RequestHandler =>
@@ -118,7 +120,23 @@ export function createApiRouter(): Router {
   api.put(
     '/settings',
     wrap(async (req, res) => {
-      res.json(await writeSettings(req.body));
+      const saved = await writeSettings(req.body);
+      serverEvents.emit('settings', saved);
+      res.json(saved);
+    }),
+  );
+
+  api.get('/app', (_req, res) => {
+    res.json(appInfo);
+  });
+
+  api.post(
+    '/captures',
+    wrap(async (req, res) => {
+      const body = typeof req.body?.body === 'string' ? req.body.body : '';
+      if (!body.trim()) throw new StorageError('Nothing to keep.', 400);
+      await captureToLastCharacter(body);
+      res.status(204).end();
     }),
   );
 

@@ -8,6 +8,7 @@ import {
   Info,
   Plus,
   Search,
+  Settings,
   Tags,
   Target,
   UserRound,
@@ -57,6 +58,7 @@ interface SidebarProps {
   onImport: () => void;
   onBackups: () => void;
   onAbout: () => void;
+  onSettings: () => void;
 }
 
 function NavRow({
@@ -152,6 +154,7 @@ export function Sidebar({
   onImport,
   onBackups,
   onAbout,
+  onSettings,
 }: SidebarProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -362,6 +365,11 @@ export function Sidebar({
         <div className="flex items-center gap-0.5">
           <SecretsToggle />
           <ThemeToggle />
+          <Tooltip label="Preferences" side="top">
+            <IconButton variant="ghost" size="sm" aria-label="Preferences" onClick={onSettings}>
+              <Settings className="h-3.5 w-3.5" />
+            </IconButton>
+          </Tooltip>
           <Tooltip label="About Wayfarer's Journal" side="top">
             <IconButton variant="ghost" size="sm" aria-label="About" onClick={onAbout}>
               <Info className="h-3.5 w-3.5" />

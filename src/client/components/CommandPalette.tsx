@@ -13,6 +13,7 @@ import {
   Info,
   Moon,
   Search,
+  Settings as SettingsIcon,
   Sun,
   Tag as TagIcon,
   Target,
@@ -57,6 +58,7 @@ export interface PaletteActions {
   importCharacter: () => void;
   backups: () => void;
   about: () => void;
+  settings: () => void;
 }
 
 type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
@@ -328,6 +330,14 @@ function buildCommands(
     hint: 'Last 20 saves',
     icon: Archive,
     run: actions.backups,
+  });
+  commands.push({
+    id: 'journal:settings',
+    group: 'Journal',
+    label: 'Preferences',
+    keywords: 'settings options hotkey shortcut tray data folder',
+    icon: SettingsIcon,
+    run: actions.settings,
   });
   commands.push({
     id: 'journal:about',

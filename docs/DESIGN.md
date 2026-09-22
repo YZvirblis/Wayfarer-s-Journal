@@ -37,6 +37,16 @@ It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene,
 - The client loads a whole character document into state and autosaves the full document with a debounce (~800 ms). Data is small, so full-document saves are simpler and safer than partial updates.
 - A save-status indicator is always visible: Saved / Saving… / Error.
 
+### Desktop app (Phase 4b)
+The portable `.exe` is a wrapper, not a rewrite. `electron/main.ts` picks a data folder and a free loopback port, sets `WJ_DATA_DIR` and `WJ_PORT`, and only then loads `electron/server.ts` — a second bundle that starts the very same Express app (`src/server/app.ts`, `startServer()`) in-process and loads it in a `BrowserWindow`. Storage, migrations and the API are untouched; `npm start`, `start.bat` and `npm run dev` keep working exactly as before.
+
+- **Build:** `vite.electron.config.ts` compiles `main` and `server` to CommonJS in `dist/electron/` with zod and nanoid bundled and express external; electron-builder packs `dist/`, `examples/`, the preload and the icon with `asar: false` into a single portable exe (`npm run electron:build` → `release/`). Client-only libraries are devDependencies so they never ship inside the exe. `npm run icon` renders `assets/icon.svg` with Electron's own renderer into `build/icon.png` and a PNG-wrapped `build/icon.ico`; both are generated, never committed.
+- **Data folder:** `data/` beside the executable (`PORTABLE_EXECUTABLE_DIR`), or the project folder in development. If that is not writable, the app falls back to `%APPDATA%\wayfarers-journal\data` and says so once in a dialog; Preferences shows the path in use, and `GET /api/app` reports it.
+- **Window:** size, position and maximised state persist in `%APPDATA%\wayfarers-journal\window-state.json`; the title follows the open character; links open in the system browser (`setWindowOpenHandler` plus `will-navigate`); the application menu is off; a single-instance lock re-shows the window.
+- **Tray:** Open, Quick capture, Quit. With *Keep running in the tray* on (the default), closing the window hides it and a one-time balloon explains why. The main process reads the setting from `settings.json` and hears changes through `serverEvents` (emitted by `PUT /api/settings`).
+- **Global capture:** `globalShortcut` registers `settings.desktop.captureHotkey` (default `CommandOrControl+Shift+J`) and re-registers on every change; the result (registered, or the reason it failed) goes into `appInfo.hotkey`, which Preferences shows. The hotkey opens a 560×220 frameless, always-on-top, taskbar-less window on `/capture` (`CapturePage`): Enter sends the text over IPC to the main window, whose store adds it to the open journal (so the next autosave carries it); if no journal is open the main process writes it to the last-opened character itself (`captureToLastCharacter`, also `POST /api/captures`). Escape, or losing focus, closes the window, which hands focus back to the game.
+- **Bridge:** `electron/preload.cjs` exposes only `window.wayfarerDesktop` (`onCapture`, `submitCapture`, `closeCapture`, `openCapture`) through `contextBridge`, with the sandbox on.
+
 ### As built (Phase 1)
 ```
 src/shared    schema.ts (zod, the file format), defaults.ts (built-in types, new-character factory)
@@ -314,6 +324,8 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | The desktop wrapper runs the existing Express server in-process on a random loopback port rather than talking to storage directly | One code path for web and desktop; the renderer stays a plain web page, and the storage module's atomic writes, backups and migrations are exercised identically in both |
+| 2026-09-22 | Global captures are routed through the main window's store when a journal is open, with a server-side write only as the fallback | The renderer holds the document and autosaves the whole thing; a server-side write behind its back would be overwritten by the next keystroke |
 | 2026-09-22 | The currency name is a per-character profile setting (schema v6), not an app setting | A player with characters on different servers or systems wants each ledger in its own coin; and it keeps the code free of any one game's vocabulary |
 | 2026-09-22 | Portraits are stored inline as ≤256px JPEG data URLs, and adding the field bumped the schema to v4 even though the migration is empty | One JSON file per character stays the whole truth (backups, duplicates and exports carry the images for free); the bump keeps the "format changed → version changed" rule honest, so an older build cannot strip portraits by accident |
 | 2026-09-22 | The relationship web uses `d3-force` alone, rendering to SVG by hand, with the character pinned at the centre | A full graph library would add hundreds of kB for features the web does not need; SVG keeps nodes clickable and the picture crisp for screenshots. Pinning the character gives every graph the same readable shape |

@@ -191,6 +191,23 @@ export interface CharacterSummary {
   portrait?: string;
 }
 
+/** Facts about the running app, from `GET /api/app`; the desktop wrapper fills the rest in. */
+export interface HotkeyStatus {
+  accelerator: string;
+  registered: boolean;
+  error?: string;
+}
+
+export interface AppInfo {
+  version: string;
+  /** Running inside the Electron wrapper. */
+  desktop: boolean;
+  dataDir: string;
+  /** The preferred data folder was not writable and the user-data folder is used instead. */
+  dataDirFallback: boolean;
+  hotkey?: HotkeyStatus;
+}
+
 /** What an import found in a file, shown before anything is written. */
 export interface ImportSummary {
   name: string;
@@ -234,12 +251,29 @@ export interface ImportResult {
 export const THEMES = ['dark', 'parchment'] as const;
 export type Theme = (typeof THEMES)[number];
 
+export const DEFAULT_CAPTURE_HOTKEY = 'CommandOrControl+Shift+J';
+
+/** Settings that only mean something in the desktop (Electron) app. */
+export const desktopSettingsSchema = z.object({
+  /** Closing or minimising the window keeps the app alive in the tray, so the hotkey still works behind the game. */
+  closeToTray: z.boolean().catch(true),
+  /** Electron accelerator for the global quick-capture window. */
+  captureHotkey: z.string().catch(DEFAULT_CAPTURE_HOTKEY),
+});
+export type DesktopSettings = z.infer<typeof desktopSettingsSchema>;
+
 export const settingsSchema = z.object({
   theme: z.enum(THEMES).catch('dark'),
   lastCharacterId: z.string().nullable().default(null),
   /** Blur everything marked secret, for screenshots and streaming. */
   hideSecrets: z.boolean().catch(false),
+  desktop: desktopSettingsSchema.catch({ closeToTray: true, captureHotkey: DEFAULT_CAPTURE_HOTKEY }),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'dark', lastCharacterId: null, hideSecrets: false };
+export const DEFAULT_SETTINGS: Settings = {
+  theme: 'dark',
+  lastCharacterId: null,
+  hideSecrets: false,
+  desktop: { closeToTray: true, captureHotkey: DEFAULT_CAPTURE_HOTKEY },
+};

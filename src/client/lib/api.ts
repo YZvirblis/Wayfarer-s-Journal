@@ -1,4 +1,5 @@
 import type {
+  AppInfo,
   BackupInfo,
   CharacterDocument,
   CharacterSummary,
@@ -49,6 +50,9 @@ export const api = {
   /** `commit: false` validates and migrates without writing, returning only the summary. */
   importCharacter: (document: unknown, commit: boolean) =>
     request<ImportResult>('/characters/import', { method: 'POST', body: JSON.stringify({ document, commit }) }),
+  getAppInfo: () => request<AppInfo>('/app'),
+  /** Server-side capture into the last-opened character; the hotkey window's fallback. */
+  addCapture: (body: string) => request<void>('/captures', { method: 'POST', body: JSON.stringify({ body }) }),
   getSettings: () => request<Settings>('/settings'),
   saveSettings: (settings: Settings) => request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(settings) }),
 };

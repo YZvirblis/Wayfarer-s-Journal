@@ -3,8 +3,9 @@ import { useState } from 'react';
 import type { Capture, CharacterDocument } from '../../shared/schema';
 import { appendCaptureToEntry, convertCapture, deleteCapture, splitCapture, updateCapture } from '../lib/documentStore';
 import { relativeTime } from '../lib/format';
-import { CAPTURE_SHORTCUT } from '../lib/keys';
+import { CAPTURE_SHORTCUT, formatAccelerator } from '../lib/keys';
 import { useLinks } from '../lib/linkContext';
+import { useSettings } from '../lib/settingsStore';
 import { EntryPicker } from './EntryPicker';
 import { MarkdownField } from './MarkdownField';
 import { NewEntryDialog } from './NewEntryDialog';
@@ -64,6 +65,8 @@ interface InboxViewProps {
 
 export function InboxView({ doc, onCapture }: InboxViewProps) {
   const { openEntry } = useLinks();
+  const { desktop } = useSettings();
+  const globalHotkey = window.wayfarerDesktop ? formatAccelerator(desktop.captureHotkey) : null;
   const [converting, setConverting] = useState<Capture | null>(null);
   const [appending, setAppending] = useState<Capture | null>(null);
   const draftTitle = converting ? splitCapture(converting.body).title : '';
@@ -78,7 +81,15 @@ export function InboxView({ doc, onCapture }: InboxViewProps) {
             <p className="mt-1.5 text-sm text-muted">
               Things jotted mid-scene, waiting to be filed. Press{' '}
               <kbd className="rounded border border-line/20 px-1.5 py-px font-sans text-2xs text-faint">{CAPTURE_SHORTCUT}</kbd>{' '}
-              anywhere to add one.
+              here to add one
+              {globalHotkey ? (
+                <>
+                  , or{' '}
+                  <kbd className="rounded border border-line/20 px-1.5 py-px font-sans text-2xs text-faint">{globalHotkey}</kbd> from
+                  anywhere on your PC, even over the game
+                </>
+              ) : null}
+              .
             </p>
           </div>
           <Tooltip label={`Quick capture · ${CAPTURE_SHORTCUT}`}>

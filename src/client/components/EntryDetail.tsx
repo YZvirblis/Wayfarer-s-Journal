@@ -8,7 +8,9 @@ import { colorClasses } from '../lib/palette';
 import { useAutoCommit } from '../lib/useAutoCommit';
 import { iconByName } from '../lib/icons';
 import { singularize } from '../lib/words';
+import { BUILT_IN_TYPE_IDS } from '../../shared/defaults';
 import { Backlinks } from './Backlinks';
+import { Dealings } from './Dealings';
 import { MarkdownField } from './MarkdownField';
 import { ProgressBar, STATUS_META, STATUS_ORDER } from './QuestStatus';
 import { TagRow } from './TagPicker';
@@ -306,6 +308,13 @@ export function EntryDetail({ doc, type, entry, onDeleted, onSelect, onBack, foc
           placeholder="What happened? What did they promise? Write it down before you forget."
           minHeight={220}
         />
+
+        {type.id === BUILT_IN_TYPE_IDS.people ? (
+          <>
+            <Divider className="my-6" />
+            <Dealings doc={doc} entryId={entry.id} />
+          </>
+        ) : null}
 
         <Divider className="my-6" />
         <Backlinks doc={doc} entryId={entry.id} />

@@ -1,5 +1,5 @@
 import * as Popover from '@radix-ui/react-popover';
-import { CalendarDays, Feather, Inbox, Plus, Search, Tags, UserRound, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Coins, Feather, Inbox, Plus, Search, Tags, Target, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import type { CharacterDocument, CharacterSummary } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -152,6 +152,20 @@ export function SidebarRail({
           color="text-gold"
           active={view.kind === 'sessions'}
           onClick={() => onNavigate({ kind: 'sessions', sessionId: null })}
+        />
+        <RailButton
+          label={`Ledger · ${doc.transactions.length}`}
+          icon={Coins}
+          color="text-gold"
+          active={view.kind === 'ledger'}
+          onClick={() => onNavigate({ kind: 'ledger', counterpartyId: null })}
+        />
+        <RailButton
+          label={`Goals · ${doc.goals.length}`}
+          icon={Target}
+          color="text-gold"
+          active={view.kind === 'goals'}
+          onClick={() => onNavigate({ kind: 'goals' })}
         />
         <span className="my-1.5 h-px w-4 bg-line/10" />
         {doc.entryTypes.map((type) => (

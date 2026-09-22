@@ -1,5 +1,15 @@
 import { useSyncExternalStore } from 'react';
-import type { Capture, CharacterDocument, Entry, EntryType, PaletteColor, Session, Tag } from '../../shared/schema';
+import type {
+  Capture,
+  CharacterDocument,
+  Entry,
+  EntryType,
+  Goal,
+  PaletteColor,
+  Session,
+  Tag,
+  Transaction,
+} from '../../shared/schema';
 import { SCHEMA_VERSION } from '../../shared/schema';
 import { newId } from '../../shared/defaults';
 import { api, errorMessage } from './api';
@@ -175,9 +185,13 @@ export function renameEntry(id: string, title: string): void {
   });
 }
 
+/** Deleting an entry also detaches it as a ledger counterparty. */
 export function deleteEntry(id: string): void {
   mutate((draft) => {
     draft.entries = draft.entries.filter((entry) => entry.id !== id);
+    for (const transaction of draft.transactions) {
+      if (transaction.counterpartyId === id) delete transaction.counterpartyId;
+    }
   });
 }
 
@@ -301,6 +315,72 @@ export function deleteSession(id: string): void {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Ledger and goals                                                            */
+/* -------------------------------------------------------------------------- */
+
+export type NewTransaction = Omit<Transaction, 'id' | 'createdAt' | 'tagIds' | 'secret'> &
+  Partial<Pick<Transaction, 'tagIds' | 'secret'>>;
+
+export function addTransaction(input: NewTransaction): string {
+  const transaction: Transaction = {
+    tagIds: [],
+    secret: false,
+    ...input,
+    description: input.description.trim(),
+    id: newId(),
+    createdAt: stamp(),
+  };
+  mutate((draft) => {
+    draft.transactions.push(transaction);
+  });
+  return transaction.id;
+}
+
+export function updateTransaction(id: string, recipe: (transaction: Transaction) => void): void {
+  mutate((draft) => {
+    const transaction = draft.transactions.find((candidate) => candidate.id === id);
+    if (transaction) recipe(transaction);
+  });
+}
+
+export function deleteTransaction(id: string): void {
+  mutate((draft) => {
+    draft.transactions = draft.transactions.filter((transaction) => transaction.id !== id);
+  });
+}
+
+export type GoalInput = Pick<Goal, 'title' | 'kind' | 'target' | 'notes' | 'secret'> & { deadline?: string };
+
+export function addGoal(input: GoalInput): string {
+  const goal: Goal = { ...input, id: newId(), createdAt: stamp(), updatedAt: stamp() };
+  if (!goal.deadline) delete goal.deadline;
+  mutate((draft) => {
+    draft.goals.push(goal);
+  });
+  return goal.id;
+}
+
+export function updateGoal(id: string, recipe: (goal: Goal) => void): void {
+  mutate((draft) => {
+    const goal = draft.goals.find((candidate) => candidate.id === id);
+    if (!goal) return;
+    recipe(goal);
+    if (!goal.deadline) delete goal.deadline;
+    goal.updatedAt = stamp();
+  });
+}
+
+/** The goal's transactions stay in the ledger; they just stop pointing at it. */
+export function deleteGoal(id: string): void {
+  mutate((draft) => {
+    draft.goals = draft.goals.filter((goal) => goal.id !== id);
+    for (const transaction of draft.transactions) {
+      if (transaction.goalId === id) delete transaction.goalId;
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------- */
 /* Tags                                                                        */
 /* -------------------------------------------------------------------------- */
 
@@ -319,12 +399,15 @@ export function updateTag(id: string, recipe: (tag: Tag) => void): void {
   });
 }
 
-/** Deleting a tag also removes it from every entry that carried it. */
+/** Deleting a tag also removes it from every entry and transaction that carried it. */
 export function deleteTag(id: string): void {
   mutate((draft) => {
     draft.tags = draft.tags.filter((tag) => tag.id !== id);
     for (const entry of draft.entries) {
       if (entry.tagIds.includes(id)) entry.tagIds = entry.tagIds.filter((tagId) => tagId !== id);
+    }
+    for (const transaction of draft.transactions) {
+      if (transaction.tagIds.includes(id)) transaction.tagIds = transaction.tagIds.filter((tagId) => tagId !== id);
     }
   });
 }
@@ -351,7 +434,11 @@ export function updateEntryType(id: string, recipe: (type: EntryType) => void): 
 /** Removes the section and every entry filed under it. */
 export function deleteEntryType(id: string): void {
   mutate((draft) => {
+    const gone = new Set(draft.entries.filter((entry) => entry.typeId === id).map((entry) => entry.id));
     draft.entryTypes = draft.entryTypes.filter((type) => type.id !== id);
     draft.entries = draft.entries.filter((entry) => entry.typeId !== id);
+    for (const transaction of draft.transactions) {
+      if (transaction.counterpartyId && gone.has(transaction.counterpartyId)) delete transaction.counterpartyId;
+    }
   });
 }

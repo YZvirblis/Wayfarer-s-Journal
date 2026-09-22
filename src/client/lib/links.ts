@@ -78,7 +78,9 @@ export type LinkSource =
   | { kind: 'entry'; id: string; label: string; typeId: string; body: string }
   | { kind: 'section'; id: string; label: string; body: string }
   | { kind: 'capture'; id: string; label: string; body: string }
-  | { kind: 'session'; id: string; label: string; body: string };
+  | { kind: 'session'; id: string; label: string; body: string }
+  | { kind: 'transaction'; id: string; label: string; body: string }
+  | { kind: 'goal'; id: string; label: string; body: string };
 
 export function linkSources(doc: CharacterDocument): LinkSource[] {
   return [
@@ -106,6 +108,18 @@ export function linkSources(doc: CharacterDocument): LinkSource[] {
       id: session.id,
       label: session.title || session.date,
       body: session.body,
+    })),
+    ...doc.transactions.map((transaction): LinkSource => ({
+      kind: 'transaction',
+      id: transaction.id,
+      label: `${transaction.amount < 0 ? '−' : '+'}${Math.abs(transaction.amount).toLocaleString()} septims`,
+      body: transaction.description,
+    })),
+    ...doc.goals.map((goal): LinkSource => ({
+      kind: 'goal',
+      id: goal.id,
+      label: goal.title || 'Untitled goal',
+      body: goal.notes,
     })),
   ];
 }
@@ -175,4 +189,6 @@ export function rewriteLinksTo(doc: CharacterDocument, entryId: string, newTitle
   for (const section of doc.profile.sections) section.body = rewrite(section.body);
   for (const capture of doc.captures) capture.body = rewrite(capture.body);
   for (const session of doc.sessions) session.body = rewrite(session.body);
+  for (const transaction of doc.transactions) transaction.description = rewrite(transaction.description);
+  for (const goal of doc.goals) goal.notes = rewrite(goal.notes);
 }

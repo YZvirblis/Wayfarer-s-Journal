@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Bump SCHEMA_VERSION and add a migration in src/server/migrations.ts whenever
  * this file changes shape.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /** Curated accent palette. Tags and entry types store a key, not a hex value, so
  *  colours follow the active theme. */
@@ -120,6 +120,42 @@ export const sessionSchema = z.object({
 });
 export type Session = z.infer<typeof sessionSchema>;
 
+/**
+ * One movement of septims. Added in schemaVersion 3. Positive amounts are
+ * income, negative are expenses. `counterpartyId` points at a People entry;
+ * `goalId` ties the transaction to a goal, whose progress is derived from it.
+ */
+export const transactionSchema = z.object({
+  id: z.string().min(1),
+  date: z.string(), // YYYY-MM-DD
+  amount: z.number(),
+  description: z.string(), // markdown, may contain [[links]]
+  counterpartyId: z.string().optional(),
+  tagIds: z.array(z.string()).default([]),
+  goalId: z.string().optional(),
+  secret: z.boolean().default(false),
+  createdAt: isoDate,
+});
+export type Transaction = z.infer<typeof transactionSchema>;
+
+export const GOAL_KINDS = ['save', 'debt'] as const;
+export type GoalKind = (typeof GOAL_KINDS)[number];
+
+/** A sum to save up, or a debt to pay down. Added in schemaVersion 3. Progress is
+ *  never stored: it is the sum of the transactions carrying the goal's id. */
+export const goalSchema = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+  kind: z.enum(GOAL_KINDS),
+  target: z.number(),
+  deadline: z.string().optional(), // YYYY-MM-DD
+  notes: z.string().default(''), // markdown
+  secret: z.boolean().default(false),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+});
+export type Goal = z.infer<typeof goalSchema>;
+
 export const characterDocumentSchema = z.object({
   id: z.string().min(1),
   schemaVersion: z.number().int().positive(),
@@ -131,6 +167,8 @@ export const characterDocumentSchema = z.object({
   entries: z.array(entrySchema),
   captures: z.array(captureSchema).default([]),
   sessions: z.array(sessionSchema).default([]),
+  transactions: z.array(transactionSchema).default([]),
+  goals: z.array(goalSchema).default([]),
 });
 export type CharacterDocument = z.infer<typeof characterDocumentSchema>;
 

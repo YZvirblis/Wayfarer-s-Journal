@@ -1,4 +1,4 @@
-import { CalendarDays, Inbox, UserRound, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Coins, Inbox, Target, UserRound, type LucideIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { CharacterDocument } from '../../shared/schema';
 import { cn } from '../lib/cn';
@@ -12,12 +12,16 @@ const KIND_LABELS: Record<Exclude<Backlink['source']['kind'], 'entry'>, string> 
   section: 'Overview',
   capture: 'Inbox',
   session: 'Session',
+  transaction: 'Ledger',
+  goal: 'Goal',
 };
 
 const KIND_ICONS: Record<Exclude<Backlink['source']['kind'], 'entry'>, LucideIcon> = {
   section: UserRound,
   capture: Inbox,
   session: CalendarDays,
+  transaction: Coins,
+  goal: Target,
 };
 
 function BacklinkRow({ backlink, doc }: { backlink: Backlink; doc: CharacterDocument }) {

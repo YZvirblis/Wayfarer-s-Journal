@@ -86,7 +86,7 @@ interface CharacterDocument {
   tags: Tag[];
   entryTypes: EntryType[];
   entries: Entry[];
-  // schemaVersion 2 adds captures and sessions (see below); Phase 3 adds ledger and goals
+  // schemaVersion 2 adds captures and sessions; schemaVersion 3 adds transactions and goals (see below)
 }
 
 interface Profile {
@@ -173,9 +173,43 @@ interface Session { id: string; date: string /* YYYY-MM-DD */; title: string; bo
 - **Backlinks** ("Mentioned in…", `components/Backlinks.tsx`) are computed from the document on every render of an entry's detail pane: every body (entries, profile sections, captures, sessions) is parsed, each link resolved, and one row per source kept, with the sentence around the first mention as a snippet and a `×n` count for repeat mentions. Clicking a row jumps to the source. Nothing is cached or stored; the data is small enough that this is instant.
 - **Implementation:** `lib/links.ts` (parse, resolve, rewrite, backlinks), `lib/remarkWikiLinks.ts` (a remark plugin that turns `[[…]]` text into link nodes with a private `#wj-link:` href, which the Markdown component renders as `WikiLink`), `lib/linkContext.tsx` (what Workspace provides to the renderer and the editor), `lib/caret.ts` (mirror-div caret measurement for the autocomplete popup).
 
-### Planned additions (future schema versions)
-- **Ledger (Phase 3):** `{ id, date, amount, description, entryIds, tagIds }` in septims.
-- **Goals (Phase 3):** `{ id, title, target, deadline?, kind: "save" | "debt" }`, with progress derived from the ledger.
+### schemaVersion 3 (Phase 3)
+Two more additive collections: the septim ledger and goals.
+```ts
+interface CharacterDocument {
+  // ...everything from v2, plus:
+  transactions: Transaction[];
+  goals: Goal[];
+}
+interface Transaction {
+  id: string;
+  date: string;            // YYYY-MM-DD
+  amount: number;          // septims; positive = income, negative = expense
+  description: string;     // markdown, may contain [[links]]
+  counterpartyId?: string; // a People entry
+  tagIds: string[];
+  goalId?: string;
+  secret: boolean;
+  createdAt: string;
+}
+interface Goal {
+  id: string;
+  title: string;
+  kind: 'save' | 'debt';
+  target: number;
+  deadline?: string;       // YYYY-MM-DD
+  notes: string;           // markdown
+  secret: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+- **Goal progress is derived, never stored.** A save goal counts the sum of the transactions carrying its id; a debt goal counts the money that went *out* under its name (the negative of that sum). Remaining, percent, days to the deadline and the "per week needed" figure are all computed in `lib/ledger.ts` at render time.
+- **Running balance** is computed over *every* transaction in date order even when the view is filtered, so a filtered row still shows the true balance at that point.
+- **Quick entry** is one line: `40 back room at the Kettle`. The Spent / Earned toggle supplies the sign unless the line starts with `+` or `−`; typing `@` opens a counterparty autocomplete over People, and the chosen person becomes a chip beside the box rather than text in the description.
+- **Deleting** an entry detaches it as a counterparty; deleting a goal detaches its transactions; deleting a tag strips it from transactions as well as entries. All in one mutation each.
+- **Migration 2 → 3** adds `transactions: []` and `goals: []` when absent, like 1 → 2. Verified against the example character and the real imported character on 2026-09-22 with v2 backups taken first.
+- **Ids in the example** for these collections are readable (`t-shield-bands`, `g-horse`); the app uses nanoid.
 
 ## 5. UI / UX
 
@@ -242,6 +276,9 @@ Record significant decisions here, newest first.
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-09-22 | Transactions carry `secret` from the start (v3), although the ledger spec did not list it | Hide-secrets mode (Phase 3 item 5) has to blur transactions too; adding the flag now avoids a fourth schema bump one item later |
+| 2026-09-22 | A debt goal's progress is the negative sum of its transactions; a save goal's is the plain sum | Repayments are expenses in the ledger. Deriving progress this way keeps the ledger the single source of truth and lets one transaction serve both the balance and the goal |
+| 2026-09-22 | Ledger counterparties are picked from People only (not any entry) | The relationship web reads counterparties as edges between people; a place or faction as a counterparty would need a different edge type. Fields can broaden it later without a migration |
 | 2026-09-22 | Quick capture is bound to `Ctrl+/` | The obvious candidates collide: Ctrl+J is Downloads in Chrome, Ctrl+Shift+J/C/K open devtools or the console, Ctrl+Space is claimed by IMEs. Nothing in Chrome, Edge or Firefox uses Ctrl+/ |
 | 2026-09-22 | Narrow layouts use an icon rail rather than a slide-in drawer | Navigation stays one click away while the game is running; a drawer would cost a click to open and one to close on every switch |
 | 2026-09-22 | Links stay as `[[Title]]` text in bodies; nothing is stored beside them, and namesakes are resolved oldest-first | Text survives any edit, export, or hand-editing of the file. A stored id would break the moment the user edits the link in write mode. Oldest-first keeps existing links stable when a new entry borrows a title |

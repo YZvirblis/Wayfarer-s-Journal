@@ -2,12 +2,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import {
   CalendarDays,
   CirclePlus,
+  Coins,
   Feather,
   Inbox,
   Moon,
   Search,
   Sun,
   Tag as TagIcon,
+  Target,
   UserRound,
   Users,
   type LucideIcon,
@@ -31,6 +33,9 @@ export interface PaletteActions {
   openInbox: () => void;
   openSessions: (sessionId?: string) => void;
   newSession: () => void;
+  openLedger: () => void;
+  openGoals: () => void;
+  newGoal: () => void;
   quickCapture: () => void;
   toggleTag: (tagId: string) => void;
   createEntry: (type: EntryType, title: string) => void;
@@ -113,6 +118,24 @@ function buildCommands(
     run: () => actions.openSessions(),
   });
   commands.push({
+    id: 'go:ledger',
+    group: 'Go to',
+    label: 'Ledger',
+    keywords: 'septims coin money gold income expenses balance',
+    icon: Coins,
+    iconClass: 'text-gold',
+    run: actions.openLedger,
+  });
+  commands.push({
+    id: 'go:goals',
+    group: 'Go to',
+    label: 'Goals',
+    keywords: 'savings debt target',
+    icon: Target,
+    iconClass: 'text-gold',
+    run: actions.openGoals,
+  });
+  commands.push({
     id: 'go:inbox',
     group: 'Go to',
     label: 'Inbox',
@@ -179,6 +202,15 @@ function buildCommands(
     iconClass: 'text-gold',
     run: actions.newSession,
   });
+  commands.push({
+    id: 'create:goal',
+    group: 'Create',
+    label: 'New goal',
+    keywords: 'save debt target septims',
+    icon: Target,
+    iconClass: 'text-gold',
+    run: actions.newGoal,
+  });
   for (const type of doc.entryTypes) {
     const singular = singularize(type.name).toLowerCase();
     commands.push({
@@ -235,7 +267,7 @@ function rank(commands: Command[], query: string): Command[] {
     );
   }
   const scored = commands.flatMap((command) => {
-    if (command.id.startsWith('create:') && command.id !== 'create:capture' && command.id !== 'create:session') {
+    if (command.id.startsWith('create:') && !['create:capture', 'create:session', 'create:goal'].includes(command.id)) {
       return [{ command, score: -1 }]; // "Create as…" is always offered, always last
     }
     const score = fuzzyScore(needle, command.keywords ? `${command.label} ${command.keywords}` : command.label);

@@ -35,8 +35,8 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Example character ships with a sample capture and a sample session (file is schemaVersion 2)
 
 ## Phase 3 — Depth
-- [ ] Septim ledger: income/expenses linked to people and tags
-- [ ] Goals: savings/debt targets with deadlines and progress bars
+- [x] Septim ledger (schema v3): running balance, month groups, filters by person / tag / goal, totals in view, one-line quick entry with `@person` autocomplete, inline editing, "Dealings" on every person
+- [x] Goals (schema v3): save / debt kinds, progress derived from the ledger, remaining / percent / days left / per-week figure, cards on the Overview and a Goals page with a quick payment line
 - [ ] Relationship web: interactive graph of people, factions, places
 - [ ] Custom field editor for entry types
 - [ ] "Hide secrets" blur mode for screenshots/streaming

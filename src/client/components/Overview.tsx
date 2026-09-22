@@ -5,7 +5,10 @@ import type { CharacterDocument, ProfileField, ProfileSection } from '../../shar
 import { cn } from '../lib/cn';
 import { mutate } from '../lib/documentStore';
 import { compactRelative } from '../lib/format';
+import { goalProgress, totals } from '../lib/ledger';
+import { useLinks } from '../lib/linkContext';
 import { useAutoCommit } from '../lib/useAutoCommit';
+import { GoalTile } from './GoalCard';
 import { MarkdownField } from './MarkdownField';
 import { Sigil } from './Sigil';
 import { Button, IconButton } from './ui/Button';
@@ -133,6 +136,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export function Overview({ doc }: { doc: CharacterDocument }) {
   const [pendingSection, setPendingSection] = useState<ProfileSection | null>(null);
+  const { openGoals } = useLinks();
   const name = useAutoCommit(doc.profile.name, (value) =>
     updateProfile((profile) => void (profile.name = value || 'Unnamed Wayfarer')),
   );
@@ -142,8 +146,8 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
     const open = questType
       ? doc.entries.filter((entry) => entry.typeId === questType.id && (entry.status ?? 'active') === 'active').length
       : 0;
-    return { entries: doc.entries.length, tags: doc.tags.length, open, questType };
-  }, [doc.entries, doc.entryTypes, doc.tags]);
+    return { entries: doc.entries.length, tags: doc.tags.length, open, questType, balance: totals(doc.transactions).net };
+  }, [doc.entries, doc.entryTypes, doc.tags, doc.transactions]);
 
   const subtitle = doc.profile.fields
     .filter((field) => field.value.trim())
@@ -168,11 +172,23 @@ export function Overview({ doc }: { doc: CharacterDocument }) {
           </div>
         </header>
 
-        <div className="mt-8 grid grid-cols-3 gap-6 border-y border-line/[0.1] py-4">
+        <div className="mt-8 grid grid-cols-2 gap-6 border-y border-line/[0.1] py-4 sm:grid-cols-4">
           <Stat label="Entries" value={String(stats.entries)} />
           <Stat label={stats.questType ? 'Quests afoot' : 'Tags'} value={String(stats.questType ? stats.open : stats.tags)} />
+          <Stat label="Septims" value={`${stats.balance < 0 ? '−' : ''}${Math.abs(stats.balance).toLocaleString()}`} />
           <Stat label="Last written" value={compactRelative(doc.updatedAt)} />
         </div>
+
+        {doc.goals.length > 0 ? (
+          <div className="mt-8">
+            <p className="wj-eyebrow mb-3">Goals</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {doc.goals.map((goal) => (
+                <GoalTile key={goal.id} goal={goal} progress={goalProgress(goal, doc.transactions)} onOpen={openGoals} />
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-8">
           <p className="wj-eyebrow mb-2">The bearer of this journal</p>

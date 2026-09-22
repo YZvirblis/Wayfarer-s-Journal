@@ -132,6 +132,8 @@ export function createCharacterDocument(name: string, now = new Date().toISOStri
     entries: [],
     captures: [],
     sessions: [],
+    transactions: [],
+    goals: [],
   };
 }
 

@@ -1,8 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { CharacterSummary, EntryType, PaletteColor } from '../../shared/schema';
+import type { CharacterSummary, EntryType, Goal, PaletteColor } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
 import {
+  addGoal,
   createEntry,
   createEntryType,
   createSession,
@@ -10,6 +11,7 @@ import {
   getDocument,
   openDocument,
   updateEntryType,
+  updateGoal,
   useDocumentState,
 } from '../lib/documentStore';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
@@ -20,7 +22,10 @@ import { toggleTheme } from '../lib/settingsStore';
 import type { View } from '../types';
 import { CommandPalette, type PaletteActions } from './CommandPalette';
 import { EntryTypeView } from './EntryTypeView';
+import { GoalDialog } from './GoalDialog';
+import { GoalsView } from './GoalsView';
 import { InboxView } from './InboxView';
+import { LedgerView } from './LedgerView';
 import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
 import { QuickCapture } from './QuickCapture';
@@ -57,6 +62,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [pendingSectionDelete, setPendingSectionDelete] = useState<EntryType | null>(null);
   /** A `[[link]]` that resolved to nothing and was clicked: offer to create the entry. */
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
+  const [goalDialog, setGoalDialog] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
   const wide = useMediaQuery(WIDE_QUERY);
   const [palette, setPalette] = useState<{ open: boolean; query: string }>({ open: false, query: '' });
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -134,10 +140,21 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       if (source.kind === 'entry') showEntry(source.typeId, source.id);
       else if (source.kind === 'section') setView({ kind: 'overview' });
       else if (source.kind === 'capture') setView({ kind: 'inbox' });
-      else setView({ kind: 'sessions', sessionId: source.id });
+      else if (source.kind === 'session') setView({ kind: 'sessions', sessionId: source.id });
+      else if (source.kind === 'transaction') setView({ kind: 'ledger', counterpartyId: null });
+      else setView({ kind: 'goals' });
     },
     [showEntry],
   );
+
+  const openLedger = useCallback((counterpartyId?: string) => {
+    setView({ kind: 'ledger', counterpartyId: counterpartyId ?? null });
+  }, []);
+  const openGoals = useCallback(() => setView({ kind: 'goals' }), []);
+  const newGoal = useCallback(() => {
+    setView({ kind: 'goals' });
+    setGoalDialog({ open: true, goal: null });
+  }, []);
 
   const openOverview = useCallback((sectionId?: string) => {
     setView({ kind: 'overview' });
@@ -156,6 +173,9 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       openInbox: () => setView({ kind: 'inbox' }),
       openSessions: (sessionId) => setView({ kind: 'sessions', sessionId: sessionId ?? null }),
       newSession: () => setView({ kind: 'sessions', sessionId: createSession() }),
+      openLedger: () => openLedger(),
+      openGoals,
+      newGoal,
       quickCapture: () => setCaptureOpen(true),
       toggleTag,
       createEntry: (type, title) => showEntry(type.id, createEntry(type, title)),
@@ -163,7 +183,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       manageCharacters: onManageCharacters,
       toggleTheme,
     }),
-    [showEntry, openOverview, toggleTag, onSwitchCharacter, onManageCharacters],
+    [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters],
   );
 
   const linkContext = useMemo<LinkContextValue>(
@@ -172,9 +192,11 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       entryTypes: doc?.entryTypes ?? [],
       openEntry,
       openSource,
+      openLedger,
+      openGoals,
       createFromLink: (title, typeName) => setLinkDraft({ title, ...(typeName ? { typeName } : {}) }),
     }),
-    [doc?.entries, doc?.entryTypes, openEntry, openSource],
+    [doc?.entries, doc?.entryTypes, openEntry, openSource, openLedger, openGoals],
   );
 
   const openCapture = useCallback(() => {
@@ -274,6 +296,19 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
             selectedId={view.sessionId}
             onSelect={(sessionId) => setView({ kind: 'sessions', sessionId })}
           />
+        ) : view.kind === 'ledger' ? (
+          <LedgerView
+            doc={doc}
+            counterpartyId={view.counterpartyId}
+            onFilterCounterparty={(counterpartyId) => setView({ kind: 'ledger', counterpartyId })}
+          />
+        ) : view.kind === 'goals' ? (
+          <GoalsView
+            doc={doc}
+            onNewGoal={() => setGoalDialog({ open: true, goal: null })}
+            onEditGoal={(goal) => setGoalDialog({ open: true, goal })}
+            onOpenLedger={() => openLedger()}
+          />
         ) : activeType ? (
           <EntryTypeView
             key={activeType.id}
@@ -317,6 +352,28 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         onSubmit={({ title, typeId }) => {
           const type = doc.entryTypes.find((candidate) => candidate.id === typeId);
           if (type) showEntry(type.id, createEntry(type, title));
+        }}
+      />
+
+      <GoalDialog
+        open={goalDialog.open}
+        onOpenChange={(open) => setGoalDialog((current) => ({ ...current, open }))}
+        goal={goalDialog.goal}
+        onSubmit={(values) => {
+          const existing = goalDialog.goal;
+          if (existing) {
+            updateGoal(existing.id, (goal) => {
+              goal.title = values.title;
+              goal.kind = values.kind;
+              goal.target = values.target;
+              goal.notes = values.notes;
+              goal.secret = values.secret;
+              if (values.deadline) goal.deadline = values.deadline;
+              else delete goal.deadline;
+            });
+          } else {
+            addGoal(values);
+          }
         }}
       />
 

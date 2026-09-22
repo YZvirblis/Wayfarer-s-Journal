@@ -22,6 +22,15 @@ const migrations: Record<number, (doc: RawDocument) => RawDocument> = {
     captures: Array.isArray(doc.captures) ? doc.captures : [],
     sessions: Array.isArray(doc.sessions) ? doc.sessions : [],
   }),
+  /**
+   * 2 -> 3: Phase 3 adds the septim ledger and goals. Again two new top-level
+   * collections and nothing else, so additive and idempotent.
+   */
+  2: (doc) => ({
+    ...doc,
+    transactions: Array.isArray(doc.transactions) ? doc.transactions : [],
+    goals: Array.isArray(doc.goals) ? doc.goals : [],
+  }),
 };
 
 export class MigrationError extends Error {}

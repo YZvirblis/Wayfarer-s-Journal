@@ -1,7 +1,6 @@
 import { CornerDownRight, Feather, FilePlus2, Inbox, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Capture, CharacterDocument } from '../../shared/schema';
-import { cn } from '../lib/cn';
 import { appendCaptureToEntry, convertCapture, deleteCapture, splitCapture, updateCapture } from '../lib/documentStore';
 import { relativeTime } from '../lib/format';
 import { CAPTURE_SHORTCUT } from '../lib/keys';
@@ -9,30 +8,10 @@ import { useLinks } from '../lib/linkContext';
 import { EntryPicker } from './EntryPicker';
 import { MarkdownField } from './MarkdownField';
 import { NewEntryDialog } from './NewEntryDialog';
+import { ArmedButton } from './ui/ArmedButton';
 import { Button } from './ui/Button';
 import { EmptyState } from './ui/EmptyState';
 import { Tooltip } from './ui/Tooltip';
-
-/** "Dismiss" asks once, inline, and forgets the question after a moment. */
-function DismissButton({ onConfirm }: { onConfirm: () => void }) {
-  const [armed, setArmed] = useState(false);
-  useEffect(() => {
-    if (!armed) return;
-    const timer = window.setTimeout(() => setArmed(false), 3000);
-    return () => window.clearTimeout(timer);
-  }, [armed]);
-  return (
-    <Button
-      variant={armed ? 'danger' : 'ghost'}
-      size="sm"
-      className={cn(!armed && 'text-faint hover:text-rose')}
-      onClick={() => (armed ? onConfirm() : setArmed(true))}
-    >
-      <Trash2 className="h-3 w-3" />
-      {armed ? 'Sure? Dismiss' : 'Dismiss'}
-    </Button>
-  );
-}
 
 function CaptureCard({
   capture,
@@ -61,7 +40,18 @@ function CaptureCard({
           <CornerDownRight className="h-3 w-3" />
           Add to an entry
         </Button>
-        <DismissButton onConfirm={() => deleteCapture(capture.id)} />
+        <ArmedButton
+          armedLabel={
+            <>
+              <Trash2 className="h-3 w-3" />
+              Sure? Dismiss
+            </>
+          }
+          onConfirm={() => deleteCapture(capture.id)}
+        >
+          <Trash2 className="h-3 w-3" />
+          Dismiss
+        </ArmedButton>
       </div>
     </li>
   );

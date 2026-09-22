@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   ChevronsUpDown,
+  Coins,
   Feather,
   Inbox,
   MoreHorizontal,
@@ -8,6 +9,7 @@ import {
   Plus,
   Search,
   Tags,
+  Target,
   Trash2,
   UserRound,
   type LucideIcon,
@@ -215,6 +217,22 @@ export function Sidebar({
           count={doc.sessions.length}
           active={view.kind === 'sessions'}
           onClick={() => onNavigate({ kind: 'sessions', sessionId: null })}
+        />
+        <NavRow
+          label="Ledger"
+          icon={Coins}
+          color="text-gold"
+          count={doc.transactions.length}
+          active={view.kind === 'ledger'}
+          onClick={() => onNavigate({ kind: 'ledger', counterpartyId: null })}
+        />
+        <NavRow
+          label="Goals"
+          icon={Target}
+          color="text-gold"
+          count={doc.goals.length}
+          active={view.kind === 'goals'}
+          onClick={() => onNavigate({ kind: 'goals' })}
         />
 
         <p className="wj-label px-3 pb-1 pt-4">Journal</p>

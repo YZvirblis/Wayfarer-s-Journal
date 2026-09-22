@@ -14,6 +14,9 @@ export interface LinkContextValue {
   openEntry: (id: string) => void;
   /** Jump to wherever a backlink came from: an entry, the Overview, the Inbox, a session. */
   openSource: (source: LinkSource) => void;
+  /** The ledger, optionally filtered to one person's dealings. */
+  openLedger: (counterpartyId?: string) => void;
+  openGoals: () => void;
   /** Offer to create an entry for a link that resolves to nothing. */
   createFromLink: (title: string, typeName?: string) => void;
 }
@@ -25,6 +28,8 @@ export const LinkContext = createContext<LinkContextValue>({
   entryTypes: [],
   openEntry: noop,
   openSource: noop,
+  openLedger: noop,
+  openGoals: noop,
   createFromLink: noop,
 });
 

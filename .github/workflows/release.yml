@@ -1,0 +1,52 @@
+name: Release
+
+# Builds the portable Windows executable and attaches it to a GitHub Release
+# whenever a version tag is pushed:
+#
+#   git tag -a v1.0.0 -m "v1.0.0"
+#   git push origin v1.0.0
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Portable Windows build
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build the portable executable
+        # electron:build = client build + Electron bundles + icon + electron-builder.
+        # --publish never keeps electron-builder from trying to upload on its own;
+        # the release step below attaches the file instead.
+        run: npm run electron:build -- --publish never
+
+      - name: List artifacts
+        run: Get-ChildItem release -Filter *.exe | Select-Object Name, Length
+        shell: pwsh
+
+      - name: Create the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.exe
+          generate_release_notes: true
+          fail_on_unmatched_files: true

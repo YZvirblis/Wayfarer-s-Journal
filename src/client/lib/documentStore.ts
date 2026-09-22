@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react';
-import type { Capture, CharacterDocument, Entry, EntryType, PaletteColor, Tag } from '../../shared/schema';
+import type { Capture, CharacterDocument, Entry, EntryType, PaletteColor, Session, Tag } from '../../shared/schema';
 import { SCHEMA_VERSION } from '../../shared/schema';
 import { newId } from '../../shared/defaults';
 import { api, errorMessage } from './api';
+import { localDate } from './format';
 import { rewriteLinksTo } from './links';
 
 export const SAVE_DEBOUNCE_MS = 800;
@@ -270,6 +271,33 @@ export function appendCaptureToEntry(id: string, entryId: string): boolean {
     draft.captures = draft.captures.filter((candidate) => candidate.id !== id);
   });
   return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sessions (the play log)                                                     */
+/* -------------------------------------------------------------------------- */
+
+export function createSession(date = localDate()): string {
+  const session: Session = { id: newId(), date, title: '', body: '', createdAt: stamp(), updatedAt: stamp() };
+  mutate((draft) => {
+    draft.sessions.unshift(session);
+  });
+  return session.id;
+}
+
+export function updateSession(id: string, recipe: (session: Session) => void): void {
+  mutate((draft) => {
+    const session = draft.sessions.find((candidate) => candidate.id === id);
+    if (!session) return;
+    recipe(session);
+    session.updatedAt = stamp();
+  });
+}
+
+export function deleteSession(id: string): void {
+  mutate((draft) => {
+    draft.sessions = draft.sessions.filter((session) => session.id !== id);
+  });
 }
 
 /* -------------------------------------------------------------------------- */

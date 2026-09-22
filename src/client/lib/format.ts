@@ -45,6 +45,39 @@ export function formatDate(iso: string): string {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+/** Today as YYYY-MM-DD in local time — what a session's date defaults to. */
+export function localDate(now = new Date()): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+/** A calendar date (YYYY-MM-DD, no time zone) as a Date at local midnight. */
+function calendarDate(date: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+/** "Sun 22 Sep" style, for the timeline. */
+export function formatCalendarShort(date: string): string {
+  const value = calendarDate(date);
+  return value ? value.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : date;
+}
+
+/** "Sunday, 22 September 2026", for a session's heading. */
+export function formatCalendarLong(date: string): string {
+  const value = calendarDate(date);
+  return value
+    ? value.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : date;
+}
+
+/** "September 2026", for grouping the timeline. */
+export function formatMonth(date: string): string {
+  const value = calendarDate(date);
+  return value ? value.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : date.slice(0, 7);
+}
+
 /** Markdown reduced to its words: links keep their text, emphasis and headings lose their markers. */
 export function stripMarkdown(markdown: string): string {
   return markdown

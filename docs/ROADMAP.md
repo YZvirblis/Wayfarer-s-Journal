@@ -28,7 +28,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Ctrl+K command palette: fuzzy search over entries, sections, profile sections and tags; jump anywhere; create entries of any type; switch characters; toggle theme
 - [x] Quick-capture popup (`Ctrl+/` in-app hotkey, `[[links]]` work inside) → Inbox with a count in the sidebar
 - [x] Convert a capture into an entry of any type, append it to an existing entry, or dismiss it
-- [ ] Session log: dated timeline of play sessions, linked to entries
+- [x] Session log: dated timeline of play sessions; entries linked from a session's body list it under "Mentioned in"
 - [x] Narrow-window layout (~600–1000px): icon-rail sidebar below 1200px, single-pane list/detail with a back action below 960px
 - [ ] Keyboard navigation of the entry list (↑/↓ to move, Enter to open)
 - [ ] Search across every section, not just the open one

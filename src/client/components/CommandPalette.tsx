@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import {
+  CalendarDays,
   CirclePlus,
   Feather,
   Inbox,
@@ -14,6 +15,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CharacterDocument, CharacterSummary, EntryType } from '../../shared/schema';
 import { cn } from '../lib/cn';
+import { formatCalendarShort } from '../lib/format';
 import { fuzzyScore } from '../lib/fuzzy';
 import { iconByName } from '../lib/icons';
 import { CAPTURE_SHORTCUT } from '../lib/keys';
@@ -27,6 +29,8 @@ export interface PaletteActions {
   openType: (typeId: string) => void;
   openOverview: (sectionId?: string) => void;
   openInbox: () => void;
+  openSessions: (sessionId?: string) => void;
+  newSession: () => void;
   quickCapture: () => void;
   toggleTag: (tagId: string) => void;
   createEntry: (type: EntryType, title: string) => void;
@@ -35,7 +39,7 @@ export interface PaletteActions {
   toggleTheme: () => void;
 }
 
-type Group = 'Entries' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
+type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
 
 interface Command {
   id: string;
@@ -50,7 +54,7 @@ interface Command {
   run: () => void;
 }
 
-const GROUP_ORDER: Group[] = ['Entries', 'Go to', 'Overview', 'Tags', 'Create', 'Characters', 'Journal'];
+const GROUP_ORDER: Group[] = ['Entries', 'Sessions', 'Go to', 'Overview', 'Tags', 'Create', 'Characters', 'Journal'];
 const MAX_ENTRIES = 12;
 
 function buildCommands(
@@ -78,6 +82,19 @@ function buildCommands(
     });
   }
 
+  for (const session of doc.sessions) {
+    commands.push({
+      id: `session:${session.id}`,
+      group: 'Sessions',
+      label: session.title || 'Untitled session',
+      keywords: `${session.date} ${session.body.slice(0, 200)}`,
+      hint: formatCalendarShort(session.date),
+      icon: CalendarDays,
+      iconClass: 'text-gold',
+      run: () => actions.openSessions(session.id),
+    });
+  }
+
   commands.push({
     id: 'go:overview',
     group: 'Go to',
@@ -85,6 +102,15 @@ function buildCommands(
     icon: UserRound,
     iconClass: 'text-gold',
     run: () => actions.openOverview(),
+  });
+  commands.push({
+    id: 'go:sessions',
+    group: 'Go to',
+    label: 'Sessions',
+    keywords: 'session log timeline play',
+    icon: CalendarDays,
+    iconClass: 'text-gold',
+    run: () => actions.openSessions(),
   });
   commands.push({
     id: 'go:inbox',
@@ -143,6 +169,16 @@ function buildCommands(
     iconClass: 'text-gold',
     run: actions.quickCapture,
   });
+  commands.push({
+    id: 'create:session',
+    group: 'Create',
+    label: 'New session',
+    keywords: 'start log tonight play',
+    hint: 'Dated today',
+    icon: CalendarDays,
+    iconClass: 'text-gold',
+    run: actions.newSession,
+  });
   for (const type of doc.entryTypes) {
     const singular = singularize(type.name).toLowerCase();
     commands.push({
@@ -193,11 +229,13 @@ function buildCommands(
 function rank(commands: Command[], query: string): Command[] {
   const needle = query.trim();
   if (!needle) {
-    // Nothing typed: a browsable menu, without the full entry list.
-    return commands.filter((command) => command.group !== 'Entries' && command.group !== 'Overview');
+    // Nothing typed: a browsable menu, without the full entry and session lists.
+    return commands.filter(
+      (command) => command.group !== 'Entries' && command.group !== 'Sessions' && command.group !== 'Overview',
+    );
   }
   const scored = commands.flatMap((command) => {
-    if (command.id.startsWith('create:') && command.id !== 'create:capture') {
+    if (command.id.startsWith('create:') && command.id !== 'create:capture' && command.id !== 'create:session') {
       return [{ command, score: -1 }]; // "Create as…" is always offered, always last
     }
     const score = fuzzyScore(needle, command.keywords ? `${command.label} ${command.keywords}` : command.label);

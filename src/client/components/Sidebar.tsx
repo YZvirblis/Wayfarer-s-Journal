@@ -1,4 +1,5 @@
 import {
+  CalendarDays,
   ChevronsUpDown,
   Feather,
   Inbox,
@@ -205,6 +206,15 @@ export function Sidebar({
               </IconButton>
             </Tooltip>
           }
+        />
+
+        <NavRow
+          label="Sessions"
+          icon={CalendarDays}
+          color="text-gold"
+          count={doc.sessions.length}
+          active={view.kind === 'sessions'}
+          onClick={() => onNavigate({ kind: 'sessions', sessionId: null })}
         />
 
         <p className="wj-label px-3 pb-1 pt-4">Journal</p>

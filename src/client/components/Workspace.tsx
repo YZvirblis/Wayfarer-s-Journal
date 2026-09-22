@@ -5,6 +5,7 @@ import { api, errorMessage } from '../lib/api';
 import {
   createEntry,
   createEntryType,
+  createSession,
   deleteEntryType,
   getDocument,
   openDocument,
@@ -24,6 +25,7 @@ import { NewEntryDialog } from './NewEntryDialog';
 import { Overview } from './Overview';
 import { QuickCapture } from './QuickCapture';
 import { SectionDialog } from './SectionDialog';
+import { SessionsView } from './SessionsView';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
 import { TagManager } from './TagManager';
@@ -127,7 +129,7 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       if (source.kind === 'entry') showEntry(source.typeId, source.id);
       else if (source.kind === 'section') setView({ kind: 'overview' });
       else if (source.kind === 'capture') setView({ kind: 'inbox' });
-      // Sessions gain their own view later in Phase 2.
+      else setView({ kind: 'sessions', sessionId: source.id });
     },
     [showEntry],
   );
@@ -147,6 +149,8 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       openType: (typeId) => setView({ kind: 'type', typeId }),
       openOverview,
       openInbox: () => setView({ kind: 'inbox' }),
+      openSessions: (sessionId) => setView({ kind: 'sessions', sessionId: sessionId ?? null }),
+      newSession: () => setView({ kind: 'sessions', sessionId: createSession() }),
       quickCapture: () => setCaptureOpen(true),
       toggleTag,
       createEntry: (type, title) => showEntry(type.id, createEntry(type, title)),
@@ -259,6 +263,12 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           <Overview doc={doc} />
         ) : view.kind === 'inbox' ? (
           <InboxView doc={doc} onCapture={openCapture} />
+        ) : view.kind === 'sessions' ? (
+          <SessionsView
+            doc={doc}
+            selectedId={view.sessionId}
+            onSelect={(sessionId) => setView({ kind: 'sessions', sessionId })}
+          />
         ) : activeType ? (
           <EntryTypeView
             key={activeType.id}

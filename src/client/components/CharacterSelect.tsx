@@ -1,5 +1,6 @@
-import { AlertTriangle, BookOpen, Copy, MoreHorizontal, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { AlertTriangle, BookOpen, Copy, MoreHorizontal, Plus, Sparkles, Trash2, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { ImportCharacterDialog } from './ImportCharacterDialog';
 import type { CharacterSummary } from '../../shared/schema';
 import { api, errorMessage } from '../lib/api';
 import { cn } from '../lib/cn';
@@ -84,6 +85,7 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
   const [pendingDelete, setPendingDelete] = useState<CharacterSummary | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   async function run(action: () => Promise<string | void>): Promise<void> {
     setBusy(true);
@@ -143,6 +145,10 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
                   <Sparkles className="h-4 w-4" />
                   Open the example
                 </Button>
+                <Button size="lg" variant="ghost" onClick={() => setImporting(true)} disabled={busy}>
+                  <Upload className="h-4 w-4" />
+                  Import a file
+                </Button>
               </div>
             </div>
           ) : (
@@ -178,6 +184,16 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
                 >
                   <Sparkles className="h-3 w-3" />
                   Add the example character
+                </button>
+                <span className="text-[0.5rem] opacity-50">◆</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setImporting(true)}
+                  className="inline-flex items-center gap-1.5 underline-offset-2 transition-colors hover:text-gold hover:underline"
+                >
+                  <Upload className="h-3 w-3" />
+                  Import a character file
                 </button>
                 <span className="text-[0.5rem] opacity-50">◆</span>
                 <span>Everything is stored in the app&rsquo;s own data folder. Nothing leaves this machine.</span>
@@ -236,6 +252,12 @@ export function CharacterSelect({ characters, onOpen, onChanged }: CharacterSele
           className="wj-field h-10 font-display text-base tracking-title"
         />
       </Modal>
+
+      <ImportCharacterDialog
+        open={importing}
+        onOpenChange={setImporting}
+        onImported={(id) => void run(async () => id)}
+      />
 
       <ConfirmDialog
         open={pendingDelete !== null}

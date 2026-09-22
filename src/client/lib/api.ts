@@ -1,4 +1,4 @@
-import type { CharacterDocument, CharacterSummary, Settings } from '../../shared/schema';
+import type { CharacterDocument, CharacterSummary, ImportResult, Settings } from '../../shared/schema';
 
 export class ApiError extends Error {}
 
@@ -36,6 +36,9 @@ export const api = {
   deleteCharacter: (id: string) => request<void>(`/characters/${id}`, { method: 'DELETE' }),
   duplicateCharacter: (id: string) => request<CharacterDocument>(`/characters/${id}/duplicate`, { method: 'POST' }),
   importExample: () => request<CharacterDocument>('/characters/example', { method: 'POST' }),
+  /** `commit: false` validates and migrates without writing, returning only the summary. */
+  importCharacter: (document: unknown, commit: boolean) =>
+    request<ImportResult>('/characters/import', { method: 'POST', body: JSON.stringify({ document, commit }) }),
   getSettings: () => request<Settings>('/settings'),
   saveSettings: (settings: Settings) => request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(settings) }),
 };

@@ -8,9 +8,10 @@ import {
   SCHEMA_VERSION,
   type CharacterDocument,
   type CharacterSummary,
+  type ImportResult,
   type Settings,
 } from '../shared/schema';
-import { createCharacterDocument, newId, toSummary } from '../shared/defaults';
+import { createCharacterDocument, newId, profileFieldValue, PROFILE_FIELD_IDS, toSummary } from '../shared/defaults';
 import {
   BACKUPS_DIR,
   CHARACTERS_DIR,
@@ -193,6 +194,41 @@ export async function importExampleCharacter(): Promise<CharacterDocument> {
   }
   const doc = parseDocument(raw, 'The example character');
   return saveCharacter(reborn(doc, doc.profile.name));
+}
+
+/**
+ * Bring a character file in from outside. It is validated and migrated like
+ * any other read, then — only when `commit` is true — saved under a fresh id,
+ * so an import can never overwrite what is already here. The original
+ * `createdAt` is kept; everything else about identity is new.
+ */
+export async function importCharacter(raw: unknown, commit: boolean): Promise<ImportResult> {
+  const fromVersion =
+    typeof raw === 'object' && raw !== null && typeof (raw as { schemaVersion?: unknown }).schemaVersion === 'number'
+      ? (raw as { schemaVersion: number }).schemaVersion
+      : 1;
+  const doc = parseDocument(raw, 'The chosen file');
+  const existing = await listCharacters();
+  const summary: ImportResult['summary'] = {
+    name: doc.profile.name,
+    race: profileFieldValue(doc, PROFILE_FIELD_IDS.race, 'Race'),
+    trade: profileFieldValue(doc, PROFILE_FIELD_IDS.trade, 'Trade'),
+    fromVersion,
+    toVersion: SCHEMA_VERSION,
+    counts: {
+      entries: doc.entries.length,
+      sections: doc.entryTypes.length,
+      tags: doc.tags.length,
+      sessions: doc.sessions.length,
+      transactions: doc.transactions.length,
+      goals: doc.goals.length,
+      captures: doc.captures.length,
+    },
+    duplicateName: existing.some((character) => character.name === doc.profile.name),
+  };
+  if (!commit) return { summary };
+  const document = await saveCharacter({ ...reborn(doc, doc.profile.name), createdAt: doc.createdAt });
+  return { summary, document };
 }
 
 export async function readSettings(): Promise<Settings> {

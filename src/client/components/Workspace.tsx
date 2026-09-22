@@ -14,6 +14,7 @@ import {
   updateGoal,
   useDocumentState,
 } from '../lib/documentStore';
+import { downloadText, exportFilename } from '../lib/download';
 import { LinkContext, type LinkContextValue } from '../lib/linkContext';
 import { isCaptureShortcut, isPaletteShortcut } from '../lib/keys';
 import { WIDE_QUERY, useMediaQuery } from '../lib/layout';
@@ -43,6 +44,12 @@ const CommandPalette = lazy(() => import('./CommandPalette').then((module) => ({
 const TagManager = lazy(() => import('./TagManager').then((module) => ({ default: module.TagManager })));
 const FieldsDialog = lazy(() => import('./FieldsDialog').then((module) => ({ default: module.FieldsDialog })));
 const GoalDialog = lazy(() => import('./GoalDialog').then((module) => ({ default: module.GoalDialog })));
+const ExportMarkdownDialog = lazy(() =>
+  import('./ExportMarkdownDialog').then((module) => ({ default: module.ExportMarkdownDialog })),
+);
+const ImportCharacterDialog = lazy(() =>
+  import('./ImportCharacterDialog').then((module) => ({ default: module.ImportCharacterDialog })),
+);
 
 function Loading() {
   return (
@@ -57,13 +64,15 @@ interface WorkspaceProps {
   characters: CharacterSummary[];
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
+  /** A character was imported; refresh the list and open it. */
+  onImported: (id: string) => void;
 }
 
 function Centered({ children }: { children: ReactNode }) {
   return <div className="flex h-full items-center justify-center px-8">{children}</div>;
 }
 
-export function Workspace({ characterId, characters, onSwitchCharacter, onManageCharacters }: WorkspaceProps) {
+export function Workspace({ characterId, characters, onSwitchCharacter, onManageCharacters, onImported }: WorkspaceProps) {
   const { doc } = useDocumentState();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [view, setView] = useState<View>({ kind: 'overview' });
@@ -79,7 +88,14 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
   const [linkDraft, setLinkDraft] = useState<{ title: string; typeName?: string } | null>(null);
   const [goalDialog, setGoalDialog] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
   const [fieldsTypeId, setFieldsTypeId] = useState<string | null>(null);
+  const [exportMdOpen, setExportMdOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const { hideSecrets } = useSettings();
+
+  const exportJson = useCallback(() => {
+    const current = getDocument();
+    if (current) downloadText(exportFilename(current.profile.name, 'json'), `${JSON.stringify(current, null, 2)}\n`, 'application/json');
+  }, []);
   const wide = useMediaQuery(WIDE_QUERY);
   const [palette, setPalette] = useState<{ open: boolean; query: string }>({ open: false, query: '' });
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -201,8 +217,11 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
       manageCharacters: onManageCharacters,
       toggleTheme,
       toggleSecrets: toggleHideSecrets,
+      exportJson,
+      exportMarkdown: () => setExportMdOpen(true),
+      importCharacter: () => setImportOpen(true),
     }),
-    [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters],
+    [showEntry, openOverview, openLedger, openGoals, newGoal, toggleTag, onSwitchCharacter, onManageCharacters, exportJson],
   );
 
   const linkContext = useMemo<LinkContextValue>(
@@ -287,6 +306,9 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onDeleteSection={(type) => setPendingSectionDelete(type)}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
+          onExportJson={exportJson}
+          onExportMarkdown={() => setExportMdOpen(true)}
+          onImport={() => setImportOpen(true)}
         />
       ) : (
         <SidebarRail
@@ -303,6 +325,9 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
           onNewSection={() => setSectionDialog({ open: true, type: null })}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
+          onExportJson={exportJson}
+          onExportMarkdown={() => setExportMdOpen(true)}
+          onImport={() => setImportOpen(true)}
         />
       )}
 
@@ -384,6 +409,9 @@ export function Workspace({ characterId, characters, onSwitchCharacter, onManage
         {fieldsTypeId !== null ? (
           <FieldsDialog open onOpenChange={(open) => !open && setFieldsTypeId(null)} doc={doc} typeId={fieldsTypeId} />
         ) : null}
+
+        {exportMdOpen ? <ExportMarkdownDialog open onOpenChange={setExportMdOpen} doc={doc} /> : null}
+        {importOpen ? <ImportCharacterDialog open onOpenChange={setImportOpen} onImported={onImported} /> : null}
 
         {goalDialog.open ? (
           <GoalDialog

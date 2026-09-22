@@ -187,6 +187,32 @@ export interface CharacterSummary {
   portrait?: string;
 }
 
+/** What an import found in a file, shown before anything is written. */
+export interface ImportSummary {
+  name: string;
+  race: string;
+  trade: string;
+  fromVersion: number;
+  toVersion: number;
+  counts: {
+    entries: number;
+    sections: number;
+    tags: number;
+    sessions: number;
+    transactions: number;
+    goals: number;
+    captures: number;
+  };
+  /** A character with this name already exists; the import still creates a new one. */
+  duplicateName: boolean;
+}
+
+export interface ImportResult {
+  summary: ImportSummary;
+  /** Present when the import was committed. */
+  document?: CharacterDocument;
+}
+
 export const THEMES = ['dark', 'parchment'] as const;
 export type Theme = (typeof THEMES)[number];
 

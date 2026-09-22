@@ -43,6 +43,9 @@ interface SidebarRailProps {
   onNewSection: () => void;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
+  onExportJson: () => void;
+  onExportMarkdown: () => void;
+  onImport: () => void;
 }
 
 function RailButton({
@@ -95,6 +98,9 @@ export function SidebarRail({
   onNewSection,
   onSwitchCharacter,
   onManageCharacters,
+  onExportJson,
+  onExportMarkdown,
+  onImport,
 }: SidebarRailProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -127,6 +133,9 @@ export function SidebarRail({
           currentId={doc.id}
           onSwitchCharacter={onSwitchCharacter}
           onManageCharacters={onManageCharacters}
+          onExportJson={onExportJson}
+          onExportMarkdown={onExportMarkdown}
+          onImport={onImport}
         />
       </Menu>
 

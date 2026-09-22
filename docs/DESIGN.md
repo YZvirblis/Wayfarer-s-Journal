@@ -75,6 +75,7 @@ data/                          (gitignored; location overridable via env var)
 | DELETE | `/api/characters/:id` | Delete a character (backups are kept) |
 | POST | `/api/characters/:id/duplicate` | Duplicate a character |
 | POST | `/api/characters/example` | Copy the example character into data |
+| POST | `/api/characters/import` | Phase 4a. Body `{ document, commit }`. Validates and migrates the document; with `commit: false` returns only an `ImportSummary` (name, counts, file format before/after, duplicate-name flag); with `commit: true` saves it under a **new** id and returns the saved document. Never overwrites |
 | GET/PUT | `/api/settings` | App settings |
 
 ## 4. Data Model (schemaVersion 1)
@@ -241,6 +242,12 @@ interface Goal {
 
 ### Hide-secrets mode (Phase 3)
 `settings.hideSecrets` (persisted in `settings.json`, toggled from the sidebar footer, the rail, or the palette) blurs everything marked secret: entries in lists and in the detail pane, profile sections, goals (cards and Overview tiles), ledger lines and, since v5, sessions. `ui/Veil.tsx` wraps each of them: a blurred, non-selectable copy under a "Secret · click to reveal" pill; a click (never a hover) reveals that one item until the mode is turned off and on again. A plum banner across the top of the main area says "Secrets hidden" while it is on. Secret entries, sections, transactions and goals are also left out of the relationship web, the "Mentioned in" panel, palette results, the Inbox's entry picker and a person's Dealings, so nothing leaks through a snippet or a count. Balances still include secret transactions; the mode hides words, not arithmetic.
+
+### Export and import (Phase 4a)
+Reachable from the character switcher menu, the palette, and (import only) the character-select screen.
+- **Export as JSON** downloads the full document as-is (`lib/download.ts`), named `<slug>-<date>.json`. It is the backup format; anything the app can read, it can read back.
+- **Export as Markdown** (`lib/exportMarkdown.ts`) writes one readable file: profile, every section in sidebar order (quests with status and progress), sessions, a ledger summary (on hand, earned, spent, net per month, every line), goals with progress, and the inbox. Hide-secrets mode decides whether secret items go in, and the confirmation dialog says so in plain words with the count. `[[links]]` are kept as text.
+- **Import** (`ImportCharacterDialog`) reads a `.json` file, asks the server to validate and migrate it without writing (`commit: false`), shows what it found — name, race, trade, counts of everything, the file format it was written by, and whether a character of that name already exists — and only then saves it as a new character, keeping the original `createdAt` but nothing else of its identity. Imports never overwrite.
 
 ### Layout modes (Phase 2)
 Players run the journal beside the game, so it has to work from roughly 600px up. Two breakpoints, registered both as Tailwind screens and as media queries in `lib/layout.ts` so CSS and JS agree:

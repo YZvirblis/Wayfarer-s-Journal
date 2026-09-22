@@ -51,6 +51,9 @@ interface SidebarProps {
   onDeleteSection: (type: EntryType) => void;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
+  onExportJson: () => void;
+  onExportMarkdown: () => void;
+  onImport: () => void;
 }
 
 function NavRow({
@@ -141,6 +144,9 @@ export function Sidebar({
   onDeleteSection,
   onSwitchCharacter,
   onManageCharacters,
+  onExportJson,
+  onExportMarkdown,
+  onImport,
 }: SidebarProps) {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -193,6 +199,9 @@ export function Sidebar({
             currentId={doc.id}
             onSwitchCharacter={onSwitchCharacter}
             onManageCharacters={onManageCharacters}
+            onExportJson={onExportJson}
+            onExportMarkdown={onExportMarkdown}
+            onImport={onImport}
           />
         </Menu>
       </div>

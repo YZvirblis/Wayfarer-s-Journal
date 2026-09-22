@@ -3,15 +3,18 @@ import {
   CalendarDays,
   CirclePlus,
   Coins,
+  Download,
   Eye,
   EyeOff,
   Feather,
+  FileText,
   Inbox,
   Moon,
   Search,
   Sun,
   Tag as TagIcon,
   Target,
+  Upload,
   UserRound,
   Users,
   Waypoints,
@@ -47,6 +50,9 @@ export interface PaletteActions {
   manageCharacters: () => void;
   toggleTheme: () => void;
   toggleSecrets: () => void;
+  exportJson: () => void;
+  exportMarkdown: () => void;
+  importCharacter: () => void;
 }
 
 type Group = 'Entries' | 'Sessions' | 'Go to' | 'Overview' | 'Tags' | 'Create' | 'Characters' | 'Journal';
@@ -283,6 +289,32 @@ function buildCommands(
     keywords: 'theme light dark parchment appearance',
     icon: theme === 'dark' ? Sun : Moon,
     run: actions.toggleTheme,
+  });
+  commands.push({
+    id: 'journal:export-json',
+    group: 'Journal',
+    label: 'Export as JSON',
+    keywords: 'backup download save file',
+    hint: 'Full character',
+    icon: Download,
+    run: actions.exportJson,
+  });
+  commands.push({
+    id: 'journal:export-md',
+    group: 'Journal',
+    label: 'Export as Markdown…',
+    keywords: 'readable download text file',
+    icon: FileText,
+    run: actions.exportMarkdown,
+  });
+  commands.push({
+    id: 'journal:import',
+    group: 'Journal',
+    label: 'Import a character…',
+    keywords: 'upload json file restore',
+    hint: 'As a new character',
+    icon: Upload,
+    run: actions.importCharacter,
   });
 
   return commands;

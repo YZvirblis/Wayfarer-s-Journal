@@ -49,8 +49,8 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Sessions gain a `secret` flag (schema v5); captures stay unblurred, balances stay visible
 - [x] Reorder sections in the sidebar (drag the grip in the full sidebar; Move up / down in every section menu, which also serves the icon rail)
 - [x] Code-split the web view (d3) and other heavy routes; drop unused font subsets; entry chunk 193 kB (51 kB gzipped), vendors in separate cacheable chunks, fonts 507 → 332 kB
-- [ ] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette
-- [ ] Import JSON as a new character: validate, migrate, preview what was found, never overwrite
+- [x] Export JSON (full document) and Markdown (readable; secrets omitted while hide-secrets is on, with a confirmation saying which), from the character menu and the palette
+- [x] Import JSON as a new character: validate, migrate, preview what was found, never overwrite (character menu, palette, and the character-select screen)
 - [ ] Restore from backup in the UI: list with timestamps and counts, restore as new or replace current (two-step, current backed up first)
 - [ ] Polish pass: spacing, typography, focus states, transitions, empty states, keyboard access for dialogs, both themes on every Phase 2 and 3 view
 - [ ] Dark-theme screenshots of the example at 1440px in `docs/screenshots/`: web (hero), entry detail with backlinks, ledger with goals, palette open, character select

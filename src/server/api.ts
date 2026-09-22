@@ -3,6 +3,7 @@ import {
   createCharacter,
   deleteCharacter,
   duplicateCharacter,
+  importCharacter,
   importExampleCharacter,
   listCharacters,
   readCharacter,
@@ -46,6 +47,15 @@ export function createApiRouter(): Router {
     '/characters/example',
     wrap(async (_req, res) => {
       res.status(201).json(await importExampleCharacter());
+    }),
+  );
+
+  api.post(
+    '/characters/import',
+    wrap(async (req, res) => {
+      const commit = req.body?.commit === true;
+      const result = await importCharacter(req.body?.document, commit);
+      res.status(commit ? 201 : 200).json(result);
     }),
   );
 

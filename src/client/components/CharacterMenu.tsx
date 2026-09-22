@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react';
+import { Download, FileText, Upload, Users } from 'lucide-react';
 import type { CharacterSummary } from '../../shared/schema';
 import { Sigil } from './Sigil';
 import { MenuContent, MenuItem, MenuSeparator } from './ui/Menu';
@@ -9,12 +9,18 @@ export function CharacterMenu({
   currentId,
   onSwitchCharacter,
   onManageCharacters,
+  onExportJson,
+  onExportMarkdown,
+  onImport,
   align = 'start',
 }: {
   characters: CharacterSummary[];
   currentId: string;
   onSwitchCharacter: (id: string) => void;
   onManageCharacters: () => void;
+  onExportJson: () => void;
+  onExportMarkdown: () => void;
+  onImport: () => void;
   align?: 'start' | 'center' | 'end';
 }) {
   return (
@@ -26,6 +32,19 @@ export function CharacterMenu({
           {character.id === currentId ? <span className="text-[0.5rem] text-gold">◆</span> : null}
         </MenuItem>
       ))}
+      <MenuSeparator />
+      <MenuItem onSelect={onExportJson}>
+        <Download className="h-3.5 w-3.5 opacity-70" />
+        Export as JSON
+      </MenuItem>
+      <MenuItem onSelect={onExportMarkdown}>
+        <FileText className="h-3.5 w-3.5 opacity-70" />
+        Export as Markdown…
+      </MenuItem>
+      <MenuItem onSelect={onImport}>
+        <Upload className="h-3.5 w-3.5 opacity-70" />
+        Import a character…
+      </MenuItem>
       <MenuSeparator />
       <MenuItem onSelect={onManageCharacters}>
         <Users className="h-3.5 w-3.5 opacity-70" />

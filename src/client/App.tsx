@@ -69,6 +69,14 @@ export function App() {
     [activeId, open],
   );
 
+  const imported = useCallback(
+    async (id: string) => {
+      await refresh().catch(() => undefined);
+      await switchTo(id);
+    },
+    [refresh, switchTo],
+  );
+
   const leave = useCallback(async () => {
     await flushSave();
     closeDocument();
@@ -114,6 +122,7 @@ export function App() {
           characters={characters}
           onSwitchCharacter={(id) => void switchTo(id)}
           onManageCharacters={() => void leave()}
+          onImported={(id) => void imported(id)}
         />
       ) : (
         <Suspense fallback={null}>

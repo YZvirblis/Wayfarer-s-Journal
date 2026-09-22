@@ -3,25 +3,24 @@
 Read this file first at the start of every session. Update it at the end of every session.
 
 ## Current Status
-**Phase:** 3 — Depth, **complete** except one small roadmap item (reorder sections in the sidebar). Phases 1 and 2 are complete.
+**Phase:** 4a — Harden and polish, **complete**. Phases 1–3 are complete. Next is Phase 4b — Release (Electron, CI, README, v1.0.0).
 
-The journal now has a septim ledger with a running balance and one-line quick entry, goals whose progress is derived from that ledger, a force-directed relationship web of People, Factions and Places (the intended README hero image), a field editor for every section, a hide-secrets mode that blurs everything marked secret with click-to-reveal, portraits for the character and for People, and drag-to-reorder for profile fields and sections. Lists answer the keyboard, and the list search box hands off to the Ctrl+K palette for cross-section search.
+The app is on GitHub (`origin/main`, pushed at the start of Session 4 on the user's instruction). Everything since is committed locally and **not pushed**; the user pushes.
 
-**Schema is v4.** v3 added `transactions[]` and `goals[]`; v4 added `Entry.portrait`. Each step has an additive (v4: identity) migration in `src/server/migrations.ts`, and each was exercised through the storage layer on both local characters with a backup taken first. The example character ships at v4 with nine transactions, two goals (one secret), a capture, a session, and `[[links]]` woven through its People, Places and Factions so the web has 28 ties on first open.
+What Phase 4a added: a narrow-width pass so ledger, goals, web, field editor, sessions and inbox all work at 700px and 960px; a `secret` flag on sessions (schema v5) that settles the hide-secrets question; sidebar section reordering; a code-split bundle (193 kB entry chunk, 51 kB gzipped, vendors and every off-screen view in their own chunks, fonts trimmed to latin subsets); JSON and Markdown export plus JSON import with a preview; restore-from-backup with restore-as-new and a two-step replace; a polish pass on dialog focus and the Parchment web; and six dark-theme screenshots in `docs/screenshots/`.
 
-One new runtime dependency this phase: `d3-force`. The client bundle is now roughly 620 kB in one chunk (Vite warns); splitting it is a Phase 4 task.
+**Schema is v5.** v3 added `transactions[]` and `goals[]`, v4 `Entry.portrait`, v5 `Session.secret`. Every step has a migration in `src/server/migrations.ts` and was exercised on both local characters with a backup taken first. The example character ships at v5.
 
 ## Next Up
-1. **Phase 4 — Release.** Start with the visual polish pass and the bundle split (`d3-force` and the WebView are the obvious lazy chunk), then JSON/Markdown export, JSON import, restore-from-backup in the UI, and Electron packaging with the OS-level capture hotkey.
-2. The README hero: take the screenshot from the Web view of the example character at ~1440px in the dark theme. Sivrid sits pinned at the centre with 28 ties around her.
-3. The one Phase 3 leftover: reorder sections in the sidebar. `lib/useReorder.ts` already does the work; it needs a grip in the sidebar rows and `updateEntryTypes` order commit.
-4. Before Phase 4 code, click through the ledger, goals and web at ~700px; they were verified at 1440px and the layout rules are shared, but the web's overlays and the ledger's filter bar deserve a look at narrow widths.
+1. **Phase 4b — Release**, in the ROADMAP order: Electron portable `.exe` with `data/` beside the exe, then the OS-level capture hotkey (`globalShortcut` → a small always-on-top capture window that posts to the same API), then the GitHub Actions release workflow, README with the screenshots, CONTRIBUTING and issue templates, v1.0.0.
+2. Before Electron: decide how the packaged app finds `data/` (`src/server/paths.ts` reads `WJ_DATA_DIR`; the Electron main process should set it to `path.join(path.dirname(process.execPath), 'data')` for the portable build).
+3. The README hero is `docs/screenshots/web.png`. The other five are ready to drop into a features section.
 
 ## Open Questions
 - Final project name: "Wayfarer's Journal" is the working name (kept in one config constant).
 - The example character's ids are readable strings (`p-sigunn`, `t-shield-bands`). New records use nanoid. Both are valid.
-- Should hide-secrets mode also blur the *balance* on the Overview and ledger header? Today it hides words, not arithmetic (a secret repayment still moves the total). Decided against for now; recorded in DESIGN.
 - Ledger counterparties are People only. Places or factions as counterparties would need a different web edge; left for a real request.
+- Should the Markdown export get a per-section toggle (e.g. "leave out the ledger")? Today it is all-or-nothing apart from secrets.
 
 ---
 
@@ -41,6 +40,33 @@ Newest first. Copy this template for each session:
 **Next:**
 -
 ```
+
+### Session 4 — 2026-09-22
+**Goal:** Push to GitHub, then Phase 4a items 1–8 in order, one commit each.
+
+**Done:**
+- **Pushed** `main` to `origin` (the user asked explicitly; the remote had no branch yet).
+- **Narrow-width pass.** Web on small canvases: one scrolling chip row, hub-only labels, automatic fit-to-view once the layout settles (plus a Fit button), one-line legend; rail scrollbar fixed; field-editor icons no longer squeezed. Checked at 700px and 960px.
+- **Sessions can be secret (schema v5).** Toggle, list marker, veils, exclusions from backlinks and palette; 4→5 migration writes `secret: false`; verified with v4 backups. Captures stay unblurred, balances stay visible — reasoning in DESIGN.
+- **Sidebar reordering.** Grip on hover in the full sidebar (drag or arrows via `useReorder`); Move up / down in every section's menu (`SectionMenu`, shared with the compact list header).
+- **Bundle.** Vendor chunks `react`, `radix`, `markdown`, `d3`; lazy routes for web, ledger, goals, sessions, inbox, palette, tag manager, field editor, goal dialog, character select, export/import/backups dialogs. `styles/fonts.css` declares latin + latin-ext only via a `~fonts` alias. Entry chunk 663 → 193 kB; fonts 507 → 332 kB; no Vite warning.
+- **Export / import.** `lib/download.ts`, `lib/exportMarkdown.ts`, `ExportMarkdownDialog` (says whether secrets go in), `ImportCharacterDialog` (drop or pick, server dry-run preview, import as new). `POST /api/characters/import` with `commit`. Reachable from the switcher menu, palette, and character select.
+- **Restore from backup.** `GET /:id/backups`, `POST /:id/restore` (`new` | `replace`), `BackupsDialog` with two-step replace; the replaced version is backed up first by the ordinary save path. Backup file names validated against traversal.
+- **Polish.** Modals focus their first field (or the confirm button); web "mentions" edges use the line token so Parchment stays soft; both themes checked on the Phase 2/3 views.
+- **Screenshots.** `docs/screenshots/{web,entry,ledger,goals,palette,characters}.png`, dark theme, 1440px wide (entry at 1150px tall so title and backlinks both fit). The character-select capture had the user's real character card removed from the DOM before capture; only the fictional example appears.
+- **Verified in Chrome** at each step: import dry-run/commit/cleanup, restore-as-new/replace with a fresh backup, sidebar keyboard and pointer reordering persisted, session veils, lazy chunks on the production build served on 4777, fonts loading from the trimmed set.
+
+**Decisions:** Captures stay unblurred and balances visible in hide-secrets mode; a hand-written `fonts.css` instead of the packages' all-subset CSS; imports and restores never overwrite except the explicit two-step "Replace current", which itself backs up first. In the DESIGN Decision Log and section notes.
+
+**Build / typecheck:** pass. `npm run typecheck` clean on both projects; `npm run build` succeeds with no size warning.
+
+**Known issues:**
+- Two ledger-row date labels still wrap at 700px ("Sun, Aug 23"); cosmetic.
+- Markdown export is all-or-nothing apart from secrets (see Open Questions).
+- The web's auto-fit can zoom out far on very sparse graphs; the Fit button and wheel zoom recover.
+- `data/_import/` still holds the Session 2 import script and source files; gitignored.
+
+**Next:** Phase 4b — Electron packaging first.
 
 ### Session 3 — 2026-09-22
 **Goal:** Finish the two Phase 2 leftovers, seed the example with a capture and a session, then build Phase 3 items 1–7 in order, one commit each.

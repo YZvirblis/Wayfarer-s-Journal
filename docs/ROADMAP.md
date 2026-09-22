@@ -53,7 +53,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Import JSON as a new character: validate, migrate, preview what was found, never overwrite (character menu, palette, and the character-select screen)
 - [x] Restore from backup in the UI: list with timestamps and counts, restore as new or replace current (two-step, current backed up first)
 - [x] Polish pass: dialogs focus their first field, softer web edges on Parchment, both themes checked on web, ledger, goals, sessions, inbox and palette
-- [ ] Dark-theme screenshots of the example at 1440px in `docs/screenshots/`: web (hero), entry detail with backlinks, ledger with goals, palette open, character select
+- [x] Dark-theme screenshots of the example at 1440×900 in `docs/screenshots/`: `web.png` (hero), `entry.png` (detail with backlinks), `ledger.png`, `goals.png`, `palette.png`, `characters.png`
 
 ## Phase 4b — Release
 - [ ] Electron packaging → portable Windows .exe with `data/` next to the exe

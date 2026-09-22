@@ -33,14 +33,9 @@ function isWritable(dir: string): boolean {
   }
 }
 
-/** `data/` beside the executable when portable; the project folder in development; user data as the fallback. */
+/** `data/` beside the executable when packaged; the project folder in development; user data as the fallback. */
 function resolveDataDir(): { dir: string; fallback: boolean; preferred: string } {
-  const portableDir = process.env.PORTABLE_EXECUTABLE_DIR;
-  const preferred = portableDir
-    ? path.join(portableDir, 'data')
-    : app.isPackaged
-      ? path.join(path.dirname(process.execPath), 'data')
-      : path.join(app.getAppPath(), 'data');
+  const preferred = app.isPackaged ? path.join(path.dirname(process.execPath), 'data') : path.join(app.getAppPath(), 'data');
   if (isWritable(preferred)) return { dir: preferred, fallback: false, preferred };
   return { dir: path.join(app.getPath('userData'), 'data'), fallback: true, preferred };
 }
@@ -121,7 +116,9 @@ let foreground: Foreground | null = null;
 let previousForeground: WindowHandle = 0;
 let hotkeyTestUntil = 0;
 
-const iconPath = () => path.join(app.getAppPath(), 'build', 'icon.png');
+/** The app is packed into app.asar; files that must exist on disk for the OS (the icon, native modules) are unpacked beside it. */
+const unpackedAppPath = () => app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked');
+const iconPath = () => path.join(unpackedAppPath(), 'build', 'icon.png');
 const preloadPath = () => path.join(app.getAppPath(), 'electron', 'preload.cjs');
 const splashPath = () => path.join(app.getAppPath(), 'electron', 'splash.html');
 

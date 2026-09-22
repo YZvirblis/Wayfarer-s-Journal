@@ -6,7 +6,7 @@ A beautiful, local-first journal for roleplay characters — born on Keizaal Onl
 It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene, pleasant to browse, and good at answering "who was that Khajit in Whiterun and what did I promise him?"
 
 ### Audience
-- **Primary:** Keizaal players, mostly on Windows, mostly **not** developers. They should be able to download one file and run it (Phase 4: portable .exe).
+- **Primary:** Keizaal players, mostly on Windows, mostly **not** developers. They should be able to download one file, extract it and run it (Phase 4: the Windows zip).
 - **Secondary:** developers who clone the repo, run it with `start.bat`, and contribute.
 
 ### Principles
@@ -28,7 +28,7 @@ It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene,
 | Validation | zod schemas shared between client and server |
 | IDs | nanoid |
 | Package manager | npm |
-| Distribution (Phase 4) | Electron portable .exe via GitHub Releases |
+| Distribution (Phase 4) | Electron app folder as a zip via GitHub Releases |
 
 ### Architecture
 - A single npm package. In production, one Node process serves both the API and the built frontend.
@@ -38,10 +38,10 @@ It should feel like a well-kept adventurer's ledger: fast to jot into mid-scene,
 - A save-status indicator is always visible: Saved / Saving… / Error.
 
 ### Desktop app (Phase 4b)
-The portable `.exe` is a wrapper, not a rewrite. `electron/main.ts` picks a data folder and a free loopback port, sets `WJ_DATA_DIR` and `WJ_PORT`, and only then loads `electron/server.ts` — a second bundle that starts the very same Express app (`src/server/app.ts`, `startServer()`) in-process and loads it in a `BrowserWindow`. Storage, migrations and the API are untouched; `npm start`, `start.bat` and `npm run dev` keep working exactly as before.
+The desktop app is a wrapper, not a rewrite. `electron/main.ts` picks a data folder and a free loopback port, sets `WJ_DATA_DIR` and `WJ_PORT`, and only then loads `electron/server.ts` — a second bundle that starts the very same Express app (`src/server/app.ts`, `startServer()`) in-process and loads it in a `BrowserWindow`. Storage, migrations and the API are untouched; `npm start`, `start.bat` and `npm run dev` keep working exactly as before.
 
-- **Build:** `vite.electron.config.ts` compiles `main` and `server` to CommonJS in `dist/electron/` with zod and nanoid bundled and express external; electron-builder packs `dist/`, `examples/`, the preload and the icon with `asar: false` into a single portable exe (`npm run electron:build` → `release/`). Client-only libraries are devDependencies so they never ship inside the exe. `npm run icon` renders `assets/icon.svg` with Electron's own renderer into `build/icon.png` and a PNG-wrapped `build/icon.ico`; both are generated, never committed.
-- **Data folder:** `data/` beside the executable (`PORTABLE_EXECUTABLE_DIR`), or the project folder in development. If that is not writable, the app falls back to `%APPDATA%\wayfarers-journal\data` and says so once in a dialog; Preferences shows the path in use, and `GET /api/app` reports it.
+- **Build:** `vite.electron.config.ts` compiles `main` and `server` to CommonJS in `dist/electron/` with zod and nanoid bundled and express external; electron-builder packs `dist/`, `examples/`, the preload, the splash and the icon into `app.asar` and zips the app folder (`npm run electron:build` → `release/`; see *Packaging* below). Client-only libraries are devDependencies so they never ship inside the exe. `npm run icon` renders `assets/icon.svg` with Electron's own renderer into `build/icon.png` and a PNG-wrapped `build/icon.ico`; both are generated, never committed.
+- **Data folder:** `data/` beside `Wayfarer's Journal.exe` (`path.dirname(process.execPath)`), or the project folder in development. If that is not writable, the app falls back to `%APPDATA%\wayfarers-journal\data` and says so once in a dialog; Preferences shows the path in use, and `GET /api/app` reports it.
 - **Window:** size, position and maximised state persist in `%APPDATA%\wayfarers-journal\window-state.json`; the title follows the open character; links open in the system browser (`setWindowOpenHandler` plus `will-navigate`); the application menu is off; a single-instance lock re-shows the window.
 - **Tray:** Open, Quick capture, Quit. With *Keep running in the tray* on (the default), closing the window hides it and a one-time balloon explains why. The main process reads the setting from `settings.json` and hears changes through `serverEvents` (emitted by `PUT /api/settings`).
 - **Global capture:** `electron/hotkey.ts` listens for `settings.desktop.captureHotkey` (default `CommandOrControl+Shift+J`) and re-arms on every change; the status (registered or not, which backend, a running test) goes into `appInfo.hotkey`, which Preferences shows. The hotkey opens a 560×220 frameless, always-on-top, taskbar-less window on `/capture` (`CapturePage`): Enter sends the text over IPC to the main window, whose store adds it to the open journal (so the next autosave carries it); if no journal is open the main process writes it to the last-opened character itself (`captureToLastCharacter`, also `POST /api/captures`). Escape, Enter, or the hotkey again closes the window; a click elsewhere closes it too but leaves focus where the player put it.
@@ -50,7 +50,7 @@ The portable `.exe` is a wrapper, not a rewrite. `electron/main.ts` picks a data
 - **Test your hotkey:** `POST /api/app/hotkey-test` makes the main process record the next press for six seconds instead of opening the box (`appInfo.hotkey.test`); Preferences polls and shows arrived / nothing arrived.
 - **Bridge:** `electron/preload.cjs` exposes only `window.wayfarerDesktop` (`onCapture`, `submitCapture`, `closeCapture`, `openCapture`) through `contextBridge`, with the sandbox on.
 - **Startup (Session 6):** `boot()` shows `electron/splash.html` (frameless, 360×240, emblem + name + a pulsing ember, background from the theme in `settings.json`) before the port is picked or the server chunk is loaded; the main window closes it on `ready-to-show`. The tray, the keyboard hook, koffi and the hotkey registration run in `bootExtras()` a tick after the main window is shown, so nothing non-essential sits in front of first paint.
-- **Packaging (Session 6):** two Windows artifacts — the single-file portable exe and a zip of the unpacked app (`win.target: portable, zip`; the release workflow attaches both). electron-builder's portable launcher (`templates/nsis/portable.nsi`) does `RMDir /r` on its unpack folder and re-extracts the whole app on **every** launch; `portable.unpackDirName` only fixes the folder name (`%TEMP%\wayfarers-journal`) and does not cache. With `asar: false` that extraction is thousands of files and dominates the portable exe's launch time, which is why the zip exists and the README recommends it.
+- **Packaging (Session 7):** one Windows artifact, `Wayfarers-Journal-<version>-win64.zip` — the unpacked app folder; the player extracts it anywhere and runs the exe inside, and `data/` appears beside it. The portable exe was dropped in Session 7: electron-builder's portable launcher (`templates/nsis/portable.nsi`) does `RMDir /r` on its unpack folder and re-extracts the whole app on every launch (~19 s), and Windows 11 Smart App Control refused the unsigned NSIS launcher outright, while it lets the plain exe run. The app is now packed as `app.asar` with `asarUnpack` for the two native modules (`uiohook-napi`, `koffi` and its `@koromix/*` platform package — Electron redirects `.node` loads to `app.asar.unpacked` on its own) and for `build/icon.png`, which the tray and window icons need as a real file (`unpackedAppPath()` in `main.ts`). Everything else reads from inside the archive through Electron's patched `fs`: `PROJECT_ROOT` resolves to `app.asar`, express serves `dist/client` from it, the example character is read from it, the preload and the splash load from it.
 
 ### As built (Phase 1)
 ```

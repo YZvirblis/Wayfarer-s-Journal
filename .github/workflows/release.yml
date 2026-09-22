@@ -1,6 +1,6 @@
 name: Release
 
-# Builds the portable Windows executable and attaches it to a GitHub Release
+# Builds the Windows zip (the unpacked app) and attaches it to a GitHub Release
 # whenever a version tag is pushed:
 #
 #   git tag -a v1.0.0 -m "v1.0.0"
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   windows:
-    name: Portable Windows build
+    name: Windows zip build
     runs-on: windows-latest
     steps:
       - name: Check out
@@ -34,22 +34,19 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Build the portable executable
+      - name: Build the Windows zip
         # electron:build = client build + Electron bundles + icon + electron-builder.
         # --publish never keeps electron-builder from trying to upload on its own;
         # the release step below attaches the file instead.
         run: npm run electron:build -- --publish never
 
       - name: List artifacts
-        run: Get-ChildItem release -Include *.exe, *.zip -Recurse -Depth 0 | Select-Object Name, Length
+        run: Get-ChildItem release -Filter *.zip | Select-Object Name, Length
         shell: pwsh
 
       - name: Create the GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # The single-file portable exe, and a zip of the unpacked app that starts faster.
-          files: |
-            release/*.exe
-            release/*.zip
+          files: release/*.zip
           generate_release_notes: true
           fail_on_unmatched_files: true

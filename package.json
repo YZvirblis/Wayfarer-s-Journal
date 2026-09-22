@@ -19,7 +19,7 @@
     "build:electron": "vite build --config vite.electron.config.ts",
     "icon": "electron scripts/make-icon.cjs",
     "electron:dev": "npm run build && npm run build:electron && npm run icon && electron .",
-    "electron:build": "npm run build && npm run build:electron && npm run icon && electron-builder --win portable",
+    "electron:build": "npm run build && npm run build:electron && npm run icon && electron-builder --win zip",
     "start": "tsx src/server/index.ts",
     "typecheck": "tsc -p tsconfig.client.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.electron.json --noEmit"
   },
@@ -64,7 +64,13 @@
     "appId": "dev.yuriyz.wayfarers-journal",
     "productName": "Wayfarer's Journal",
     "copyright": "MIT — Yuriy Zvirblis",
-    "asar": false,
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/uiohook-napi/**",
+      "node_modules/koffi/**",
+      "node_modules/@koromix/**",
+      "build/icon.png"
+    ],
     "npmRebuild": false,
     "directories": {
       "output": "release",
@@ -80,15 +86,10 @@
     ],
     "win": {
       "target": [
-        "portable",
         "zip"
       ],
       "icon": "build/icon.ico",
-      "artifactName": "Wayfarers-Journal-${version}-win-x64.${ext}"
-    },
-    "portable": {
-      "artifactName": "Wayfarers-Journal-${version}-portable.exe",
-      "unpackDirName": "wayfarers-journal"
+      "artifactName": "Wayfarers-Journal-${version}-win64.${ext}"
     }
   }
 }

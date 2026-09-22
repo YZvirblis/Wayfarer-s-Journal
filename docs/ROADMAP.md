@@ -68,7 +68,7 @@ Tick items as they are completed (`- [x]`). Add newly discovered tasks under the
 - [x] Session 6: form-control contrast fixed at the token level (`ground` colour token replaces the colliding `base`; text, caret, placeholder, option, checkbox, disabled and native date/number widgets themed once in `index.css`); both themes audited
 - [x] Session 6: icon controls sized by the `IconButton` primitive (36 px / 18 px floor, 32 px only in dense rows, rail 40 px / 20 px), consistent rest/hover/open states, tooltips on every icon-only control
 - [x] Session 6: splash window on launch, non-essential main-process work deferred until the window shows; zip of the unpacked app as a second release asset (the portable exe re-extracts on every launch by electron-builder design; see DESIGN)
-- [ ] Portable exe launch time: consider `asar: true` with the native modules and `examples/` unpacked, so the launcher extracts one archive instead of thousands of files
+- [x] Session 7: the zip is the only Windows artifact (`Wayfarers-Journal-<version>-win64.zip`); the portable exe is gone (19 s launch, blocked by Smart App Control); `asar: true` with the native modules and the icon unpacked; README download and FAQ rewritten for the extract-and-run flow
 - [ ] v1.0.0 release — package.json is at 1.0.0; the user creates and pushes the tag
 - [ ] Optional plain-text journal import
 

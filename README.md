@@ -58,10 +58,13 @@ And besides those:
 
 ## Download
 
-**Windows:** the [latest release](https://github.com/YZvirblis/Wayfarer-s-Journal/releases/latest) has two downloads. There is no installer and nothing to uninstall either way: the app makes a `data` folder next to itself and that is the whole footprint.
+**Windows:** download `Wayfarers-Journal-<version>-win64.zip` from the [latest release](https://github.com/YZvirblis/Wayfarer-s-Journal/releases/latest). There is no installer and nothing to uninstall.
 
-- `Wayfarers-Journal-<version>-portable.exe` — one file. Put it in a folder of its own and run it. It unpacks itself into a temporary folder on every launch, which takes a while (about twenty seconds on a fast SSD); you see the splash screen while it does.
-- `Wayfarers-Journal-<version>-win-x64.zip` — the same app, already unpacked. Extract the folder anywhere, run `Wayfarer's Journal.exe` inside it, and it starts in a couple of seconds. **Recommended** if you open the journal often.
+1. **Extract the zip anywhere that is yours** — your Documents, a games folder, a USB stick. Not inside *Program Files* or another system folder, because the app writes next to itself.
+2. **Run `Wayfarer's Journal.exe`** inside the extracted folder. It starts in about a second; the first launch after extracting takes a few seconds longer while Windows reads the files.
+3. A **`data` folder appears beside the exe** the first time you save anything. That folder is your journal: one JSON file per character plus their backups. Nothing is written anywhere else, apart from the window position under your user profile.
+
+**To back up**, copy the `data` folder (or the whole app folder). **To update**, extract the new version's zip over the old folder and let it replace the files; `data/` is not part of the zip, so your journals stay exactly where they are. **To move to another PC**, copy the whole folder.
 
 > **Windows SmartScreen will warn you the first time.** Click **More info → Run anyway**. The warning appears because the executable is not code-signed: a signing certificate costs a few hundred dollars a year, and this is a free, open-source project built by one person. The build is produced in public by [GitHub Actions](.github/workflows/release.yml) straight from the tagged source, so you can read exactly what went into it.
 
@@ -91,7 +94,7 @@ npm run build          # build the client into dist/client
 npm start              # serve the API and the built client on 127.0.0.1:4777
 npm run typecheck      # strict TypeScript for client, server and Electron
 npm run electron:dev   # build everything and open the desktop app
-npm run electron:build # build the portable Windows .exe into release/
+npm run electron:build # build the Windows zip into release/
 ```
 
 Environment variables the server understands:
@@ -221,7 +224,7 @@ data/
   backups/<id>/*.json      the last 20 saves of each character, kept automatically
 ```
 
-- **Desktop app:** `data/` sits next to the `.exe`. Move the folder and the exe together and everything comes with them. If that location cannot be written (say, the exe is inside *Program Files* or on a read-only drive), the app falls back to `%APPDATA%\wayfarers-journal\data` and tells you once; Preferences always shows the folder in use.
+- **Desktop app:** `data/` sits next to `Wayfarer's Journal.exe`, inside the folder you extracted. Move the folder and everything comes with it. If that location cannot be written (say, you extracted into *Program Files* or onto a read-only drive), the app falls back to `%APPDATA%\wayfarers-journal\data` and tells you once; Preferences always shows the folder in use.
 - **From source:** `data/` sits in the project folder.
 
 **To back up your journal, copy the `data` folder.** To move to another PC, copy it across. Or use *Export JSON* per character and import it on the other side.
@@ -245,8 +248,8 @@ Saves are atomic: a new file is written beside the old one and swapped in, so a 
 **Windows says "Windows protected your PC".**
 Click **More info**, then **Run anyway**. The build is unsigned because a code-signing certificate is a recurring cost that does not make sense for a free tool; see [Download](#download). If you would rather not trust a binary, [run from source](#run-from-source).
 
-**Windows says "An Application Control policy has blocked this file" and the portable exe never opens.**
-That is **Smart App Control** (Windows 11), which is stricter than SmartScreen: it refuses unsigned self-extracting launchers outright, with no "Run anyway". Use the **zip** download instead; the unpacked app inside it starts normally. (Turning Smart App Control off is a one-way switch in Windows Security, so the zip is the better answer.)
+**I extracted a new version and my journals are gone.**
+They are not: `data/` lives beside the exe, so if you extracted the new version into a *different* folder, the journal is still in the old one. Either copy the old `data` folder next to the new exe, or extract the new version over the old folder next time. Preferences always shows the folder in use.
 
 **"Port 4777 is already in use".**
 Something else on your PC is listening there, or a previous journal is still running (`stop.bat` closes it). Otherwise start with another port: `set WJ_PORT=4800` then `npm start` (or `WJ_PORT=4800 npm start` on macOS/Linux). The desktop app never has this problem; it picks a free port each time.

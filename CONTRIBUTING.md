@@ -21,7 +21,7 @@ Other scripts:
 | `npm run build` | production client into `dist/client` |
 | `npm start` | serve the API and the built client on `127.0.0.1:4777` |
 | `npm run electron:dev` | build everything and open the desktop app |
-| `npm run electron:build` | build the portable Windows exe into `release/` |
+| `npm run electron:build` | build the Windows zip (the app folder, packed with asar) into `release/` |
 | `npm run icon` | regenerate `build/icon.png` and `build/icon.ico` from `assets/icon.svg` |
 
 The layout:

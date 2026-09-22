@@ -21,7 +21,7 @@ Please reproduce with the bundled example character if you can. Never paste your
 
 **Environment**
 - Version (About dialog, or the release you downloaded):
-- How you run it: portable .exe / `start.bat` / `npm run dev` / other
+- How you run it: the Windows zip / `start.bat` / `npm run dev` / other
 - Operating system:
 - Browser (if not the desktop app):
 

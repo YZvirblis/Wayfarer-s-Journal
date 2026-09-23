@@ -10,6 +10,10 @@
 
 It was born on **Keizaal Online**, a roleplay server where one character can carry years of promises and grudges, but nothing in it is tied to one game. If you play a character somewhere and keep a pile of notes about them, this is for that pile.
 
+### Watch the walkthrough (8 min)
+
+[![Wayfarer's Journal walkthrough](https://img.youtube.com/vi/ZIcDGWcFc3o/maxresdefault.jpg)](https://www.youtube.com/watch?v=ZIcDGWcFc3o)
+
 ---
 
 ## Contents
